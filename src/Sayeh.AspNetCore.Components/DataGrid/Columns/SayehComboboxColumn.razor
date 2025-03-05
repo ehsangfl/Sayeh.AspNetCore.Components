@@ -1,0 +1,52 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@namespace Sayeh.AspNetCore.Components
+@typeparam TItem
+@typeparam TValue
+@typeparam TOption
+@inherits SayehPropertyColumn<TItem,TValue>
+@{
+    InternalGridContext.Grid.AddColumn(this);
+}
+
+@code {
+
+    public void CellEditContent(RenderTreeBuilder __builder)
+    {
+        if (!InternalIsReadonly)
+        {
+            if (DisplayMember is null)
+                DisplayMember = f => f?.ToString();
+            //<FluentCombobox TOption="TOption" Items=Items @ref=element OptionText=DisplayMember @bind-SelectedOption=_selectedItem />
+            <select @bind=@selectedValue>
+                @foreach (var item in Items)
+                {
+                    <option selected="@(item!.Equals(_selectedItem))" value="@ValueMember.Invoke(item)">@DisplayMember.Invoke(item)</option>
+                }
+            </select>
+        }
+        else
+        {
+            CellContent(__builder, Item!);
+        }
+    }
+
+
+    protected internal override void CellContent(RenderTreeBuilder builder, TItem item)
+    {
+        builder.AddContent(10, getItemText(item));
+    }
+
+    private string? getItemText(TItem item)
+    {
+        if (_compiledSelectedItem is not null)
+        {
+            if (DisplayMember is not null)
+                return DisplayMember.Invoke(_compiledSelectedItem.Invoke(item));
+            else
+                return _compiledSelectedItem.Invoke(item)?.ToString();
+        }
+        else
+            return _cellTextFunc?.Invoke(item);
+    }
+
+}

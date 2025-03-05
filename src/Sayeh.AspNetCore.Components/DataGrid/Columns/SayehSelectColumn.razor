@@ -1,0 +1,21 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@namespace Sayeh.AspNetCore.Components
+@inherits SayehPropertyColumn<TItem, bool>
+@typeparam TItem where TItem : class
+@{
+    InternalGridContext.Grid.AddColumn(this);
+}
+
+@code {
+    protected internal override void CellContent(RenderTreeBuilder __builder, TItem item)
+    {
+        if (Selectable is not null && !Selectable.Invoke(item))
+            return;
+        <FluentCheckbox Value="GetChecked(item)" ValueChanged="e=>UpdateChecked(e,item)"></FluentCheckbox>
+    }
+
+    private void GetHeaderContent(RenderTreeBuilder __builder)
+    {
+        <FluentCheckbox ThreeState="true" CheckState=@selectAll CheckStateChanged="OnCheckAllChangeAsync"></FluentCheckbox>
+    }
+}

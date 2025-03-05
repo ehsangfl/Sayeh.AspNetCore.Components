@@ -1,0 +1,85 @@
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Reflection
+@namespace Sayeh.AspNetCore.Components
+@typeparam TItem
+@typeparam TValue
+
+@inherits ColumnOptionsBase<TItem>
+
+@if (OwnerColumn is not null)
+{
+    getPropertyType();
+    <div>
+    <FluentButton Appearance=@(hasFilter ? Appearance.Filled : Appearance.Stealth) aria-haspopup="true" OnClick="@openPopupClicked">
+        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Filter())" />
+    </FluentButton>
+    @if (dropDownIsOpen)
+    {
+        <div class="col-options">
+            @if (IsSortable)
+            {
+                <div>
+                    <FluentAnchor Appearance="Appearance.Hypertext" OnClick=ApplySort>
+                        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSortUp())" />
+                        Ascending
+                    </FluentAnchor>
+                </div>
+                <div>
+                    <FluentAnchor Appearance="Appearance.Hypertext" OnClick=ApplySortDescending>
+                        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSortDown())" />
+                        Descending
+                    </FluentAnchor>
+                </div>
+                <div>
+                    <FluentAnchor Appearance="Appearance.Hypertext" OnClick=RemoveSort>
+                        @*<PresenceBadge Status="PresenceStatus.Offline" Size="BadgeSize.ExtraSmall">
+                            <FluentIcon Name="@FluentIcons.ArrowSort" />
+                        </PresenceBadge>*@
+                        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSort())" />
+                        Remove Sort
+                    </FluentAnchor>
+                </div>
+                <div>
+                    <FluentAnchor Appearance="Appearance.Hypertext" OnClick=RemoveFilter>
+                        @*<PresenceBadge Status="PresenceStatus.Offline" Size="BadgeSize.ExtraSmall">
+                            <FluentIcon Name="@FluentIcons.Filter" />
+                        </PresenceBadge>*@
+                        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Filter())" />
+                        Remove Filter
+                    </FluentAnchor>
+                </div>
+            }
+            @if (propertyType == typeof(string))
+            {
+                <div class="search-box">
+                    <FluentSearch type="search" Autofocus=true @bind-Value=TextFilter @onchange="OnTextFilterSetted" />
+                </div>
+            }
+            else if (propertyType == typeof(DateTime))
+            {
+                <DateRangePicker FromDate=FromDate ToDate=ToDate RangeSelected=DateRangeSelected></DateRangePicker>
+            }
+            else if (propertyType == typeof(int) || propertyType == typeof(short) || propertyType == typeof(decimal) || propertyType == typeof(double)
+            || propertyType == typeof(Single) || propertyType == typeof(int?) || propertyType == typeof(short?) || propertyType == typeof(decimal?) || propertyType == typeof(double?)
+            || propertyType == typeof(Single?))
+            {
+                <NumberRangePicker FromNumber=FromNumber ToNumber=ToNumber RangeSelected="NumberRangeSelected" />
+            }
+            else if (propertyType == typeof(bool))
+            {
+                <FluentListbox TOption="bool" ValueChanged=@OnBoolSelectedChanged Value="Bool">
+                    <FluentOption Value="true">True</FluentOption>
+                    <FluentOption Value="false">False</FluentOption>
+                </FluentListbox>
+            }
+            else if (propertyType.IsClass)
+            {
+                prepaireDistictList();
+                <FluentListbox TOption="TValue" SelectedOption=SelectedItem SelectedOptionChanged="OnSelectedItemChanged"
+                   Items="DistinctList" OptionValue="s=> s.ToString()" OptionText="s=> s.ToString()">
+                </FluentListbox>
+            }
+        </div>
+    }
+    </div>
+}

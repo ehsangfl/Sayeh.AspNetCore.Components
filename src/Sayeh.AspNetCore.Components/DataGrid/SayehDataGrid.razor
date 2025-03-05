@@ -1,0 +1,204 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.FluentUI.AspNetCore.Components.DataGrid.Infrastructure
+@using Sayeh.AspNetCore.Components.DataGrid.Infrastructure
+@namespace Sayeh.AspNetCore.Components
+@inherits FluentComponentBase
+@typeparam TItem
+@attribute [CascadingTypeParameter(nameof(TItem))]
+<CascadingValue TValue="InternalGridContext<TItem>" IsFixed="true" Value="@_internalGridContext">
+    @{
+        StartCollectingColumns();
+    }
+    @if (!_manualGrid)
+    {
+        @ChildContent
+    }
+    <Defer>
+        @{
+            FinishCollectingColumns();
+        }
+        <Sayeh.AspNetCore.Components.DataGrid.Infrastructure.ColumnsCollectedNotifier TItem="TItem" />
+        <table @ref=_gridReference
+               no-tabbing=@NoTabbing
+               generate-header="none"
+               grid-template-columns=@_internalGridTemplateColumns
+               class="@GridClass()"
+               style="@Style"
+               aria-rowcount="@(_ariaBodyRowCount + 1)"
+               @onclosecolumnoptions="CloseColumnOptions"
+               @attributes="AdditionalAttributes"
+               @onkeydown=OnKeyPress>
+            @if (GenerateHeader != GenerateHeaderOption.None)
+            {
+                DataGridRowType headerType = DataGridRowType.Header;
+                if (GenerateHeader == GenerateHeaderOption.Sticky)
+                    headerType = DataGridRowType.StickyHeader;
+                <thead>
+                    <SayehDataGridRow RowType=@headerType TItem=TItem>
+                        @_renderColumnHeaders
+                    </SayehDataGridRow>
+                </thead>
+            }
+            <tbody>
+                @if (Loading)
+                {
+                    @_renderLoadingContent
+                }
+                else
+                {
+                    @if (Virtualize)
+                    {
+                        if (_ariaBodyRowCount == 0)
+                        {
+                            @_renderEmptyContent
+                        }
+                        else
+                        {
+                            <Virtualize @ref="@_virtualizeComponent"
+                                        TItem="(int RowIndex, TItem Data)"
+                                        ItemSize="@ItemSize"
+                                        OverscanCount="@OverscanCount"
+                                        ItemsProvider="@ProvideVirtualizedItemsAsync"
+                                        ItemContent="@(item => builder => RenderRow(builder, item.RowIndex, item.Data))"
+                                        Placeholder="@(placeholderContext => builder => RenderPlaceholderRow(builder, placeholderContext))"
+                                        SpacerElement="tr" />
+                        }
+                    }
+                    else
+                    {
+                        @_renderNonVirtualizedRows
+                    }
+                }
+                @if (_manualGrid)
+                {
+                    @ChildContent
+                }
+            </tbody>
+
+        </table>
+    </Defer>
+
+</CascadingValue>
+
+@code {
+
+    private void RenderNonVirtualizedRows(RenderTreeBuilder __builder)
+    {
+        var initialRowIndex = (GenerateHeader != GenerateHeaderOption.None) ? 2 : 1; // aria-rowindex is 1-based, plus 1 if there is a header
+        var rowIndex = initialRowIndex;
+        if (_internalItemsSource is not null && _internalItemsSource.Any())
+        {
+            Loading = false;
+            foreach (var item in _internalItemsSource)
+            {
+                RenderRow(__builder, rowIndex++, item);
+            }
+        }
+        else
+        {
+            RenderEmptyContent(__builder);
+        }
+    }
+
+    private void RenderRow(RenderTreeBuilder __builder, int rowIndex, TItem item)
+    {
+
+        var rowClass = RowClass?.Invoke(item) ?? null;
+        var rowStyle = RowStyle?.Invoke(item) ?? null;
+
+        <SayehDataGridRow @key="@ItemKey(item)"
+                          aria-rowindex="@rowIndex"
+                          Style="@rowStyle"
+                          Class="@rowClass"
+                          TItem="TItem"
+                          Options=@(new DataGridRowOptions<TItem>(rowIndex,item,GridTemplateColumns,_columns))>
+
+        </SayehDataGridRow>
+
+    }
+
+    private void RenderPlaceholderRow(RenderTreeBuilder __builder, PlaceholderContext placeholderContext)
+    {
+        string? _rowsDataSize = $"height: {ItemSize}px";
+
+        <SayehDataGridRow GridTemplateColumns=@GridTemplateColumns aria-rowindex="@(placeholderContext.Index + 1)" Style="@_rowsDataSize" TItem="TItem">
+            @for (var colIndex = 0; colIndex < _columns.Count; colIndex++)
+            {
+                var col = _columns[colIndex];
+
+                <SayehDataGridCell Class="@("grid-cell-placeholder " + @ColumnClass(col))" Style="@col.Style" @key="@col" GridColumn=@(colIndex+1) TItem="TItem">
+                    @((RenderFragment)(__builder => col.RenderPlaceholderContent(__builder, placeholderContext)))
+                </SayehDataGridCell>
+            }
+        </SayehDataGridRow>
+    }
+
+    private void RenderColumnHeaders(RenderTreeBuilder __builder)
+    {
+        @for (var colIndex = 0; colIndex < _columns.Count; colIndex++)
+        {
+            var col = _columns[colIndex];
+            string CellId = Identifier.NewId();
+            
+            <SayehDataGridCell @key="@col"
+                               TItem="TItem"
+                               ColumnIndex=@(colIndex+1)
+                               CellType=DataGridCellType.ColumnHeader
+                               Class="@("column-header " + ColumnHeaderClass(col) + (ResizableColumns ? " resizable" : ""))"
+                               Style="@col.Style"
+                               aria-sort="@AriaSortValue(col)"
+                               scope="col"
+                               @ref=col.HeaderCell>
+                @col.HeaderContent
+                @if (col == _displayOptionsForColumn)
+                {
+                    <div class="col-options">@col.ColumnOptions</div>
+                }
+                @if (ResizableColumns)
+                {
+                    <FluentDivider Class="resize-handle" Orientation="Orientation.Vertical" Role="DividerRole.Separator" />
+                }
+            </SayehDataGridCell>
+        }
+    }
+
+    private void RenderEmptyContent(RenderTreeBuilder __builder)
+    {
+        @if (_manualGrid)
+        {
+            return;
+        }
+        // If we use the Blazor components here the renderer gets upset/lost, so we use the web components directly
+        <fluent-data-grid-row class="@EMPTY_CONTENT_ROW_CLASS" row-id="empty-row">
+            <fluent-data-grid-cell class="empty-content-cell" Style="@($"grid-column: 1 / {_columns.Count + 1}")">
+                @if (EmptyContent is null)
+                {
+                    @("No data to show!")
+                }
+                else
+                {
+                    @EmptyContent
+                }
+            </fluent-data-grid-cell>
+        </fluent-data-grid-row>
+
+    }
+
+    private void RenderLoadingContent(RenderTreeBuilder __builder)
+    {
+        <SayehDataGridRow TItem="TItem" Class="@LOADING_CONTENT_ROW_CLASS">
+            <SayehDataGridCell Class="loading-content-cell" Style="@($"grid-column: 1 / {_columns.Count + 1}")">
+                @if (LoadingContent is null)
+                {
+                    <FluentStack HorizontalGap="3">
+                        <FluentProgressRing Width="24px" /> <div>Loading...</div>
+                    </FluentStack>
+                }
+                else
+                {
+                    @LoadingContent
+                }
+            </SayehDataGridCell>
+        </SayehDataGridRow>
+    }
+}

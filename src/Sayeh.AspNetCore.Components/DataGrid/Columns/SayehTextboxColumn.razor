@@ -1,0 +1,28 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@namespace Sayeh.AspNetCore.Components
+@inherits SayehPropertyColumn<TItem, string>
+@typeparam TItem where TItem : class
+@{
+    InternalGridContext.Grid.AddColumn(this);
+}
+
+@code {
+
+    public void CellEditContent(RenderTreeBuilder __builder)
+    {
+        if (!InternalIsReadonly)
+        {
+            <FluentTextField TextFieldType=TextFieldType @ref=element @bind-Value=internalValue />
+        }
+        else
+        {
+            CellContent(__builder, Item!);
+        }
+    }
+
+    protected internal override void CellContent(RenderTreeBuilder builder, TItem item)
+    {
+        builder.AddContent(10, _cellTextFunc!(item));
+    }
+
+}

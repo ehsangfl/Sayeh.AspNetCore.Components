@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@namespace Sayeh.AspNetCore.Components
+@typeparam TItem
+@inherits SayehPropertyColumn<TItem,bool>
+@{
+    InternalGridContext.Grid.AddColumn(this);
+}
+@code {
+
+    public void CellEditContent(RenderTreeBuilder __builder)
+    {
+        <FluentCheckbox @bind-Value=@internalValue @ref=checkboxReference ReadOnly=@IsReadonly/>
+    }
+
+    protected internal override void CellContent(RenderTreeBuilder __builder, TItem item)
+    {
+        var currentValue = _compiledProperty?.Invoke(item);
+        <fluent-checkbox readonly=true
+                         value=@currentValue
+                         current-value=@currentValue
+                         current-checked="@currentValue">
+        </fluent-checkbox>
+    }
+
+}

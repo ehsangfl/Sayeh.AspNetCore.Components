@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@namespace Sayeh.AspNetCore.Components
+@typeparam TItem
+@inherits SayehColumnBase<TItem>
+@{
+    InternalGridContext.Grid.AddColumn(this);
+}
+@code {
+
+    protected internal override void CellContent(RenderTreeBuilder __builder, TItem item)
+    {
+        <SayehButton Command="Command" CommandParameter="@item" OnClick=@(()=> Onclicked(item))>
+            @ChildContent.Invoke(item)
+        </SayehButton>
+    }
+
+}

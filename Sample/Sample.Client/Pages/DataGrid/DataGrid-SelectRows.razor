@@ -1,0 +1,64 @@
+﻿@page "/datagrid-selectrows"
+<h3>DataGrid</h3>
+@if (weatherForeacasts is null)
+{
+    <p>loading ...</p>
+}
+else
+{
+    <label>multi selection</label>
+    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts">
+        <SayehSelectColumn Property="p=> p.IsSelected" />
+        <SayehPropertyColumn Property="p=> p.Order" />
+        <SayehDatePickerColumn Property="p=> p.Date" />
+        <SayehPropertyColumn Property="p=> p.DayofWeek" />
+        <SayehComboboxColumn Property="p=> p.Type" Items="DayTypes" />
+        <SayehNumericTextboxColumn Property="p=> p.Tempreture" />
+        <SayehPropertyColumn Property="p=> p.TemporatureF" />
+        <SayehTextboxColumn Property="p=> p.Description" />
+    </SayehDataGrid>
+}
+@code {
+
+    private WeatherForeacast[]? weatherForeacasts { get; set; }
+
+    private DayType[]? DayTypes { get; set; }
+
+    public class WeatherForeacast
+    {
+        public bool IsSelected { get; set; }
+        public int Order { get; set; }
+        public DateTime Date { get; set; }
+        public DayType Type { get; set; }
+        public int Tempreture { get; set; }
+        public double TemporatureF => (Tempreture * 9.5) + 32;
+        public string? DayofWeek { get; set; }
+        public string Description { get; set; }
+    }
+
+    public enum DayType
+    {
+        Sunny = 1,
+        Rainy = 2,
+        Snowy = 3
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            DayTypes = Enum.GetValues<DayType>();
+            weatherForeacasts = new WeatherForeacast[] {
+                new WeatherForeacast(){ Order =1,  Date = DateTime.Now, DayofWeek = "the today", Tempreture = -5 , Type = DayType.Snowy },
+                new WeatherForeacast(){ Order =2, Date = DateTime.Now.AddDays(1), DayofWeek =DateTime.Now.AddDays(1).DayOfWeek.ToString() , Tempreture = -5 , Type = DayType.Snowy },
+                new WeatherForeacast(){ Order =3, Date = DateTime.Now.AddDays(2), DayofWeek = DateTime.Now.AddDays(2).DayOfWeek.ToString(), Tempreture = -2 , Type = DayType.Rainy },
+                new WeatherForeacast(){ Order =4, Date = DateTime.Now.AddDays(3), DayofWeek = DateTime.Now.AddDays(3).DayOfWeek.ToString(), Tempreture = 10 , Type = DayType.Sunny },
+                new WeatherForeacast(){ Order =5, Date = DateTime.Now.AddDays(4), DayofWeek = DateTime.Now.AddDays(4).DayOfWeek.ToString(), Tempreture = 5 , Type = DayType.Sunny },
+                new WeatherForeacast(){ Order =4, Date = DateTime.Now.AddDays(5), DayofWeek = DateTime.Now.AddDays(5).DayOfWeek.ToString(), Tempreture = 3 , Type = DayType.Rainy}
+    };
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+}

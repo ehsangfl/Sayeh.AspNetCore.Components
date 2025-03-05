@@ -1,0 +1,30 @@
+﻿@namespace Sayeh.AspNetCore.Components
+@inherits FluentComponentBase
+@typeparam TItem
+@if (CellType == DataGridCellType.Default)
+{
+    <td col-index=@ColumnIndex
+        class="@ClassValue"
+        style="@StyleValue"
+        role="gridcell"
+        tabindex="0"
+        @onkeydown="@HandleOnCellKeyDownAsync"
+        @onclick="@HandleOnCellClickAsync"
+        @onfocus="@HandleOnCellFocusAsync"
+        @attributes="AdditionalAttributes">
+        @ChildContent
+    </td>
+}
+else
+{
+    <th col-index=@ColumnIndex
+        class="@ClassValue"
+        style="@StyleValue"
+        @oncontextmenu:preventDefault="true"
+        @onkeydown="@HandleOnCellKeyDownAsync"
+        @onclick="@HandleOnCellClickAsync"
+        @onfocus="@HandleOnCellFocusAsync"
+        @attributes="AdditionalAttributes">
+        @ChildContent
+    </th>
+}

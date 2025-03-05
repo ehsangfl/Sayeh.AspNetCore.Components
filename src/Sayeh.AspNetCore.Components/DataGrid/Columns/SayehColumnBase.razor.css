@@ -1,0 +1,16 @@
+﻿.col-title {
+    padding: 0.4rem 0.8rem;
+    user-select: none;
+}
+
+.col-title-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+th.col-justify-center svg {
+    align-content: center;
+    text-align: center;
+}
