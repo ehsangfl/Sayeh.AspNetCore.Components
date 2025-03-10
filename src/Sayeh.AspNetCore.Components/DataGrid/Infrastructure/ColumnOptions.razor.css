@@ -7,6 +7,8 @@
     box-shadow: 0 3px 8px 1px var(--neutral-layer-4);
     padding: 1rem;
     z-index: 1;
+    display:flex;
+    flex-direction:column;
 }
 
 [dir=rtl] .col-options {
@@ -21,4 +23,8 @@
 [dir=rtl] .col-justify-end .col-options, [dir=rtl] .col-justify-right .col-options {
     right: unset;
     left: 0.2rem;
+}
+
+fluent-anchor {
+    margin-bottom: .75rem;
 }

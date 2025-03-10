@@ -8,7 +8,7 @@ export function init(gridElement, autoFocus) {
 
     enableColumnResizing(gridElement);
 
-    let start = gridElement.querySelector('td:first-child');
+    let start = gridElement.querySelector('td:nth-of-type(2)');
 
     if (autoFocus) {
         start.focus();

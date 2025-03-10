@@ -21,11 +21,6 @@ namespace Sayeh.AspNetCore.Components
 
         [Parameter] public bool IsReadonly { get; set; }
 
-        public SayehTextboxColumn()
-        {
-
-        }
-
         //private string? _internalValue;
         private string? internalValue { get; set; }
         //{

@@ -74,12 +74,12 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
 
     #region Function
 
-    private void openPopupClicked()
+    private async void openPopupClicked()
     {
         if (!dropDownIsOpen)
         {
-            Owner.Grid.ShowColumnOptionsAsync(OwnerColumn);
-            dropDownIsOpen = true;
+            if (await Owner.Grid.ShowColumnOptionsAsync(OwnerColumn))
+                dropDownIsOpen = true;
         }
         else
             Owner.Grid.CloseColumnOptions();
@@ -337,7 +337,7 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
                 //var LeftExp = (Expression)Expression.Property(ExpParam, pInfo);
                 result = Expression.Equal(bindingExpression, RightExp);
             }
-            
+
             //return Expression.Call(typeof(Queryable), "Where", new Type[] { source.ElementType }, source.Expression, Expression.Lambda(Deleg, Result, new ParameterExpression[] { ExpParam }));
             return Expression.Lambda<Func<TItem, bool>>(result, new ParameterExpression[] { pExpression }).Compile();
         }
@@ -368,7 +368,7 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
             if (toValue is not null)
             {
                 var toExpr = Expression.Constant(Convert.ChangeType(toValue, pInfo.PropertyType), pInfo.PropertyType);
-                var toWehreC =Expression.AndAlso(nullCheck, Expression.LessThanOrEqual(bindingExpression, toExpr));
+                var toWehreC = Expression.AndAlso(nullCheck, Expression.LessThanOrEqual(bindingExpression, toExpr));
                 if (Result is null)
                     Result = toWehreC;
                 else

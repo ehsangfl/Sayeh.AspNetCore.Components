@@ -1,12 +1,6 @@
 ﻿@namespace Sayeh.AspNetCore.Components
-<div>
-<FluentNumberField TValue="double?" @bind-Value=FromNumber >From</FluentNumberField>
-</div>
-<div>
-<FluentNumberField TValue="double?" @bind-Value=ToNumber>To</FluentNumberField>
-</div>
-<div>
-<FluentButton @onclick="DataEntered">Search</FluentButton>
-</div>
+<FluentNumberField TValue="double?" @bind-Value=FromNumber Label="@Resources.FromValue"/>
+<FluentNumberField TValue="double?" @bind-Value=ToNumber Label="@Resources.ToValue"/>
+<FluentButton @onclick="DataEntered">@Resources.Search</FluentButton>
 
 

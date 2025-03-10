@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Components.Forms;
 using Sayeh.AspNetCore.Components.DataGrid.Infrastructure;
 
 namespace Sayeh.AspNetCore.Components
@@ -22,7 +23,7 @@ namespace Sayeh.AspNetCore.Components
 
         #region Parameters
 
-
+        private EditContext _editContext;
 
         #endregion
 
@@ -35,17 +36,17 @@ namespace Sayeh.AspNetCore.Components
                 _implementedIEditableObject = typeof(IEditableObject).IsAssignableFrom(typeof(TItem));
             if (Columns is null || Item is null)
                 return false;
-            if (Mode == DataGridItemMode.Readonly && Owner.Grid.BeginItemEdit(this))
+            if (Mode == DataGridItemMode.Readonly && GridContext.Grid.BeginItemEdit(this))
             {
                 _validationContext = new ValidationContext(Item);
                 _validationResult = new List<ValidationResult>();
+                _editContext = new EditContext(Item);
                 Mode = DataGridItemMode.Edit;
                 foreach (var col in Columns.Where(w => w.IsEditable))
-                {
                     ColBeginEdit(col);
-                }
+                StateHasChanged();
                 Columns.First().SetFocuse();
-                Owner.Grid.setCellEditableConfig(this);
+                //Grid.setCellEditableConfig(this);
             }
             else
                 return false;
@@ -57,9 +58,11 @@ namespace Sayeh.AspNetCore.Components
             if (_implementedIEditableObject!.Value)
                 ((IEditableObject)Item!).EndEdit();
             Mode = DataGridItemMode.Readonly;
+            foreach (var cell in cells.Where(w => w.Value.Column?.IsEditable ?? false))
+                cell.Value.MakeValid();
             _currentEditCell = null;
             StateHasChanged();
-            Owner.Grid.removeCellEditableConfig(this);
+            //Grid.removeCellEditableConfig(this);
         }
 
         [RequiresUnreferencedCode("Use 'MethodFriendlyToTrimming' instead", Url = "http://help/unreferencedcode")]
@@ -69,20 +72,38 @@ namespace Sayeh.AspNetCore.Components
                 return true;
             if (Mode == DataGridItemMode.Readonly)
                 return false;
+            _validationResult?.Clear();
+            foreach (var cell in cells.Where(w => w.Value.Column?.IsEditable ?? false))
+            {
+                cell.Value.MakeValid();
+            }
             await Task.Delay(10);
             if (!CommitCell())
                 return false;
             CommitEdit();
             _validationContext!.MemberName = null;
-            return Validator.TryValidateObject(Item!, _validationContext!, _validationResult!);
+            var isValid = Validator.TryValidateObject(Item!, _validationContext!, _validationResult!);
+            if (!isValid)
+            {
+                foreach (var cell in cells.Where(w => w.Value.Column?.IsEditable ?? false))
+                {
+                    var errorMessages = string.Join("<br>", _validationResult!.Where(a => a.MemberNames.Any(a => a == ((IEditableColumn<TItem>)cell.Value.Column!).GetEditPropertyPath())).Select(s=> s.ErrorMessage));
+                    if (!string.IsNullOrEmpty(errorMessages))
+                    {
+                        cell.Value.MakeInvalid(errorMessages);
+                    }
+                }
+            }
+            return isValid;
         }
 
-        [RequiresUnreferencedCode("Use 'MethodFriendlyToTrimming' instead", Url = "http://help/unreferencedcode")]
         private bool CommitCell()
         {
             if (_currentEditCell is null)
                 return true;
-            var col = Columns!.ElementAt(_currentEditCell.ColumnIndex - 1);
+            var col = _currentEditCell.Column;
+            if (col is null)
+                return false;
             if (!col.IsEditable)
                 return true;
             var cprvcol = ((IEditableColumn<TItem>)col);
@@ -93,7 +114,7 @@ namespace Sayeh.AspNetCore.Components
                     return true;
                 //if property does not have valide data or event has Cancel == true, prevent cell change and set focuse to previouse cell
                 if (!Validator.TryValidateProperty(cprvcol.GetCurrentValue(), _validationContext, _validationResult)
-                    || !Owner.Grid.EditEndingForCell(Item!, cprvcol.GetEditPropertyPath(), cprvcol.GetCurrentValue(), EditActionEnum.Commit))
+                    || !Grid.EditEndingForCell(Item!, cprvcol.GetEditPropertyPath(), cprvcol.GetCurrentValue(), EditActionEnum.Commit))
                 {
                     col.SetFocuse();
                     return false;
@@ -101,7 +122,7 @@ namespace Sayeh.AspNetCore.Components
                 else
                 {
                     cprvcol.UpdateSource();
-                    Owner.Grid.EditEndedForCell(Item!, cprvcol.GetEditPropertyPath(), EditActionEnum.Commit);
+                    Grid.EditEndedForCell(Item!, cprvcol.GetEditPropertyPath(), EditActionEnum.Commit);
                 }
 
             }
@@ -117,7 +138,7 @@ namespace Sayeh.AspNetCore.Components
                 return;
             cCol.BeginEdit(Item!);
             if (!cCol.IsReadonly)
-                col.InternalIsReadonly = !Owner.Grid.BeginPropertyEdit(Item!, cCol.GetEditPropertyPath());
+                col.InternalIsReadonly = !Grid.BeginPropertyEdit(Item!, cCol.GetEditPropertyPath());
             else
                 col.InternalIsReadonly = true;
         }
@@ -126,10 +147,10 @@ namespace Sayeh.AspNetCore.Components
         {
             if (Columns is null)
                 return;
-            //foreach (var col in Columns.Where(w => w.IsEditable).Cast<IEditableColumn<TGridItem>>())
-            //{
-            //    col.UpdateSource();
-            //}
+            foreach (var col in Columns.Where(w => w.IsEditable).Cast<IEditableColumn<TItem>>())
+            {
+                col.UpdateSource();
+            }
             StateHasChanged();
         }
 
@@ -143,22 +164,21 @@ namespace Sayeh.AspNetCore.Components
                 if (col.IsEditable)
                 {
                     var cCol = ((IEditableColumn<TItem>)col);
-                    Owner.Grid.EditEndedForCell(Item!, cCol.GetEditPropertyPath(), EditActionEnum.Cancel);
+                    Grid.EditEndedForCell(Item!, cCol.GetEditPropertyPath(), EditActionEnum.Cancel);
                 }
-
                 _currentEditCell = null;
             }
             if (Mode == DataGridItemMode.Edit)
                 Mode = DataGridItemMode.Readonly;
-            await Owner.Grid.EndEdit(this, EditActionEnum.Cancel);
-            Owner.Grid.removeCellEditableConfig(this);
+            await Grid.EndEdit(this, EditActionEnum.Cancel);
+            //Grid.removeCellEditableConfig(this);
             StateHasChanged();
         }
 
         [RequiresUnreferencedCode("Use 'MethodFriendlyToTrimming' instead", Url = "http://help/unreferencedcode")]
         private void OnRowDblClicked()
         {
-            if (Owner.Grid.IsReadonly)
+            if (Grid.IsReadonly && RowType == Microsoft.FluentUI.AspNetCore.Components.DataGridRowType.Default)
                 return;
             BeginEdit();
         }

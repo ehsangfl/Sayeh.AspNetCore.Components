@@ -3,21 +3,26 @@
 @typeparam TItem
 @if (CellType == DataGridCellType.Default)
 {
-    <td col-index=@ColumnIndex
+    <td col-index=@(ColumnIndex+1)
         class="@ClassValue"
         style="@StyleValue"
         role="gridcell"
         tabindex="0"
+        id="@CellId"
         @onkeydown="@HandleOnCellKeyDownAsync"
         @onclick="@HandleOnCellClickAsync"
         @onfocus="@HandleOnCellFocusAsync"
         @attributes="AdditionalAttributes">
         @ChildContent
+        @if (ErrorMessage is not null)
+        {
+            <FluentTooltip class="invalid" Anchor="@CellId" Visible="true">@((MarkupString)ErrorMessage)</FluentTooltip>
+        }
     </td>
 }
 else
 {
-    <th col-index=@ColumnIndex
+    <th col-index=@(ColumnIndex+1)
         class="@ClassValue"
         style="@StyleValue"
         @oncontextmenu:preventDefault="true"

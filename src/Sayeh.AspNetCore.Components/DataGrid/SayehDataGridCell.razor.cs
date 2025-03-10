@@ -90,7 +90,7 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem 
         .Build();
 
     protected string? StyleValue => new StyleBuilder(Style)
-        .AddStyle("grid-column", ColumnIndex.ToString(), () => (Grid.Items is not null) || Grid.Virtualize)
+        .AddStyle("grid-column", (ColumnIndex+1).ToString(), () => (Grid.Items is not null) || Grid.Virtualize)
         .AddStyle("text-align", "center", Column is SelectColumn<TItem>)
         .AddStyle("align-content", "center", Column is SelectColumn<TItem>)
         .AddStyle("padding-inline-start", "calc(((var(--design-unit)* 3) + var(--focus-stroke-width) - var(--stroke-width))* 1px)", Column is SelectColumn<TItem> && Owner.RowType == DataGridRowType.Default)
@@ -102,7 +102,7 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem 
         .AddStyle("height", "100%", Grid.MultiLine)
         .AddStyle("min-height", "44px", Owner.RowType != DataGridRowType.Default)
         .AddStyle("display", "flex", ShouldHaveDisplayFlex())
-        .AddStyle("z-index", (Grid._columns.Count + 1 - this.ColumnIndex).ToString(), CellType == DataGridCellType.ColumnHeader && Grid._columns.Count > 0)
+        .AddStyle("z-index", (Grid._columns.Count + 2 - this.ColumnIndex).ToString(), CellType == DataGridCellType.ColumnHeader && Grid._columns.Count > 0)
         .AddStyle(Owner.Style)
         .Build();
 
@@ -129,6 +129,7 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem 
     internal void HandleOnCellClickAsync()
     {
         _isSelected = true;
+        Owner.CurrentCell = this;
     }
 
     internal async Task HandleOnCellFocusAsync()

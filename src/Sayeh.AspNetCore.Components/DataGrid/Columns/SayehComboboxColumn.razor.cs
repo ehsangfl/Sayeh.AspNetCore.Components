@@ -29,7 +29,7 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public Func<TOption, string> DisplayMember { get; set; } = f => f?.ToString()!;
 
-        [Parameter]
+        [EditorRequired, Parameter]
         public Func<TOption, TValue> ValueMember { get; set; } = default!;
 
         [Parameter]
@@ -43,7 +43,7 @@ namespace Sayeh.AspNetCore.Components
 
         public SayehComboboxColumn()
         {
-
+            this.Class = "overflow-column";
         }
 
         protected override void OnParametersSet()

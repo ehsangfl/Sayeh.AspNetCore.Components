@@ -15,39 +15,42 @@
         @onclick="@(e => HandleOnRowClickAsync(RowId))"
         @ondblclick="@(e => HandleOnRowDoubleClickAsync(RowId))"
         @attributes="AdditionalAttributes"
-        @onfocus=HandleOnCellFocusAsync>
+        @onfocus=HandleOnRowFocusAsync>
         @ChildContent
 
         @if (Columns is not null)
         {
-            int colIndex = 1;
+            int colIndex = 0;
             if (Mode == DataGridItemMode.Readonly)
             {
+                @* <td style="max-width:20px"><FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size12.ArrowRight())" /></td> *@
                 @foreach (var col in Columns)
                 {
-                    <SayehDataGridCell Options="@(new DataGridCellOptions<TItem>(colIndex++,Item,null,ColumnClass(col),col.Style))" @key="@col" TItem="TItem" >
+                    <SayehDataGridCell Options="@(new DataGridCellOptions<TItem>(colIndex++,Item,null,ColumnJustifyClass(col),col.Style))" @key="@col" TItem="TItem">
                         @((RenderFragment)(__builder => col.CellContent(__builder, Item!)))
                     </SayehDataGridCell>
                 }
             }
             else if (Mode == DataGridItemMode.Edit)
             {
-                @foreach (var col in Columns)
-                {
-                    if (col.IsEditable)
+                <CascadingValue Value="_editContext">
+                    @foreach (var col in Columns)
                     {
-                        <SayehDataGridCell Options="@(new DataGridCellOptions<TItem>(colIndex++,Item,null,ColumnClass(col),col.Style))" @key="@col" TItem="TItem">
-                            @((RenderFragment)(__builder => ((IEditableColumn<TItem>)col).CellEditContent(__builder)))
-                        </SayehDataGridCell>
+                        if (col.IsEditable)
+                        {
+                            <SayehDataGridCell Options="@(new DataGridCellOptions<TItem>(colIndex++,Item,null,ColumnJustifyClass(col),col.Style))" @key="@col" TItem="TItem">
+                                @((RenderFragment)(__builder => ((IEditableColumn<TItem>)col).CellEditContent(__builder)))
+                            </SayehDataGridCell>
+                        }
+                        else
+                        {
+                            <SayehDataGridCell Options="@(new DataGridCellOptions<TItem>(colIndex++,Item,null,ColumnJustifyClass(col),col.Style))" @key="@col" TItem="TItem">
+                                @((RenderFragment)(__builder => col.CellContent(__builder, Item!)))
+                            </SayehDataGridCell>
+                        }
                     }
-                    else
-                    {
-                        <SayehDataGridCell Options="@(new DataGridCellOptions<TItem>(colIndex++,Item,null,ColumnClass(col),col.Style))" @key="@col" TItem="TItem">
-                            @((RenderFragment)(__builder => col.CellContent(__builder, Item!)))
-                        </SayehDataGridCell>
-                    }
-
-                }
+                    <FluentValidationSummary />
+                </CascadingValue>
             }
         }
     </tr>

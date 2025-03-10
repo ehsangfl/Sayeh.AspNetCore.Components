@@ -18,4 +18,10 @@
     <ProjectReference Include="..\..\src\Sayeh.AspNetCore.Components\Sayeh.AspNetCore.Components.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Pages\DataGrid\DataGrid-EditItem.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
 </Project>

@@ -95,3 +95,15 @@ td {
     text-align: end;
     margin-inline-end: calc(var(--design-unit) * 4px);
 }
+.isInEditMode td {
+    padding: 0 !important;
+}
+.invalid {
+    border: var(--error);
+    border-width: 1px;
+    border-style: solid;
+    --accent-fill-rest:var(--error);
+}
+.overflow-column {
+    overflow: visible !important;
+}

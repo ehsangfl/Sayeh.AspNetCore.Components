@@ -9,6 +9,7 @@ using static Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size20;
 using Sayeh.AspNetCore.Components.DataGrid.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using static Microsoft.FluentUI.AspNetCore.Components.Icons.Light.Size32;
+using Microsoft.FluentUI.AspNetCore.Components.Utilities;
 
 namespace Sayeh.AspNetCore.Components
 {
@@ -16,8 +17,9 @@ namespace Sayeh.AspNetCore.Components
     {
 
         #region Fileds
-        
-        private const string JAVASCRIPT_FILE = "./_content/Microsoft.FluentUI.AspNetCore.Components/Components/DataGrid/FluentDataGrid.razor.js";
+
+        //private const string JAVASCRIPT_FILE = "./_content/Microsoft.FluentUI.AspNetCore.Components/Components/DataGrid/FluentDataGrid.razor.js";
+        private const string JAVASCRIPT_FILE = "./_content/Sayeh.AspNetCore.Components/DataGrid/SayehDataGrid.razor.js";
         public const string EMPTY_CONTENT_ROW_CLASS = "empty-content-row";
         public const string LOADING_CONTENT_ROW_CLASS = "loading-content-row";
 
@@ -47,7 +49,7 @@ namespace Sayeh.AspNetCore.Components
         //for single column sort or no sort, we dont display sort order part.we can achieve this on each column, but this can be caused a performance issue
         internal bool multiColumnSorted;
 
-        private bool _sortByAscending;
+        //private bool _sortByAscending;
         private bool _checkColumnOptionsPosition;
         private bool _manualGrid;
 
@@ -76,7 +78,7 @@ namespace Sayeh.AspNetCore.Components
         // If the PaginationState mutates, it raises this event. We use it to trigger a re-render.
         private readonly EventCallbackSubscriber<PaginationState> _currentPageItemsChanged;
 
-        private SayehDataGridRow<TItem>? _currentRow;
+        private SayehDataGridRow<TItem>? _currentRow { get; set; }
 
         bool ImplementedIEditableObject = false;
 
@@ -445,12 +447,13 @@ namespace Sayeh.AspNetCore.Components
         /// options UI that was previously displayed.
         /// </summary>
         /// <param name="column">The column whose options are to be displayed, if any are available.</param>
-        public Task ShowColumnOptionsAsync(SayehColumnBase<TItem> column)
+        public Task<bool> ShowColumnOptionsAsync(SayehColumnBase<TItem> column)
         {
+            if (_currentRow is not null && _currentRow.Mode == DataGridItemMode.Edit)
+                return Task.FromResult(false);
             _displayOptionsForColumn = column;
             _checkColumnOptionsPosition = true; // Triggers a call to JSRuntime to position the options element, apply autofocus, and any other setup
-            StateHasChanged();
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
         public void SetLoadingState(bool loading)
         {
@@ -586,6 +589,8 @@ namespace Sayeh.AspNetCore.Components
         /// <returns>A <see cref="Task"/> representing the completion of the operation.</returns>
         internal Task ApplySort(ISortableColumn<TItem> column)
         {
+            if (_currentRow is not null && _currentRow.Mode == DataGridItemMode.Edit)
+                return Task.CompletedTask;
             var affectedColumns = _sortableColumns.Cast<ISortableColumn<TItem>>().Where(w => w.SortDirection.HasValue);
             multiColumnSorted = affectedColumns.Count() > 1;
             if (column.SortDirection.HasValue)
@@ -633,6 +638,18 @@ namespace Sayeh.AspNetCore.Components
             return sortDirection.HasValue ? (sortDirection.Value == ListSortDirection.Ascending ? "ascending" : "descending") : "none";
         }
 
+        //private string? columnheaderclass(sayehcolumnbase<titem> column)
+        //{
+        //    listsortdirection? sortdirection = null;
+        //    if (_sortablecolumns.any(a => a == column && ((isortablecolumn<titem>)a).sortdirection.hasvalue))
+        //    {
+        //        sortdirection = ((isortablecolumn<titem>)column).sortdirection!.value;
+        //    }
+        //    return sortdirection.hasvalue
+        //   ? $"{columnclass(column)} {(sortdirection.value == listsortdirection.ascending ? "col-sort-asc" : "col-sort-desc")}"
+        //   : columnclass(column);
+        //}
+
         private string? ColumnHeaderClass(SayehColumnBase<TItem> column)
         {
             ListSortDirection? sortDirection = null;
@@ -640,29 +657,32 @@ namespace Sayeh.AspNetCore.Components
             {
                 sortDirection = ((ISortableColumn<TItem>)column).SortDirection!.Value;
             }
-            return sortDirection.HasValue
-           ? $"{ColumnClass(column)} {(sortDirection.Value == ListSortDirection.Ascending ? "col-sort-asc" : "col-sort-desc")}"
-           : ColumnClass(column);
+            return new CssBuilder(Class)
+               .AddClass(ColumnJustifyClass(column))
+               .AddClass("col-sort-asc", sortDirection.HasValue && sortDirection.Value == ListSortDirection.Ascending)
+               .AddClass("col-sort-desc", sortDirection.HasValue && sortDirection.Value == ListSortDirection.Descending)
+               .Build();
         }
+
+        private static string? ColumnJustifyClass(SayehColumnBase<TItem> column)
+        {
+            return new CssBuilder(column.Class)
+                .AddClass("col-justify-start", column.Align == Align.Start)
+                .AddClass("col-justify-center", column.Align == Align.Center)
+                .AddClass("col-justify-end", column.Align == Align.End)
+                .Build();
+        }
+
 
         private string? GridClass()
         {
-            string? value = $"{Class} {(_pendingDataLoadCancellationTokenSource is null ? null : "loading")}".Trim();
-            if (string.IsNullOrEmpty(value))
-                return null;
-            else
-                return value;
+            return new CssBuilder(Class)
+                .AddClass("fluent-data-grid")
+                .AddClass("grid", DisplayMode == DataGridDisplayMode.Grid)
+                .AddClass("auto-fit", AutoFit)
+                .AddClass("loading", _pendingDataLoadCancellationTokenSource is not null)
+                .Build();
         }
-
-        private static string? ColumnClass(SayehColumnBase<TItem> column) => column.Align switch
-        {
-            Align.Start => $"col-justify-start {column.Class}",
-            Align.Center => $"col-justify-center {column.Class}",
-            Align.End => $"col-justify-end {column.Class}",
-            //Align.Left => $"col-justify-left {column.Class}",
-            //Align.Right => $"col-justify-right {column.Class}",
-            _ => column.Class,
-        };
 
         /// <inheritdoc />
         public async ValueTask DisposeAsync()
@@ -699,28 +719,24 @@ namespace Sayeh.AspNetCore.Components
             }
         }
 
-        private async Task HandleOnRowFocusAsync(DataGridRowFocusEventArgs args)
+        internal async Task OnRowFocusAsync(SayehDataGridRow<TItem> row)
         {
-            string? rowId = args.RowId;
-            if (_internalGridContext.Rows.TryGetValue(rowId!, out SayehDataGridRow<TItem>? row))
+            await OnRowFocus.InvokeAsync(row);
+            if (_currentRow is null || IsReadonly)
             {
-                await OnRowFocus.InvokeAsync(row);
-                if (_currentRow is null || IsReadonly)
-                {
-                    SetCurrentRow(row);
-                    return;
-                }
-                if (_currentRow.RowId.Equals(row.RowId))
-                    return;
-                if (_currentRow.Mode == DataGridItemMode.Edit)
-                {
-                    var canCommit = await EndEdit(_currentRow, EditActionEnum.Commit);
-                    if (canCommit)
-                        SetCurrentRow(row);
-                }
-                else
+                SetCurrentRow(row);
+                return;
+            }
+            if (_currentRow.RowId.Equals(row.RowId))
+                return;
+            if (_currentRow.Mode == DataGridItemMode.Edit)
+            {
+                var canCommit = await EndEdit(_currentRow, EditActionEnum.Commit);
+                if (canCommit)
                     SetCurrentRow(row);
             }
+            else
+                SetCurrentRow(row);
         }
 
         private async void SetCurrentRow(SayehDataGridRow<TItem> row)

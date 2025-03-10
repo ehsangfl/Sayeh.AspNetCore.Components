@@ -17,7 +17,8 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
 
     internal string RowId { get; set; } = string.Empty;
     private readonly Dictionary<string, SayehDataGridCell<TItem>> cells = [];
-    private SayehDataGridCell<TItem> selectCell;
+    private SayehDataGridCell<TItem>? selectCell;
+    private SayehDataGrid<TItem> Grid => GridContext.Grid;
 
     #endregion
 
@@ -64,7 +65,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     /// Gets or sets the owning <see cref="SayehDataGrid{TItem}"/> component
     /// </summary>
     [CascadingParameter]
-    private InternalGridContext<TItem> Owner { get; set; } = default!;
+    private InternalGridContext<TItem> GridContext { get; set; } = default!;
 
     [Parameter]
     public IEnumerable<SayehColumnBase<TItem>>? Columns { get; set; }
@@ -73,6 +74,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     [Parameter]
     public DataGridRowOptions<TItem>? Options { get; set; }
 
+    internal SayehDataGridCell<TItem>? CurrentCell { get; set; }
 
     #endregion
 
@@ -80,8 +82,8 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
 
     protected override void OnInitialized()
     {
-        RowId = $"r{Owner.GetNextRowId()}";
-        Owner.Register(this);
+        RowId = $"r{GridContext.GetNextRowId()}";
+        GridContext.Register(this);
     }
 
 
@@ -110,21 +112,22 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     #endregion
 
     protected string? ClassValue => new CssBuilder(Class)
-        .AddClass("hover", when: Owner.Grid.ShowHover)
+        .AddClass("hover", when: GridContext.Grid.ShowHover)
+        .AddClass("isInEditMode",when: Mode == DataGridItemMode.Edit)
         .Build();
 
     protected string? StyleValue => new StyleBuilder(Style)
-       .AddStyle("height", $"{Owner.Grid.ItemSize:0}px", () => Owner.Grid.Virtualize && RowType == DataGridRowType.Default)
-       .AddStyle("height", "100%", () => (!Owner.Grid.Virtualize || Owner.Rows.Count == 0) && Owner.Grid.Loading && RowType == DataGridRowType.Default)
-       .AddStyle("align-items", "center", () => Owner.Grid.Virtualize && RowType == DataGridRowType.Default && string.IsNullOrEmpty(Style))
+       .AddStyle("height", $"{GridContext.Grid.ItemSize:0}px", () => GridContext.Grid.Virtualize && RowType == DataGridRowType.Default)
+       .AddStyle("height", "100%", () => (!GridContext.Grid.Virtualize || GridContext.Rows.Count == 0) && GridContext.Grid.Loading && RowType == DataGridRowType.Default)
+       .AddStyle("align-items", "center", () => GridContext.Grid.Virtualize && RowType == DataGridRowType.Default && string.IsNullOrEmpty(Style))
        .Build();
 
-   
-    public void Dispose() => Owner.Unregister(this);
 
-    internal void Register(SayehDataGridCell<TItem> cell)
+    public void Dispose() => GridContext.Unregister(this);
+
+    internal void Register(SayehDataGridCell<TItem> cell)           
     {
-        cell.CellId = $"c{Owner.GetNextCellId()}";
+        cell.CellId = $"c{GridContext.GetNextCellId()}";
         cells.Add(cell.CellId, cell);
     }
 
@@ -142,32 +145,31 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
 
     internal async Task HandleOnRowFocusAsync()
     {
-       await HandleOnRowClickAsync(Id);
+        if (Grid.OnRowFocus.HasDelegate)
+        {
+            await Grid.OnRowFocus.InvokeAsync(this);
+        }
     }
 
-    private async Task HandleOnCellFocusAsync()
+    internal async Task HandleOnRowDoubleClickAsync(string rowId)
     {
-        //var cellId = args.CellId;
-        //if (_currentEditCell is not null && cellId is not null && cellId.Equals(_currentEditCell.CellId))
+        if (GridContext.Rows.TryGetValue(rowId, out var row))
+        {
+            if (GridContext.Grid.OnRowDoubleClick.HasDelegate)
+            {
+                await GridContext.Grid.OnRowDoubleClick.InvokeAsync(row);
+            }
+        }
+        OnRowDblClicked();
+        //if (CurrentCell is not null)
         //{
-        //    Console.WriteLine("enter to selected cell");
-        //    return;
-        //}
-        //if (cells.TryGetValue(cellId!, out var cell))
-        //{
-        //    await OnCellFocus.InvokeAsync(cell);
-        //    var col = this.Columns?.ElementAt(cell.GridColumn - 1);
-        //    if (col is not null && _currentEditCell is not null && !cell.CellId.Equals(_currentEditCell.CellId) && CommitCell())
+        //    if (_currentEditCell is not null && !CurrentCell.CellId.Equals(_currentEditCell.CellId) && CommitCell())
+        //        return;
+        //    else
         //    {
-        //        _currentEditCell = cell;
-        //        ColBeginEdit(col);
-        //        col.SetFocuse();
-        //    }
-        //    else if (col is not null && _currentEditCell is null)
-        //    {
-        //        _currentEditCell = cell;
-        //        ColBeginEdit(col);
-        //        col.SetFocuse();
+        //        _currentEditCell = CurrentCell;
+        //        ColBeginEdit(_currentEditCell.Column!);
+        //        _currentEditCell.Column!.SetFocuse();
         //    }
         //}
     }
@@ -175,24 +177,20 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     /// <summary />
     internal async Task HandleOnRowClickAsync(string rowId)
     {
-        if (Owner.Rows.TryGetValue(rowId, out var row))
+        if (GridContext.Rows.TryGetValue(rowId, out var row))
         {
-            if (Owner.Grid.OnRowClick.HasDelegate)
+            await GridContext.Grid.OnRowFocusAsync(this);
+            if (GridContext.Grid.OnRowClick.HasDelegate)
             {
-                await Owner.Grid.OnRowClick.InvokeAsync(row);
+                await GridContext.Grid.OnRowClick.InvokeAsync(row);
             }
         }
     }
 
-    /// <summary />
-    internal async Task HandleOnRowDoubleClickAsync(string rowId)
-    {
-        if (Owner.Rows.TryGetValue(rowId, out var row))
+    internal async Task HandleOnRowFocusAsync(string rowId) {
+        if (GridContext.Grid.OnRowFocus.HasDelegate)
         {
-            if (Owner.Grid.OnRowDoubleClick.HasDelegate)
-            {
-                await Owner.Grid.OnRowDoubleClick.InvokeAsync(row);
-            }
+            await GridContext.Grid.OnRowFocus.InvokeAsync(this);
         }
     }
 
@@ -209,6 +207,15 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
         Align.End => $"col-justify-end {column.Class}",
         _ => column.Class,
     };
+
+    private static string? ColumnJustifyClass(SayehColumnBase<TItem> column)
+    {
+        return new CssBuilder(column.Class)
+            .AddClass("col-justify-start", column.Align == Align.Start)
+            .AddClass("col-justify-center", column.Align == Align.Center)
+            .AddClass("col-justify-end", column.Align == Align.End)
+            .Build();
+    }
 
     /// <summary />
     Task IHandleEvent.HandleEventAsync(EventCallbackWorkItem callback, object? arg)

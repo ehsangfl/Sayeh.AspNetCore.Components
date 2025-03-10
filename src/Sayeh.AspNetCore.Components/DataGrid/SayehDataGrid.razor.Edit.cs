@@ -250,15 +250,15 @@ partial class SayehDataGrid<TItem>
         raiseCellEditEnded(Item, PropertyName, EditAction);
     }
 
-    internal void setCellEditableConfig(SayehDataGridRow<TItem> row)
-    {
-        Module?.InvokeVoidAsync("setCellEditableConfig", _gridReference, row.RowId);
-    }
+    //internal void setCellEditableConfig(SayehDataGridRow<TItem> row)
+    //{
+    //    Module?.InvokeVoidAsync("setCellEditableConfig", _gridReference, row.RowId);
+    //}
 
-    internal void removeCellEditableConfig(SayehDataGridRow<TItem> row)
-    {
-        Module?.InvokeVoidAsync("removeCellEditableConfig", _gridReference, row.RowId);
-    }
+    //internal void removeCellEditableConfig(SayehDataGridRow<TItem> row)
+    //{
+    //    Module?.InvokeVoidAsync("removeCellEditableConfig", _gridReference, row.RowId);
+    //}
 
     #endregion
 

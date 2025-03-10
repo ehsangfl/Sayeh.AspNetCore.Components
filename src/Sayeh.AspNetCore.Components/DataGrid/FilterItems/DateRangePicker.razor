@@ -1,13 +1,5 @@
 ﻿@namespace Sayeh.AspNetCore.Components
-<div>
-    <label>From</label>
-    <input type="date" @bind-value=FromDate />
-</div>
-<div>
-    <label>To</label>
-    <input type="date" @bind-value=ToDate />
-</div>
-<div>
-    <FluentButton @onclick="DataEntered">Search</FluentButton>
-</div>
+<FluentDatePicker @bind-value=FromDate Label="@Resources.FromValue"/>
+<FluentDatePicker @bind-value=ToDate Label="@Resources.ToValue" />
+<FluentButton @onclick="DataEntered">@Resources.Search</FluentButton>
 

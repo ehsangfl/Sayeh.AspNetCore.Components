@@ -19,15 +19,15 @@
         }
         <Sayeh.AspNetCore.Components.DataGrid.Infrastructure.ColumnsCollectedNotifier TItem="TItem" />
         <table @ref=_gridReference
-               no-tabbing=@NoTabbing
-               generate-header="none"
-               grid-template-columns=@_internalGridTemplateColumns
-               class="@GridClass()"
-               style="@Style"
-               aria-rowcount="@(_ariaBodyRowCount + 1)"
-               @onclosecolumnoptions="CloseColumnOptions"
-               @attributes="AdditionalAttributes"
-               @onkeydown=OnKeyPress>
+        no-tabbing=@NoTabbing
+        generate-header="none"
+        grid-template-columns=@("20px " + _internalGridTemplateColumns)
+        class="@GridClass()"
+        style="@Style"
+        aria-rowcount="@(_ariaBodyRowCount + 1)"
+        @onclosecolumnoptions="CloseColumnOptions"
+        @attributes="AdditionalAttributes"
+        @onkeydown=OnKeyPress>
             @if (GenerateHeader != GenerateHeaderOption.None)
             {
                 DataGridRowType headerType = DataGridRowType.Header;
@@ -55,13 +55,13 @@
                         else
                         {
                             <Virtualize @ref="@_virtualizeComponent"
-                                        TItem="(int RowIndex, TItem Data)"
-                                        ItemSize="@ItemSize"
-                                        OverscanCount="@OverscanCount"
-                                        ItemsProvider="@ProvideVirtualizedItemsAsync"
-                                        ItemContent="@(item => builder => RenderRow(builder, item.RowIndex, item.Data))"
-                                        Placeholder="@(placeholderContext => builder => RenderPlaceholderRow(builder, placeholderContext))"
-                                        SpacerElement="tr" />
+                            TItem="(int RowIndex, TItem Data)"
+                            ItemSize="@ItemSize"
+                            OverscanCount="@OverscanCount"
+                            ItemsProvider="@ProvideVirtualizedItemsAsync"
+                            ItemContent="@(item => builder => RenderRow(builder, item.RowIndex, item.Data))"
+                            Placeholder="@(placeholderContext => builder => RenderPlaceholderRow(builder, placeholderContext))"
+                            SpacerElement="tr" />
                         }
                     }
                     else
@@ -76,6 +76,7 @@
             </tbody>
 
         </table>
+
     </Defer>
 
 </CascadingValue>
@@ -107,11 +108,11 @@
         var rowStyle = RowStyle?.Invoke(item) ?? null;
 
         <SayehDataGridRow @key="@ItemKey(item)"
-                          aria-rowindex="@rowIndex"
-                          Style="@rowStyle"
-                          Class="@rowClass"
-                          TItem="TItem"
-                          Options=@(new DataGridRowOptions<TItem>(rowIndex,item,GridTemplateColumns,_columns))>
+        aria-rowindex="@rowIndex"
+        Style="@rowStyle"
+        Class="@rowClass"
+        TItem="TItem"
+        Options=@(new DataGridRowOptions<TItem>(rowIndex,item,GridTemplateColumns,_columns))>
 
         </SayehDataGridRow>
 
@@ -126,7 +127,7 @@
             {
                 var col = _columns[colIndex];
 
-                <SayehDataGridCell Class="@("grid-cell-placeholder " + @ColumnClass(col))" Style="@col.Style" @key="@col" GridColumn=@(colIndex+1) TItem="TItem">
+                <SayehDataGridCell Class="@("grid-cell-placeholder " + ColumnJustifyClass(col))" Style="@col.Style" @key="@col" ColumnIndex=@(colIndex+1) TItem="TItem">
                     @((RenderFragment)(__builder => col.RenderPlaceholderContent(__builder, placeholderContext)))
                 </SayehDataGridCell>
             }
@@ -135,6 +136,8 @@
 
     private void RenderColumnHeaders(RenderTreeBuilder __builder)
     {
+        // var firstColStyle = $"grid-column: 1; height: 32px; min-height: 44px; z-index: {_columns.Count + 2};width:20px";
+        // <th col-index="1" class="column-header col-justify-start" style=@firstColStyle scope="col"></th>
         @for (var colIndex = 0; colIndex < _columns.Count; colIndex++)
         {
             var col = _columns[colIndex];
@@ -142,11 +145,9 @@
             
             <SayehDataGridCell @key="@col"
                                TItem="TItem"
-                               ColumnIndex=@(colIndex+1)
+                               ColumnIndex=@(colIndex)
                                CellType=DataGridCellType.ColumnHeader
-                               Class="@("column-header " + ColumnHeaderClass(col) + (ResizableColumns ? " resizable" : ""))"
-                               Style="@col.Style"
-                               aria-sort="@AriaSortValue(col)"
+                               Class="@(ColumnHeaderClass(col) + (ResizableColumns ? " resizable" : string.Empty))"
                                scope="col"
                                @ref=col.HeaderCell>
                 @col.HeaderContent

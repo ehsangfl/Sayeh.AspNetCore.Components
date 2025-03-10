@@ -1,4 +1,4 @@
-﻿@page "/datagrid-selectrows"
+﻿@page "/datagrid-edit"
 <h3>DataGrid</h3>
 @if (weatherForeacasts is null)
 {
@@ -6,13 +6,12 @@
 }
 else
 {
-    <label>multi selection</label>
-    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts" IsReadonly="true">
-        <SayehSelectColumn Property="p=> p.IsSelected" />
+    <label>editable datagrid</label>
+    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts">
         <SayehPropertyColumn Property="p=> p.Order" />
         <SayehDatePickerColumn Property="p=> p.Date" />
         <SayehPropertyColumn Property="p=> p.DayofWeek" />
-        <SayehPropertyColumn Property="p=> p.Type"/>
+        <SayehComboboxColumn Property="p=> p.Type" Items="DayTypes" ValueMember="v=> v" />
         <SayehNumericTextboxColumn Property="p=> p.Tempreture" />
         <SayehPropertyColumn Property="p=> p.TemporatureF" />
         <SayehTextboxColumn Property="p=> p.Description" />

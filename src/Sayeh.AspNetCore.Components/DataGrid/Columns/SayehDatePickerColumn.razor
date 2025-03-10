@@ -13,7 +13,7 @@
     {
         if (!InternalIsReadonly)
         {
-            @if (typeof(TItem) == typeof(DateTime))
+            @if (typeof(TValue) == typeof(DateTime) || typeof(TValue) == typeof(Nullable<DateTime>) || typeof(TValue) == typeof(DateOnly) || typeof(TValue) == typeof(Nullable<DateOnly>))
             {
                 <FluentDatePicker @ref=element @bind-Value=internalValue  />
             }
