@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <VersionPrefix>1.2.0.2</VersionPrefix>
+    <VersionPrefix>2.0.0.0</VersionPrefix>
     <Title>Sayeh.AspNetCore.Components</Title>
     <Description>Some UI components for blazor platform based on Microsoft FuentUI</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
