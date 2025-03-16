@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sayeh.AspNetCore.Components
 {
-    public static class ExtensionMethods
+    internal static class ExtensionMethods
     {
         internal static bool IsNullableType(this Type type)
         {
