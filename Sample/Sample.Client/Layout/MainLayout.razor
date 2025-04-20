@@ -1,12 +1,25 @@
 ﻿@inherits LayoutComponentBase
+<FluentDesignTheme Direction="@Direction" StorageName="theme" />
+<FluentLayout>
+    <FluentHeader>
+        <FluentCombobox TOption="string" Label="Language" Value=@selectedCulture ValueChanged="changeCulture">
+            <FluentOption Value="en-US">English</FluentOption>
+            <FluentOption Value="fa-IR">فارسی</FluentOption>
+        </FluentCombobox>
+    </FluentHeader>
+    <FluentStack Orientation="Orientation.Horizontal" Width="100%">
+        <FluentNavMenu Width="250">
+            <FluentNavGroup Title="DataGrid">
+                <FluentNavLink Href="/datagrid-selectrows">select rows</FluentNavLink>
+                <FluentNavLink Href="/datagrid-edit">inline edite</FluentNavLink>
+            </FluentNavGroup>
+        </FluentNavMenu>
+         <FluentBodyContent>
+            @Body
+         </FluentBodyContent>
+    </FluentStack>
+</FluentLayout>
 
-@Body
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
 <FluentToastProvider />
 <FluentDialogProvider />
 <FluentTooltipProvider />

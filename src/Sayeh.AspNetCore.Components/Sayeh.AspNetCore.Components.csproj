@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <VersionPrefix>2.0.0.3</VersionPrefix>
+    <VersionPrefix>2.0.0.6</VersionPrefix>
     <Title>Sayeh.AspNetCore.Components</Title>
     <Description>Some UI components for blazor platform based on Microsoft FuentUI</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -13,12 +13,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.14" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.11.6" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.11.6" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.11.7" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.11.7" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Pagination\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sayeh.AspNetCore.Essentials.Core\Sayeh.AspNetCore.Essentials.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

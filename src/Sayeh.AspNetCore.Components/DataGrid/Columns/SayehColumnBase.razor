@@ -26,7 +26,7 @@
             @if (this.SortingIsEnable())
             {
                 var sortableColumn = this as ISortableColumn<TItem>;
-                @if (Align == Align.Start || (!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.Start) || (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.End))
+                @if ((!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.Start) || (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.End))
                 {
                     RenderFilterPart(__builder);
                 }
@@ -47,7 +47,7 @@
                     }
                 </FluentButton>
 
-                @if (Align == Align.End || (!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.End) || (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.Start))
+                @if ((!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.End) || (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.Start))
                 {
                     RenderFilterPart(__builder);
                 }
