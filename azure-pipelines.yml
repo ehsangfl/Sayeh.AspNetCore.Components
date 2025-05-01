@@ -1,0 +1,49 @@
+trigger:
+- Live
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'Restore Dependencies'
+  inputs:
+    command: restore
+    projects: |
+      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
+      src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj
+      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
+      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build Projects'
+  inputs:
+    command: build
+    projects: |
+      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
+      src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj
+      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
+      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Pack Projects for NuGet'
+  inputs:
+    command: pack
+    projects: |
+      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
+      src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj
+      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
+      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+
+- task: NuGetCommand@2
+  displayName: 'NuGet push'
+  inputs:
+    command: push
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: external
+    publishFeedCredentials: Nuget-For-Sayeh
