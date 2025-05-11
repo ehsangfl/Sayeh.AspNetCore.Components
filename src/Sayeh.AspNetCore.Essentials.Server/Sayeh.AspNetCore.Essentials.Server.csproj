@@ -9,6 +9,13 @@
     <Description>Some Services,Helpers ASPNetCore server side</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <OutputType>Library</OutputType>
+    <Authors>Ehsan Vali</Authors>
+    <Product>Sayeh</Product>
+    <PackageProjectUrl>https://apadanasystems.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ehsangfl/Sayeh.AspNetCore.Components</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>Asp.net  AspCore </PackageTags>
+    <Company>Vira Pardazesh Apadana</Company>
   </PropertyGroup>
 
   <ItemGroup>
