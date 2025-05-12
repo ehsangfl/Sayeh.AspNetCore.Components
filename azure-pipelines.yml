@@ -45,6 +45,6 @@ steps:
   inputs:
     command: push
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-    nuGetFeedType: internal
+    nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
     allowPackageConflicts: true
