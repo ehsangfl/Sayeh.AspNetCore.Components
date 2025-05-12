@@ -43,7 +43,7 @@ steps:
   displayName: 'NuGet push Components'
   inputs:
     command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Components.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Components.*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
     arguments: '-SkipDuplicate'
@@ -51,7 +51,7 @@ steps:
   displayName: 'NuGet push Essentials.Core'
   inputs:
     command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.Core.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.Core.*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
     arguments: '-SkipDuplicate'
@@ -59,7 +59,7 @@ steps:
   displayName: 'NuGet push Essentials.Server'
   inputs:
     command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.Server.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.Server.*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
     allowPackageConflicts: true
@@ -68,7 +68,7 @@ steps:
   displayName: 'NuGet push Essentials.WebAssembly'
   inputs:
     command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.WebAssembly.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.WebAssembly.*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
     arguments: '-SkipDuplicate'
