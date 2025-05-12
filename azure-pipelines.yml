@@ -43,7 +43,7 @@ steps:
 - task: NuGetCommand@2
   displayName: 'NuGet push'
   inputs:
-    command: push && nuGetFeedType = internal
+    command: push
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
