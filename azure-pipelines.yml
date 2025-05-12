@@ -47,3 +47,4 @@ steps:
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
+    arguments: '-SkipDuplicate'
