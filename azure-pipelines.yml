@@ -38,6 +38,9 @@ steps:
     arguments: '-SkipDuplicate'
   continueOnError: true
 
+- script: sleep 300  # 300 seconds = 5 minutes
+  displayName: "Wait for NuGet package availability"
+
 - task: DotNetCoreCLI@2
   displayName: 'restore Essentials.Server'
   inputs:
@@ -100,6 +103,9 @@ steps:
     publishFeedCredentials: Nuget-For-Sayeh
     arguments: '-SkipDuplicate'
   continueOnError: true
+
+- script: sleep 300  # 300 seconds = 5 minutes
+  displayName: "Wait for NuGet package availability"
 
 - task: DotNetCoreCLI@2
   displayName: 'Restore Components'
