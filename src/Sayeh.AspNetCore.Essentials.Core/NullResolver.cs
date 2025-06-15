@@ -7,23 +7,23 @@ public static class NullResolver
 
     #region Null Checker
 
-    public static bool None([NotNullWhen(false)] this object value)
+    public static bool None([NotNullWhen(false)] this object? value)
     {
         if (value is null)
             return true;
         return false;
     }
 
-    public static bool None([NotNullWhen(false)] this string value)
+    public static bool None([NotNullWhen(false)] this string? value)
     {
-        if (value == null)
+        if (value is null)
             return true;
-        if (string.IsNullOrEmpty(((string)value).Trim()))
+        if (string.IsNullOrEmpty(value.Trim()))
             return true;
         return false;
     }
 
-    public static bool HasValue([NotNullWhen(true)] this string value) => !value.None();
+    public static bool HasValue([NotNullWhen(true)] this string? value) => !value.None();
 
     public static bool None([NotNullWhen(false)] this Guid value) => value.Equals(Guid.Empty);
 
@@ -158,34 +158,39 @@ public static class NullResolver
 
     #region Null Replace
 
-    public static T Or<T>([NotNullIfNotNull("ReturnValue")] this T value, T ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static T Or<T>( this T value, T ReturnValue) 
     {
         if (value!.None())
             return ReturnValue;
         return value;
     }
 
-    public static string Or([NotNullIfNotNull("ReturnValue")] this string value, string ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static string Or(this string? value, string ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value;
     }
 
-    public static Guid Or([NotNullIfNotNull("ReturnValue")] this Guid value, Guid ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static Guid Or(this Guid value, Guid ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value;
     }
 
-    public static Guid Or([NotNullIfNotNull("ReturnValue")] this Nullable<Guid> value, Guid ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static Guid Or(this Nullable<Guid> value, Guid ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value!.Value;
     }
 
+    [return: NotNullIfNotNull("ReturnValue")]
     public static decimal Or(this decimal value, decimal ReturnValue)
     {
         if (value.None())
@@ -193,13 +198,15 @@ public static class NullResolver
         return value;
     }
 
-    public static decimal Or([NotNullIfNotNull("ReturnValue")] this Nullable<decimal> value, decimal ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static decimal Or(this Nullable<decimal> value, decimal ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value!.Value;
     }
 
+    [return: NotNullIfNotNull("ReturnValue")]
     public static TimeSpan Or(this TimeSpan value, TimeSpan ReturnValue)
     {
         if (value.None())
@@ -207,41 +214,46 @@ public static class NullResolver
         return value;
     }
 
-    public static TimeSpan Or([NotNullIfNotNull("ReturnValue")] this Nullable<TimeSpan> value, TimeSpan ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static TimeSpan Or(this Nullable<TimeSpan> value, TimeSpan ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value!.Value;
     }
 
-    public static DateTime Or( this DateTime value, DateTime ReturnValue)
+    public static DateTime Or(this DateTime value, DateTime ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value;
     }
 
-    public static DateTime Or([NotNullIfNotNull("ReturnValue")] this Nullable<DateTime> value, DateTime ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static DateTime Or(this Nullable<DateTime> value, DateTime ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value!.Value;
     }
 
-    public static double Or( this double value, double ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static double Or(this double value, double ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value;
     }
 
-    public static double Or([NotNullIfNotNull("ReturnValue")] this Nullable<double> value, double ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static double Or(this Nullable<double> value, double ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value!.Value;
     }
 
+    [return: NotNullIfNotNull("ReturnValue")]
     public static short Or(this short value, short ReturnValue)
     {
         if (value.None())
@@ -249,13 +261,15 @@ public static class NullResolver
         return value;
     }
 
-    public static short Or([NotNullIfNotNull("ReturnValue")] this Nullable<short> value, short ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static short Or(this Nullable<short> value, short ReturnValue)
     {
         if (value.None())
             return ReturnValue;
         return value!.Value;
     }
 
+    [return: NotNullIfNotNull("ReturnValue")]
     public static float Or(this float value, float ReturnValue)
     {
         if (value.None())
@@ -263,7 +277,8 @@ public static class NullResolver
         return value;
     }
 
-    public static float Or([NotNullIfNotNull("ReturnValue")] this Nullable<float> value, float ReturnValue)
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static float Or(this Nullable<float> value, float ReturnValue)
     {
         if (value.None())
             return ReturnValue;
