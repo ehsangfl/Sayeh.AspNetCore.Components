@@ -7,23 +7,23 @@ public static class NullResolver
 
     #region Null Checker
 
-    public static bool None([NotNullWhen(false)] this object value)
+    public static bool None([NotNullWhen(false)] this object? value)
     {
         if (value is null)
             return true;
         return false;
     }
 
-    public static bool None([NotNullWhen(false)] this string value)
+    public static bool None([NotNullWhen(false)] this string? value)
     {
-        if (value == null)
+        if (value is null)
             return true;
-        if (string.IsNullOrEmpty(((string)value).Trim()))
+        if (string.IsNullOrEmpty(value.Trim()))
             return true;
         return false;
     }
 
-    public static bool HasValue([NotNullWhen(true)] this string value) => !value.None();
+    public static bool HasValue([NotNullWhen(true)] this string? value) => !value.None();
 
     public static bool None([NotNullWhen(false)] this Guid value) => value.Equals(Guid.Empty);
 
