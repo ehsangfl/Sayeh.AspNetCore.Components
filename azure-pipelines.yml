@@ -21,14 +21,13 @@ steps:
     projects: |
       src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj
     arguments: '--configuration $(buildConfiguration)'
-
 - task: DotNetCoreCLI@2
-  displayName: 'Pack Sayeh.AspNetCore.Essentials.Core for NuGet'
+  displayName: 'Pack Essentials.Core'
   inputs:
-    command: pack
-    projects: |
-      src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    command: 'pack'
+    packagesToPack: 'src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj'
+    nobuild: true
+    versioningScheme: 'off'
 - task: NuGetCommand@2
   displayName: 'NuGet push Essentials.Core'
   inputs:
@@ -39,14 +38,17 @@ steps:
     arguments: '-SkipDuplicate'
   continueOnError: true
 
+- script: sleep 300  # 300 seconds = 5 minutes
+  displayName: "Wait for NuGet package availability"
+
 - task: DotNetCoreCLI@2
-  displayName: 'restore Sayeh.AspNetCore.Essentials.Server'
+  displayName: 'restore Essentials.Server'
   inputs:
     command: restore
     projects: |
       src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
 - task: DotNetCoreCLI@2
-  displayName: 'Build Sayeh.AspNetCore.Essentials.Server'
+  displayName: 'Build Essentials.Server'
   inputs:
     command: build
     projects: |
@@ -54,14 +56,15 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Pack Sayeh.AspNetCore.Essentials.Server for NuGet'
+  displayName: 'Pack Essentials.Server for NuGet'
   inputs:
-    command: pack
-    projects: |
-      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    command: 'pack'
+    packagesToPack: 'src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj'
+    nobuild: true
+    versioningScheme: 'off'
+
 - task: NuGetCommand@2
-  displayName: 'NuGet push Sayeh.AspNetCore.Essentials.Server'
+  displayName: 'NuGet push Essentials.Server'
   inputs:
     command: push
     packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.Server.*.nupkg'
@@ -71,35 +74,38 @@ steps:
   continueOnError: true
 
 - task: DotNetCoreCLI@2
-  displayName: 'restore Sayeh.AspNetCore.Essentials.WebAssembly'
+  displayName: 'restore Essentials.WebAssembly'
   inputs:
     command: restore
     projects: |
       src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
 - task: DotNetCoreCLI@2
-  displayName: 'Build Sayeh.AspNetCore.Essentials.WebAssembly'
+  displayName: 'Build Essentials.WebAssembly'
   inputs:
     command: build
     projects: |
       src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
     arguments: '--configuration $(buildConfiguration)'
-
 - task: DotNetCoreCLI@2
-  displayName: 'Pack Sayeh.AspNetCore.Essentials.WebAssembly for NuGet'
+  displayName: 'Pack Essentials.WebAssembly for NuGet'
   inputs:
-    command: pack
-    projects: |
-      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    command: 'pack'
+    packagesToPack: 'src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj'
+    nobuild: true
+    versioningScheme: 'off'
+
 - task: NuGetCommand@2
-  displayName: 'NuGet push Sayeh.AspNetCore.Essentials.WebAssembly'
+  displayName: 'NuGet push Essentials.WebAssembly'
   inputs:
     command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.Server.*.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.WebAssembly.*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
     arguments: '-SkipDuplicate'
   continueOnError: true
+
+- script: sleep 300  # 300 seconds = 5 minutes
+  displayName: "Wait for NuGet package availability"
 
 - task: DotNetCoreCLI@2
   displayName: 'Restore Components'
@@ -115,14 +121,13 @@ steps:
     projects: |
       src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
     arguments: '--configuration $(buildConfiguration)'
-
 - task: DotNetCoreCLI@2
   displayName: 'Pack Components for NuGet'
   inputs:
-    command: pack
-    projects: |
-      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    command: 'pack'
+    packagesToPack: 'src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj'
+    nobuild: true
+    versioningScheme: 'off'
 - task: NuGetCommand@2
   displayName: 'NuGet push Components'
   inputs:
