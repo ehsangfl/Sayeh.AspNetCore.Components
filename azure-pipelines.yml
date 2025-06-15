@@ -9,45 +9,26 @@ variables:
 
 steps:
 - task: DotNetCoreCLI@2
-  displayName: 'Restore Dependencies'
+  displayName: 'restore Sayeh.AspNetCore.Essentials.Core'
   inputs:
     command: restore
     projects: |
-      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
       src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj
-      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
-      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
-
 - task: DotNetCoreCLI@2
-  displayName: 'Build Projects'
+  displayName: 'Build Sayeh.AspNetCore.Essentials.Core'
   inputs:
     command: build
     projects: |
-      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
       src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj
-      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
-      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Pack Projects for NuGet'
+  displayName: 'Pack Sayeh.AspNetCore.Essentials.Core for NuGet'
   inputs:
     command: pack
     projects: |
-      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
       src/Sayeh.AspNetCore.Essentials.Core/Sayeh.AspNetCore.Essentials.Core.csproj
-      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
-      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
     arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-- task: NuGetCommand@2
-  displayName: 'NuGet push Components'
-  inputs:
-    command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Components.*.nupkg'
-    nuGetFeedType: external
-    publishFeedCredentials: Nuget-For-Sayeh
-    arguments: '-SkipDuplicate'
-  continueOnError: true
 - task: NuGetCommand@2
   displayName: 'NuGet push Essentials.Core'
   inputs:
@@ -57,21 +38,96 @@ steps:
     publishFeedCredentials: Nuget-For-Sayeh
     arguments: '-SkipDuplicate'
   continueOnError: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'restore Sayeh.AspNetCore.Essentials.Server'
+  inputs:
+    command: restore
+    projects: |
+      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
+- task: DotNetCoreCLI@2
+  displayName: 'Build Sayeh.AspNetCore.Essentials.Server'
+  inputs:
+    command: build
+    projects: |
+      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Pack Sayeh.AspNetCore.Essentials.Server for NuGet'
+  inputs:
+    command: pack
+    projects: |
+      src/Sayeh.AspNetCore.Essentials.Server/Sayeh.AspNetCore.Essentials.Server.csproj
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 - task: NuGetCommand@2
-  displayName: 'NuGet push Essentials.Server'
+  displayName: 'NuGet push Sayeh.AspNetCore.Essentials.Server'
   inputs:
     command: push
     packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.Server.*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
-    allowPackageConflicts: true
     arguments: '-SkipDuplicate'
   continueOnError: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'restore Sayeh.AspNetCore.Essentials.WebAssembly'
+  inputs:
+    command: restore
+    projects: |
+      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
+- task: DotNetCoreCLI@2
+  displayName: 'Build Sayeh.AspNetCore.Essentials.WebAssembly'
+  inputs:
+    command: build
+    projects: |
+      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Pack Sayeh.AspNetCore.Essentials.WebAssembly for NuGet'
+  inputs:
+    command: pack
+    projects: |
+      src/Sayeh.AspNetCore.Essentials.WebAssembly/Sayeh.AspNetCore.Essentials.WebAssembly.csproj
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 - task: NuGetCommand@2
-  displayName: 'NuGet push Essentials.WebAssembly'
+  displayName: 'NuGet push Sayeh.AspNetCore.Essentials.WebAssembly'
   inputs:
     command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.WebAssembly.*.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Essentials.Server.*.nupkg'
+    nuGetFeedType: external
+    publishFeedCredentials: Nuget-For-Sayeh
+    arguments: '-SkipDuplicate'
+  continueOnError: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore Components'
+  inputs:
+    command: restore
+    projects: |
+      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
+      
+- task: DotNetCoreCLI@2
+  displayName: 'Build Components'
+  inputs:
+    command: build
+    projects: |
+      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Pack Components for NuGet'
+  inputs:
+    command: pack
+    projects: |
+      src/Sayeh.AspNetCore.Components/Sayeh.AspNetCore.Components.csproj
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+- task: NuGetCommand@2
+  displayName: 'NuGet push Components'
+  inputs:
+    command: push
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/Sayeh.AspNetCore.Components.*.nupkg'
     nuGetFeedType: external
     publishFeedCredentials: Nuget-For-Sayeh
     arguments: '-SkipDuplicate'
