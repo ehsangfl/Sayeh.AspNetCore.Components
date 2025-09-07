@@ -11,7 +11,7 @@
     {
         if (Selectable is not null && !Selectable.Invoke(item))
             return;
-        <FluentCheckbox Value="GetChecked(item)" ValueChanged="e=>UpdateChecked(e,item)"></FluentCheckbox>
+        <FluentCheckbox Value="GetChecked(item)" Class="w-100" ValueChanged="e => UpdateChecked(e, item)"></FluentCheckbox>
     }
 
     private void GetHeaderContent(RenderTreeBuilder __builder)

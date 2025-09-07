@@ -30,6 +30,8 @@ namespace Sayeh.AspNetCore.Components
 
         [Parameter] public ICommand? Command { get; set; }
 
+        [Parameter] public Appearance Appearance { get; set; }
+
         public override void SetFocuse()
         {
             
