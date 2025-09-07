@@ -9,8 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sayeh.AspNetCore.Essentials.Server\Sayeh.AspNetCore.Essentials.Server.csproj" />
     <ProjectReference Include="..\Sample.Client\Sample.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.17" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.17" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(DotnetVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="$(DotnetVersion)" />
   </ItemGroup>
 
   <ItemGroup>
