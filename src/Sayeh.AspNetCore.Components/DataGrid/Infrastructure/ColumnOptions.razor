@@ -10,7 +10,7 @@
 {
     getPropertyType();
     <div>
-        <FluentButton Appearance=@(hasFilter ? Appearance.Filled : Appearance.Stealth) aria-haspopup="true" OnClick="@openPopupClicked">
+        <FluentButton Appearance=@(hasFilter ? Appearance.Stealth : Appearance.Neutral) aria-haspopup="true" OnClick="@openPopupClicked">
             <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Filter())" />
         </FluentButton>
         @if (dropDownIsOpen)

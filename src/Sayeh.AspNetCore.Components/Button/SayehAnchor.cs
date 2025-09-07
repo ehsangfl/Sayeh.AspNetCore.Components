@@ -19,10 +19,12 @@ namespace Sayeh.AspNetCore.Components
         #region Properties
 
         private ICommand? _command;
-        [Parameter] public ICommand? Command { get; set; }
+        [Parameter] 
+        public ICommand? Command { get; set; }
 
         private object? _commandParameter;
-        [Parameter] public object? CommandParameter { get; set; }
+        [Parameter] 
+        public object? CommandParameter { get; set; }
 
         bool _disabled;
        [Parameter]
