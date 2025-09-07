@@ -15,6 +15,6 @@
     <DotnetVersion>8.0.19</DotnetVersion>
     <FluentVersion>4.12.0</FluentVersion>
     <LoggingVersion>8.0.1</LoggingVersion>
-    <EssentialCore>1.1.1.2</EssentialCore>
+    <PackageVersion>2.2.0.0</PackageVersion>
   </PropertyGroup>
 </Project>

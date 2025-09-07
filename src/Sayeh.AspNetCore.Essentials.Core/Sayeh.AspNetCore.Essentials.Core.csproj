@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>$(EssentialCore)</VersionPrefix>
+    <VersionPrefix>$(PackageVersion)</VersionPrefix>
     <Title>Sayeh.AspNetCore.Essentials.Core</Title>
     <Description>Some Services,Helpers DotNetCore platform</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>

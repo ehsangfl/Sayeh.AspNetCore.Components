@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>1.1.1.1</VersionPrefix>
+    <VersionPrefix>$(PackageVersion)</VersionPrefix>
     <Title>Sayeh.AspNetCore.Essentials.Server</Title>
     <Description>Some Services,Helpers ASPNetCore server side</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PackageReference Include="Sayeh.AspNetCore.Essentials.Core" Version="$(EssentialCore)" />
+    <PackageReference Include="Sayeh.AspNetCore.Essentials.Core" Version="$(PackageVersion)" />
   </ItemGroup>
 
 </Project>
