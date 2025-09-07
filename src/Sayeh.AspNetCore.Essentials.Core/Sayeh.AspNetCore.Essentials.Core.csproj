@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>1.1.1.1</VersionPrefix>
+    <VersionPrefix>$(EssentialCore)</VersionPrefix>
     <Title>Sayeh.AspNetCore.Essentials.Core</Title>
     <Description>Some Services,Helpers DotNetCore platform</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(LoggingVersion)" />
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
   </ItemGroup>
 
