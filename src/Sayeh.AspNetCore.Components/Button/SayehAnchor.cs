@@ -36,6 +36,8 @@ namespace Sayeh.AspNetCore.Components
         {
             this.OnClick = EventCallback.Factory.Create(this, OnClick_Override);
             Href = "#";
+            if (Appearance is null)
+                Appearance = Microsoft.FluentUI.AspNetCore.Components.Appearance.Hypertext;
         }
 
         #endregion
