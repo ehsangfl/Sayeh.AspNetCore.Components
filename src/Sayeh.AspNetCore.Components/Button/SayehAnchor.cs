@@ -37,14 +37,17 @@ namespace Sayeh.AspNetCore.Components
         public SayehAnchor()
         {
             this.OnClick = EventCallback.Factory.Create(this, OnClick_Override);
-            Href = "#";
-            if (Appearance is null)
-                Appearance = Microsoft.FluentUI.AspNetCore.Components.Appearance.Hypertext;
         }
 
         #endregion
 
         #region Functions
+
+        protected override void OnInitialized()
+        {
+            Appearance = Microsoft.FluentUI.AspNetCore.Components.Appearance.Hypertext;
+            base.OnInitialized();
+        }
 
         protected override void OnParametersSet()
         {
@@ -57,7 +60,7 @@ namespace Sayeh.AspNetCore.Components
                     if (_command != null)
                     {
                         _command.CanExecuteChanged += OnCommandCanExecuteChanged;
-                        Disabled = !_command.CanExecute(CommandParameter);
+                        _disabled = !_command.CanExecute(CommandParameter);
                     }
                 }
             }
@@ -71,9 +74,9 @@ namespace Sayeh.AspNetCore.Components
             {
                 _disabled = Disabled;
                 if (Disabled)
-                    Style += " disable";
-                else if (Style is not null)
-                    Style = Style.Replace("disable","");
+                    Class += " disabled";
+                else if (Class is not null)
+                    Class = Class.Replace("disabled", "");
             }
             base.OnParametersSet();
         }
@@ -86,6 +89,8 @@ namespace Sayeh.AspNetCore.Components
 
         private void OnClick_Override()
         {
+            if (Disabled)
+                return;
             if (Command != null)
                 Command.Execute(CommandParameter);
         }

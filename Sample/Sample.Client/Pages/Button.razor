@@ -1,0 +1,67 @@
+﻿@page "/button"
+
+<div class="d-flex flex-column p-3">
+    <SayehButton Command="TestCommand">
+        Test Command call
+    </SayehButton>
+
+    <label class="mb-3">@clickCount times command executes</label>
+
+    <label> disable mode</label>
+    <SayehButton Command="DisableTestCommand" Disabled=true>
+        Test Command call
+    </SayehButton>
+    <label class="mb-3">disable click count : @disableClickCount</label>
+
+    <label> Command can execute </label>
+    <FluentCheckbox @bind-value=ThirdButtonCanExecute @bind-value:after="@AfterCanExecuteChanged">Can execute</FluentCheckbox>
+    <SayehButton Command="WithCanExecuteCommand">
+        Test Command call
+    </SayehButton>
+    <label>disable click count : @withCanExecuteClickCount</label>
+
+
+</div>
+@code {
+
+    public int clickCount { get; set; }
+    public int disableClickCount { get; set; }
+    public int withCanExecuteClickCount { get; set; }
+    bool ThirdButtonCanExecute { get; set; }
+    System.Windows.Input.ICommand TestCommand { get; set; } = default!;
+    System.Windows.Input.ICommand DisableTestCommand { get; set; } = default!;
+    System.Windows.Input.ICommand WithCanExecuteCommand { get; set; } = default!;
+
+
+    protected override void OnInitialized()
+    {
+        TestCommand = new RelayCommand(TestCommand_Sub);
+        DisableTestCommand = new RelayCommand(DisableTestCommand_Sub);
+        WithCanExecuteCommand = new RelayCommand(WithCanExecuteCommand_Sub, () => ThirdButtonCanExecute);
+        base.OnInitialized();
+    }
+
+    void TestCommand_Sub()
+    {
+        clickCount++;
+        StateHasChanged();
+    }
+
+    void DisableTestCommand_Sub()
+    {
+        disableClickCount++;
+        StateHasChanged();
+    }
+
+    void WithCanExecuteCommand_Sub()
+    {
+        withCanExecuteClickCount++;
+        StateHasChanged();
+    }
+
+    void AfterCanExecuteChanged()
+    {
+        ((RelayCommand)WithCanExecuteCommand).RaiseCanExecuteChanged();
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,41 @@
+﻿@page "/anchor"
+
+<div class="d-flex flex-column p-3">
+    <SayehAnchor Command="TestCommand" Href="#">
+        Test Command call
+    </SayehAnchor>
+
+    <label class="mb-3">@clickCount times command executes</label>
+
+    <label> disable mode</label>
+    <SayehAnchor Command="DisableTestCommand" Href="#" Disabled=true>
+        Test Command call
+    </SayehAnchor>
+    <label>disable click count : @disableClickCount</label>
+</div>
+@code {
+
+    int clickCount { get; set; }
+    int disableClickCount { get; set; }
+    System.Windows.Input.ICommand TestCommand { get; set; } = default!;
+    System.Windows.Input.ICommand DisableTestCommand { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        TestCommand = new RelayCommand(TestCommand_Sub);
+        DisableTestCommand = new RelayCommand(DisableTestCommand_Sub);
+        base.OnInitialized();
+    }
+
+    void TestCommand_Sub()
+    {
+        clickCount++;
+        StateHasChanged();
+    }
+
+    void DisableTestCommand_Sub()
+    {
+        disableClickCount++;
+        StateHasChanged();
+    }
+}

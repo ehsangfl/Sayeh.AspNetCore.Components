@@ -4,7 +4,8 @@ public static class ExtensionMethods
 {
     public static bool IsNullableType(this Type type)
     {
-        return (type == typeof(string)) || (((type != null) && type.IsGenericType) && (type.GetGenericTypeDefinition() == typeof(Nullable<>))) || (!type.IsPrimitive && type.IsClass);
+        ArgumentNullException.ThrowIfNull(nameof(type));
+        return (type == typeof(string)) || (((type != null) && type.IsGenericType) && (type.GetGenericTypeDefinition() == typeof(Nullable<>))) || (!type!.IsPrimitive && type.IsClass);
     }
 
     public static Nullable<DateTime> ToDateTime<TValue>(this TValue value)
