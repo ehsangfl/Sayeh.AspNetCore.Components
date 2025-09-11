@@ -30,7 +30,7 @@ namespace Sayeh.AspNetCore.Components
 
         [Parameter] public ICommand? Command { get; set; }
 
-        [Parameter] public Appearance Appearance { get; set; }
+        [Parameter] public Appearance Appearance { get; set; } = Appearance.Hypertext;
 
         public override void SetFocuse()
         {
@@ -43,6 +43,8 @@ namespace Sayeh.AspNetCore.Components
         {
             if (OnClick.HasDelegate)
                 OnClick.InvokeAsync(item);
+            if (Command is not null)
+                Command.Execute(item);
         }
     }
 }

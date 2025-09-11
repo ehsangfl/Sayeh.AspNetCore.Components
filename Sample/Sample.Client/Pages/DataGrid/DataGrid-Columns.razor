@@ -1,0 +1,53 @@
+﻿@page "/datagrid-columns"
+@inject NavigationManager nav
+<h3>DataGrid</h3>
+@if (weatherForeacasts is null)
+{
+    <p>loading ...</p>
+}
+else
+{
+    <label>all columns  sample</label>
+    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts" IsReadonly=true>
+        <SayehPropertyColumn Property="p=> p.Order" />
+        <SayehDatePickerColumn Property="p=> p.Date" />
+        <SayehPropertyColumn Property="p=> p.DayofWeek" />
+        <SayehComboboxColumn Property="p=> p.Type" Items="DayTypes" ValueMember="v=> v" />
+        <SayehNumericTextboxColumn Property="p=> p.Tempreture" />
+        <SayehPropertyColumn Property="p=> p.TemporatureF" />
+        <SayehTextboxColumn Property="p=> p.Description" />
+        <SayehAnchorColumn Href="https://google.com" Title="link with href to google">Goto Google</SayehAnchorColumn>
+        <SayehAnchorColumn Command="GoToGoogle" Title="Link with command go to microsoft">Goto Microsoft</SayehAnchorColumn>
+    </SayehDataGrid>
+}
+@code {
+
+    private IEnumerable<WeatherForeacast>? weatherForeacasts { get; set; }
+
+    private DayType[]? DayTypes { get; set; }
+
+    RelayCommand GoToGoogle { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        GoToGoogle = new RelayCommand(GoToGoogle_Sub);
+        base.OnInitialized();
+    }
+
+    void GoToGoogle_Sub()
+    {
+        nav.NavigateTo("Https://microsoft.com");
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            DayTypes = Enum.GetValues<DayType>();
+            weatherForeacasts = new WeatherForecastModel().GetItems();
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+}
