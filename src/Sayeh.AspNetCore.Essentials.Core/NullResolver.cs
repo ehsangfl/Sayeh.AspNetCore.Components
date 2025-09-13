@@ -285,6 +285,29 @@ public static class NullResolver
         return value!.Value;
     }
 
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static int Or(this int value, int ReturnValue)
+    {
+        if (value.None())
+        {
+            return ReturnValue;
+        }
+
+        return value;
+    }
+
+    [return: NotNullIfNotNull("ReturnValue")]
+    public static double Or(this int? value, int ReturnValue)
+    {
+        if (value.None())
+        {
+            return ReturnValue;
+        }
+
+        return value.Value;
+    }
+
+
     #endregion
 
 }
