@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web.Virtualization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.FluentUI.AspNetCore.Components.Utilities;
 using Microsoft.JSInterop;
+using Sayeh.AspNetCore.Components.DataGrid.Infrastructure;
 using Sayeh.AspNetCore.Components.Infrastructure;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using static Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size20;
-using Sayeh.AspNetCore.Components.DataGrid.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 using static Microsoft.FluentUI.AspNetCore.Components.Icons.Light.Size32;
-using Microsoft.FluentUI.AspNetCore.Components.Utilities;
 
 namespace Sayeh.AspNetCore.Components
 {
@@ -81,6 +83,8 @@ namespace Sayeh.AspNetCore.Components
         private SayehDataGridRow<TItem>? _currentRow { get; set; }
 
         bool ImplementedIEditableObject = false;
+        bool observableHandled = false;
+        IEnumerable<TItem> _oldItems;
 
         #endregion
 
@@ -327,6 +331,17 @@ namespace Sayeh.AspNetCore.Components
             {
                 throw new InvalidOperationException($"SayehDataGrid requires one of {nameof(Items)} or {nameof(ItemsProvider)}, but both were specified.");
             }
+            //if (_oldItems is not null && _oldItems.IsA<INotifyCollectionChanged>())
+            //    _oldItems.As<INotifyCollectionChanged>().CollectionChanged -= OnItemsChanged;
+
+            //if (Items is not null && _oldItems != Items && Items.IsA<INotifyCollectionChanged>())
+            //{
+            //    _oldItems = Items;
+            //    Items.As<INotifyCollectionChanged>().CollectionChanged += OnItemsChanged;
+            //}
+
+            if (_oldItems != Items)
+                _lastAssignedItemsOrProvider = null;
 
             var _newItemsOrItemsProvider = Items ?? (object?)ItemsProvider;
             var dataSourceHasChanged = _newItemsOrItemsProvider != _lastAssignedItemsOrProvider;
@@ -341,6 +356,11 @@ namespace Sayeh.AspNetCore.Components
             // to have to re-query immediately
             return (_columns.Count > 0 && mustRefreshData) ? RefreshDataCoreAsync() : Task.CompletedTask;
         }
+
+        //private void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        //{
+        //    RefreshDataCoreAsync();
+        //}
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {

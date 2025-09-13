@@ -1,10 +1,12 @@
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.FluentUI.AspNetCore.Components;
-using Blazored.LocalStorage;
-using System.Globalization;
-using Sayeh.AspNetCore.Essentials.WebAssembly;
-using Sayeh.AspNetCore.Essentials;
-using Microsoft.Extensions.Hosting;
+global using Sayeh.Essentials.Core;
+global using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+global using Microsoft.FluentUI.AspNetCore.Components;
+global using Blazored.LocalStorage;
+global using System.Globalization;
+global using Sayeh.AspNetCore.Essentials.WebAssembly;
+global using Sayeh.AspNetCore.Essentials;
+global using Microsoft.Extensions.Hosting;
+
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddFluentUIComponents();

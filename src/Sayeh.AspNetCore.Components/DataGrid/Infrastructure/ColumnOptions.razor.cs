@@ -359,7 +359,12 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
             //ParameterExpression ExpParam = Expression.Parameter(typeof(TGridItem), pName);
 
             Expression? Result = null;
-            var nullCheck = Expression.NotEqual(Expression.Property(pExpression, pInfo), Expression.Constant(null, typeof(object)));
+            Expression? nullCheck = null;
+            if (pInfo.PropertyType.IsNullableType())
+                nullCheck = Expression.NotEqual(Expression.Property(pExpression, pInfo), Expression.Constant(null, pInfo.PropertyType));
+            else
+                nullCheck = Expression.Constant(true);
+
             if (fromValue is not null)
             {
                 var fromExpr = Expression.Constant(Convert.ChangeType(fromValue, pInfo.PropertyType), pInfo.PropertyType);

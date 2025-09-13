@@ -1,0 +1,49 @@
+﻿@page "/datagrid-observable"
+@using System.Collections.ObjectModel
+@inject NavigationManager nav
+<h3>DataGrid</h3>
+@if (weatherForeacasts is null)
+{
+    <p>loading ...</p>
+}
+else
+{
+    <label>all columns  sample</label>
+    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts" IsReadonly=true>
+        <SayehPropertyColumn Property="p=> p.Order" />
+        <SayehDatePickerColumn Property="p=> p.Date" />
+        <SayehPropertyColumn Property="p=> p.DayofWeek" />
+        <SayehComboboxColumn Property="p=> p.Type" Items="DayTypes" ValueMember="v=> v" />
+        <SayehNumericTextboxColumn Property="p=> p.Tempreture" />
+        <SayehPropertyColumn Property="p=> p.TemporatureF" />
+        <SayehTextboxColumn Property="p=> p.Description" />
+    </SayehDataGrid>
+    <FluentButton OnClick="addNewItem">Add new Item </FluentButton>
+
+}
+@code {
+
+    private ObservableCollection<WeatherForeacast>? weatherForeacasts { get; set; }
+
+    private DayType[]? DayTypes { get; set; }
+
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            DayTypes = Enum.GetValues<DayType>();
+            weatherForeacasts =new ObservableCollection<WeatherForeacast>(new WeatherForecastModel().GetItems());
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    void addNewItem()
+    {
+        var order = weatherForeacasts?.Max(s => s.Order) + 1 ?? 10;
+        var newItem = new WeatherForeacast() { Order = order, Date = DateTime.Now.AddDays(order), DayofWeek = DateTime.Now.AddDays(order).DayOfWeek.ToString(), Tempreture = -5, Type = DayType.Snowy };
+        weatherForeacasts?.Add(newItem);
+    }
+
+}
