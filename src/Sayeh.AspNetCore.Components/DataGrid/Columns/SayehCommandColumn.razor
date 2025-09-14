@@ -9,7 +9,7 @@
 
     protected internal override void CellContent(RenderTreeBuilder __builder, TItem item)
     {
-        <SayehButton Command="Command" CommandParameter="@item" OnClick=@(() => Onclicked(item)) Appearance="@Appearance">
+        <SayehButton Command="Command" CommandParameter="@item" Appearance="@Appearance">
             @ChildContent.Invoke(item)
         </SayehButton>
     }

@@ -1,4 +1,5 @@
 ﻿@page "/datagrid-columns"
+@using System.Text
 @inject NavigationManager nav
 <h3>DataGrid</h3>
 @if (weatherForeacasts is null)
@@ -16,9 +17,12 @@ else
         <SayehNumericTextboxColumn Property="p=> p.Tempreture" />
         <SayehPropertyColumn Property="p=> p.TemporatureF" />
         <SayehTextboxColumn Property="p=> p.Description" />
+        <SayehCommandColumn Command="ButtonCommand" Title="btn with command"/>
         <SayehAnchorColumn Href="https://google.com" Title="link with href to google">Goto Google</SayehAnchorColumn>
         <SayehAnchorColumn Command="GoToGoogle" Title="Link with command go to microsoft">Goto Microsoft</SayehAnchorColumn>
     </SayehDataGrid>
+
+    <FluentLabel>@Action.ToString()</FluentLabel>
 }
 @code {
 
@@ -27,16 +31,25 @@ else
     private DayType[]? DayTypes { get; set; }
 
     RelayCommand GoToGoogle { get; set; } = default!;
+    RelayCommand<WeatherForeacast> ButtonCommand { get; set; } = default!;
+    public StringBuilder Action { get; set; } = new StringBuilder();
 
     protected override void OnInitialized()
     {
         GoToGoogle = new RelayCommand(GoToGoogle_Sub);
+        ButtonCommand = new RelayCommand<WeatherForeacast>(ButtonCommand_Sub);
         base.OnInitialized();
     }
 
     void GoToGoogle_Sub()
     {
         nav.NavigateTo("Https://microsoft.com");
+    }
+
+    void ButtonCommand_Sub(WeatherForeacast? e)
+    {
+        Action.AppendLine($"button command executed with {e.ToString()} parameter");
+        StateHasChanged();
     }
 
     protected override void OnAfterRender(bool firstRender)
