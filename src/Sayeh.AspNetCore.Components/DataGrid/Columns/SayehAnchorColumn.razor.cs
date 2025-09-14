@@ -22,8 +22,6 @@ namespace Sayeh.AspNetCore.Components
         /// </summary>
         [Parameter] public RenderFragment<TItem> ChildContent { get; set; } = _=> __builder => __builder.AddContent(0,"...") ;
 
-        [Parameter] public EventCallback<TItem> OnClick { get; set; }
-
         [Parameter] public Icon? StartIcon { get; set; } 
 
         [Parameter] public Icon? EndIcon { get; set; }
@@ -39,12 +37,5 @@ namespace Sayeh.AspNetCore.Components
 
         [Parameter] public string Href { get; set; } = "#";
 
-        private void Onclicked(TItem item)
-        {
-            if (OnClick.HasDelegate)
-                OnClick.InvokeAsync(item);
-            if (Command is not null)
-                Command.Execute(item);
-        }
     }
 }
