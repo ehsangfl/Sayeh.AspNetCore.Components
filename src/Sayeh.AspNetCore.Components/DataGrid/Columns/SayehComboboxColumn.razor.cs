@@ -16,10 +16,12 @@ namespace Sayeh.AspNetCore.Components
         where TItem : class
         where TOption : notnull
     {
-        private TItem? Item;
-        private FluentCombobox<TOption>? element;
-        private TOption? _selectedItem;
-        private Expression<Func<TItem, TOption>>? _lastSelectedItem;
+        TItem? Item;
+        FluentCombobox<TOption>? element;
+        TOption? _selectedItem;
+        string? _selectedValue { get; set; }
+
+        Expression<Func<TItem, TOption>>? _lastSelectedItem;
         PropertyInfo? selectedItemPropertyInfo;
         Func<TItem, TOption>? _compiledSelectedItem;
 
@@ -36,8 +38,6 @@ namespace Sayeh.AspNetCore.Components
         public Expression<Func<TItem, TOption>> SelectedItem { get; set; } = default!;
 
         [Parameter] public bool IsReadonly { get; set; }
-
-        private string? selectedValue { get; set; }
 
         //private FluentTextField? element;
 
@@ -61,14 +61,11 @@ namespace Sayeh.AspNetCore.Components
         public object? GetCurrentValue()
         {
             //===== these line of code is setted for html select and we can remove it after resolve fluent ui bug
-            SetSelectedItem();
+            //SetSelectedItem();
             //
-
 
             if (_selectedItem is null)
                 return null;
-            if (ValueMember is null)
-                return _selectedItem;
             else
                 return ValueMember.Invoke(_selectedItem);
         }
@@ -82,7 +79,7 @@ namespace Sayeh.AspNetCore.Components
         public void UpdateSource()
         {  
             //===== these line of code is setted for html select and we can remove it after resolve fluent ui bug
-            SetSelectedItem();
+            //SetSelectedItem();
             //
 
             if (Item is null) return;
@@ -112,12 +109,12 @@ namespace Sayeh.AspNetCore.Components
             return PropertyInfo?.Name;
         }
 
-        private void SetSelectedItem()
-        {
-            if (string.IsNullOrEmpty(selectedValue))
-                _selectedItem = default(TOption);
-            else if (ValueMember is not null)
-                _selectedItem = Items.FirstOrDefault(f => selectedValue.Equals(ValueMember.Invoke(f)?.ToString()));
-        }
+        //private void SetSelectedItem()
+        //{
+        //    if (string.IsNullOrEmpty(_selectedValue))
+        //        _selectedItem = default(TOption);
+        //    else if (ValueMember is not null)
+        //        _selectedItem = Items.FirstOrDefault(f => selectedValue.Equals(ValueMember.Invoke(f)?.ToString()));
+        //}
     }
 }
