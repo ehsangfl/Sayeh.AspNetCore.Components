@@ -16,13 +16,13 @@
         {
             if (DisplayMember is null)
                 DisplayMember = f => f?.ToString();
-            <FluentCombobox TOption="TOption" Items=Items @ref=element Class="w-100" OptionText=DisplayMember @bind-SelectedOption=_selectedItem />
-            // <select @bind=@selectedValue>
-            //     @foreach (var item in Items)
-            //     {
-            //         <option selected="@(item!.Equals(_selectedItem))" value="@ValueMember.Invoke(item)">@DisplayMember.Invoke(item)</option>
-            //     }
-            // </select>
+            <FluentCombobox TOption="TOption"
+                            @ref=element
+                            Items=Items 
+                            Class="w-100" 
+                            OptionText=DisplayMember 
+                            @bind-SelectedOption=_selectedItem 
+                            @bind-Value=_selectedValue/>
         }
         else
         {

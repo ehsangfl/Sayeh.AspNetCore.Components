@@ -44,7 +44,7 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem 
     /// <summary>
     /// Gets a reference to the column that this cell belongs to.
     /// </summary>
-    public SayehColumnBase<TItem>? Column => GridContext.Grid._columns.ElementAtOrDefault(ColumnIndex - 1);
+    public SayehColumnBase<TItem>? Column => GridContext.Grid._columns.ElementAtOrDefault(ColumnIndex);
 
     /// <summary>
     /// Gets or sets the content to be rendered inside the component.
@@ -106,9 +106,16 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem 
         .AddStyle(Owner.Style)
         .Build();
 
-    protected override void OnInitialized()
+    //protected override void OnInitialized()
+    //{
+    //    Owner.Register(this);
+    //}
+
+    protected override void OnAfterRender(bool firstRender)
     {
-        Owner.Register(this);
+        if (firstRender)
+            Owner.Register(this);
+        base.OnAfterRender(firstRender);
     }
 
     public void Dispose() => Owner.Unregister(this);
