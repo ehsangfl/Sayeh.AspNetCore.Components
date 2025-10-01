@@ -40,6 +40,7 @@ public class ObservableComponent<T> : ComponentBase, IDisposable
 
     private void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        Console.WriteLine($"{e.PropertyName?.ToString()} change detected for {ItemSource?.GetType().FullName}");
         InvokeAsync(StateHasChanged);
     }
 
