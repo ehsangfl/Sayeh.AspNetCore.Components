@@ -28,6 +28,7 @@ namespace Sayeh.AspNetCore.Components
 
         private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            Console.WriteLine($"{e.Action.ToString()} detected for {ItemsSource?.GetType().FullName}");
             InvokeAsync(StateHasChanged);
         }
 
