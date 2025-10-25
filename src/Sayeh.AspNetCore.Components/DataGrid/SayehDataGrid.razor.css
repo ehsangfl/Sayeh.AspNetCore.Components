@@ -89,3 +89,8 @@
     background-color: var(--neutral-fill-stealth-rest);
     z-index: 2;
 }
+
+/*Sayeh*/
+.grid ::deep tbody > tr:hover > * {
+    box-shadow: inset 0 0 0 9999px var(--neutral-fill-hover)
+}

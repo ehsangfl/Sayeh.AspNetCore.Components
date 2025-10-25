@@ -110,6 +110,7 @@ namespace Sayeh.AspNetCore.Components
         /// </summary>
         [Parameter] public RenderFragment? ChildContent { get; set; }
 
+        bool _virtualize { get; set; }
         /// <summary>
         /// If true, the grid will be rendered with virtualization. This is normally used in conjunction with
         /// scrolling and causes the grid to fetch and render only the data around the current scroll viewport.
@@ -320,6 +321,12 @@ namespace Sayeh.AspNetCore.Components
 
         protected override Task OnParametersSetAsync()
         {
+            if (_virtualize != Virtualize && Virtualize)
+            {
+                _virtualize = Virtualize;
+                DisplayMode = DataGridDisplayMode.Table;
+            }
+
             if (GridTemplateColumns is not null)
             {
                 _internalGridTemplateColumns = GridTemplateColumns;
