@@ -113,7 +113,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
 
     protected string? ClassValue => new CssBuilder(Class)
         .AddClass("hover", when: GridContext.Grid.ShowHover)
-        .AddClass("isInEditMode",when: Mode == DataGridItemMode.Edit)
+        .AddClass("edit-mode",when: Mode == DataGridItemMode.Edit)
         .Build();
 
     protected string? StyleValue => new StyleBuilder(Style)
