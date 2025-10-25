@@ -178,7 +178,7 @@ namespace Sayeh.AspNetCore.Components
         /// See <see cref="GenerateHeaderOption"/>
         /// </summary>
         [Parameter]
-        public GenerateHeaderOption? GenerateHeader { get; set; } = GenerateHeaderOption.Default;
+        public GenerateHeaderOption? GenerateHeader { get; set; } = GenerateHeaderOption.Sticky;
 
         /// <summary>
         /// Gets or sets the value that gets applied to the css gridTemplateColumns attribute of child rows.
@@ -265,6 +265,7 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public DataGridRowSize RowSize { get; set; } = DataGridRowSize.Small;
 
+        private DataGridDisplayMode _displayMode;
         [Parameter]
         public DataGridDisplayMode DisplayMode { get; set; } = DataGridDisplayMode.Grid;
 

@@ -1,0 +1,38 @@
+﻿@page "/datagrid-virtualize"
+<h3>DataGrid</h3>
+@if (items is null)
+{
+    <p>loading ...</p>
+}
+else
+{
+    <label>multi selection</label>
+    <SayehDataGrid TItem="SampleGridData" Items="items" IsReadonly="true" Virtualize=true ItemSize="50" DisplayMode="DataGridDisplayMode.Table">
+        <SayehPropertyColumn Width="25%" Property="@(c => c.Item1)" Sortable="true" />
+        <SayehPropertyColumn Width="25%" Property="@(c => c.Item2)" />
+        <SayehPropertyColumn Width="25%" Property="@(c => c.Item3)" Align="Align.Center" />
+        <SayehPropertyColumn Width="25%" Property="@(c => c.Item4)" Align="Align.End" />
+    </SayehDataGrid>
+}
+@code {
+    public record SampleGridData(string Item1, string Item2, string Item3, string Item4);
+    private IEnumerable<SampleGridData>? items { get; set; }
+
+    private DayType[]? DayTypes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        items = GenerateSampleGridData(5000);
+    }
+
+    private IEnumerable<SampleGridData> GenerateSampleGridData(int size)
+    {
+        SampleGridData[] data = new SampleGridData[size];
+
+        for (int i = 0; i < size; i++)
+        {
+            data[i] = new SampleGridData($"value {i}-1", $"value {i}-2", $"value {i}-3", $"value {i}-4");
+        }
+        return data;
+    }
+}
