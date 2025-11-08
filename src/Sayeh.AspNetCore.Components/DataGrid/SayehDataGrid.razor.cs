@@ -339,15 +339,17 @@ namespace Sayeh.AspNetCore.Components
             {
                 throw new InvalidOperationException($"SayehDataGrid requires one of {nameof(Items)} or {nameof(ItemsProvider)}, but both were specified.");
             }
-            //if (_oldItems is not null && _oldItems.IsA<INotifyCollectionChanged>())
-            //    _oldItems.As<INotifyCollectionChanged>().CollectionChanged -= OnItemsChanged;
+            if (_oldItems != Items)
+            {
+                if (_oldItems is not null && _oldItems.IsA<INotifyCollectionChanged>())
+                    _oldItems.As<INotifyCollectionChanged>().CollectionChanged -= OnItemsChanged;
 
-            //if (Items is not null && _oldItems != Items && Items.IsA<INotifyCollectionChanged>())
-            //{
-            //    _oldItems = Items;
-            //    Items.As<INotifyCollectionChanged>().CollectionChanged += OnItemsChanged;
-            //}
-
+                if (Items is not null && Items.IsA<INotifyCollectionChanged>())
+                {
+                    _oldItems = Items;
+                    Items.As<INotifyCollectionChanged>().CollectionChanged += OnItemsChanged;
+                }
+            }
             if (_oldItems != Items)
                 _lastAssignedItemsOrProvider = null;
 
@@ -365,10 +367,10 @@ namespace Sayeh.AspNetCore.Components
             return (_columns.Count > 0 && mustRefreshData) ? RefreshDataCoreAsync() : Task.CompletedTask;
         }
 
-        //private void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        //{
-        //    RefreshDataCoreAsync();
-        //}
+        private async void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            await RefreshDataCoreAsync();
+        }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
