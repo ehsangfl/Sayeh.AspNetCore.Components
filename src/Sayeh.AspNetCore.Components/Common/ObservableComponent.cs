@@ -34,6 +34,8 @@ public class ObservableComponent<T> : ComponentBase, IDisposable
                 ItemSource.PropertyChanged += OnModelPropertyChanged;
 
             _itemSource = ItemSource;
+            Console.WriteLine($"itemSource change detected for and its value is {ItemSource?.ToString()}");
+            InvokeAsync(StateHasChanged);
         }
     }
 
