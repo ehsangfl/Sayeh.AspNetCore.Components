@@ -1,0 +1,24 @@
+﻿@page "/observable-component"
+<h3>ObservableComponent</h3>
+
+<ObservableComponent ItemSource="ViewModel">
+    @if (ViewModel is not null)
+    {
+        <label>temprature of @ViewModel.Model.DayofWeek on @ViewModel.Model.Date.ToShortDateString() is @ViewModel.Model.TemporatureF because @ViewModel.Model.Description</label>
+    }
+</ObservableComponent>
+@code {
+    ObservableComponentPage_ViewModel? ViewModel = null;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ViewModel = new ObservableComponentPage_ViewModel();
+            await InvokeAsync(StateHasChanged);
+            await ViewModel.LoadData();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

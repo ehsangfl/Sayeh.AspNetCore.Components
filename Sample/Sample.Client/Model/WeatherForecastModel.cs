@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Sample.Client.Model
 {
@@ -7,7 +8,7 @@ namespace Sample.Client.Model
         public IEnumerable<WeatherForeacast> GetItems()
         {
             return new List<WeatherForeacast> {
-                new WeatherForeacast(){ Order =1,  Date = DateTime.Now, DayofWeek = "the today", Tempreture = -5 , Type = DayType.Snowy },
+                new WeatherForeacast(){ Order =1,  Date = DateTime.Now, DayofWeek = "the today", Tempreture = -5 , Type = DayType.Snowy,Description = "no reason" },
                 new WeatherForeacast(){ Order =2, Date = DateTime.Now.AddDays(1), DayofWeek =DateTime.Now.AddDays(1).DayOfWeek.ToString() , Tempreture = -5 , Type = DayType.Snowy },
                 new WeatherForeacast(){ Order =3, Date = DateTime.Now.AddDays(2), DayofWeek = DateTime.Now.AddDays(2).DayOfWeek.ToString(), Tempreture = -2 , Type = DayType.Rainy },
                 new WeatherForeacast(){ Order =4, Date = DateTime.Now.AddDays(3), DayofWeek = DateTime.Now.AddDays(3).DayOfWeek.ToString(), Tempreture = 10 , Type = DayType.Sunny },
@@ -18,7 +19,7 @@ namespace Sample.Client.Model
     }
 
 
-    public class WeatherForeacast
+    public class WeatherForeacast 
     {
         public WeatherForeacast()
         {
@@ -35,6 +36,7 @@ namespace Sample.Client.Model
         public string? DayofWeek { get; set; }
         [Required]
         public string? Description { get; set; }
+
     }
 
 
