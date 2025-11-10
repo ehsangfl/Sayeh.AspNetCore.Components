@@ -25,7 +25,7 @@ public class ObservableComponent<T> : ComponentBase, IDisposable
 
     protected override void OnParametersSet()
     {
-        if (_itemSource != ItemSource)
+        if (!ReferenceEquals(_itemSource, ItemSource))
         {
             if (_itemSource is not null)
                 _itemSource.PropertyChanged -= OnModelPropertyChanged;
