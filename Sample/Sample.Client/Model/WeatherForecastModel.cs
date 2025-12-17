@@ -3,9 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Sample.Client.Model
 {
-    public class WeatherForecastModel
+
+    public class WeatherForeacast
     {
-        public IEnumerable<WeatherForeacast> GetItems()
+
+        public static IEnumerable<WeatherForeacast> GenerateItems()
         {
             return new List<WeatherForeacast> {
                 new WeatherForeacast(){ Order =1,  Date = DateTime.Now, DayofWeek = "the today", Tempreture = -5 , Type = DayType.Snowy,Description = "no reason" },
@@ -16,11 +18,7 @@ namespace Sample.Client.Model
                 new WeatherForeacast(){ Order =4, Date = DateTime.Now.AddDays(5), DayofWeek = DateTime.Now.AddDays(5).DayOfWeek.ToString(), Tempreture = 3 , Type = DayType.Rainy}
     };
         }
-    }
 
-
-    public class WeatherForeacast 
-    {
         public WeatherForeacast()
         {
             ID = Guid.NewGuid();
@@ -30,12 +28,17 @@ namespace Sample.Client.Model
         public int Order { get; set; }
         public DateTime Date { get; set; }
         public DayType Type { get; set; }
-        [Range(0,200)]
+        [Range(0, 200)]
         public int Tempreture { get; set; }
         public double TemporatureF => (Tempreture * 9.5) + 32;
         public string? DayofWeek { get; set; }
         [Required]
         public string? Description { get; set; }
+
+        public override string ToString()
+        {
+            return this.Date.ToShortDateString() + "" + Type;
+        }
 
     }
 

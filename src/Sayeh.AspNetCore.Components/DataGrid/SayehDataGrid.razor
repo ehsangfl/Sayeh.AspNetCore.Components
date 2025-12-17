@@ -19,15 +19,15 @@
         }
         <Sayeh.AspNetCore.Components.DataGrid.Infrastructure.ColumnsCollectedNotifier TItem="TItem" />
         <table @ref=_gridReference
-        no-tabbing=@NoTabbing
-        generate-header="none"
-        grid-template-columns=@("20px " + _internalGridTemplateColumns)
-        class="@GridClass()"
-        style="@Style"
-        aria-rowcount="@(_ariaBodyRowCount + 1)"
-        @onclosecolumnoptions="CloseColumnOptions"
-        @attributes="AdditionalAttributes"
-        @onkeydown=OnKeyPress>
+               no-tabbing=@NoTabbing
+               generate-header="none"
+               grid-template-columns=@("20px " + _internalGridTemplateColumns)
+               class="@GridClass()"
+               style="@Style"
+               aria-rowcount="@(_ariaBodyRowCount + 1)"
+               @onclosecolumnoptions="CloseColumnOptions"
+               @attributes="AdditionalAttributes"
+               @onkeydown=OnKeyPress>
             @if (GenerateHeader != GenerateHeaderOption.None)
             {
                 DataGridRowType headerType = DataGridRowType.Header;
@@ -40,39 +40,41 @@
                 </thead>
             }
             <tbody>
-                @if (Loading)
-                {
-                    @_renderLoadingContent
-                }
-                else
-                {
-                    @if (Virtualize)
+                <SayehDataGridRowsPart @ref=RowsPart>
+                    @if (Loading)
                     {
-                        if (_ariaBodyRowCount == 0)
-                        {
-                            @_renderEmptyContent
-                        }
-                        else
-                        {
-                            <Virtualize @ref="@_virtualizeComponent"
-                            TItem="(int RowIndex, TItem Data)"
-                            ItemSize="@ItemSize"
-                            OverscanCount="@OverscanCount"
-                            ItemsProvider="@ProvideVirtualizedItemsAsync"
-                            ItemContent="@(item => builder => RenderRow(builder, item.RowIndex, item.Data))"
-                            Placeholder="@(placeholderContext => builder => RenderPlaceholderRow(builder, placeholderContext))"
-                            SpacerElement="tr" />
-                        }
+                        @_renderLoadingContent
                     }
                     else
                     {
-                        @_renderNonVirtualizedRows
+                        @if (Virtualize)
+                        {
+                            if (_ariaBodyRowCount == 0)
+                            {
+                                @_renderEmptyContent
+                            }
+                            else
+                            {
+                                <Virtualize @ref="@_virtualizeComponent"
+                                            TItem="(int RowIndex, TItem Data)"
+                                            ItemSize="@ItemSize"
+                                            OverscanCount="@OverscanCount"
+                                            ItemsProvider="@ProvideVirtualizedItemsAsync"
+                                            ItemContent="@(item => builder => RenderRow(builder, item.RowIndex, item.Data))"
+                                            Placeholder="@(placeholderContext => builder => RenderPlaceholderRow(builder, placeholderContext))"
+                                            SpacerElement="tr" />
+                            }
+                        }
+                        else
+                        {
+                            @_renderNonVirtualizedRows
+                        }
                     }
-                }
-                @if (_manualGrid)
-                {
-                    @ChildContent
-                }
+                    @if (_manualGrid)
+                    {
+                        @ChildContent
+                    }
+                </SayehDataGridRowsPart>
             </tbody>
 
         </table>
@@ -108,11 +110,11 @@
         var rowStyle = RowStyle?.Invoke(item) ?? null;
 
         <SayehDataGridRow @key="@ItemKey(item)"
-        aria-rowindex="@rowIndex"
-        Style="@rowStyle"
-        Class="@rowClass"
-        TItem="TItem"
-        Options=@(new DataGridRowOptions<TItem>(rowIndex,item,GridTemplateColumns,_columns))>
+                          aria-rowindex="@rowIndex"
+                          Style="@rowStyle"
+                          Class="@rowClass"
+                          TItem="TItem"
+                          Options=@(new DataGridRowOptions<TItem>(rowIndex,item,GridTemplateColumns,_columns))>
 
         </SayehDataGridRow>
 
@@ -127,7 +129,7 @@
             {
                 var col = _columns[colIndex];
 
-                <SayehDataGridCell Class="@("grid-cell-placeholder " + ColumnJustifyClass(col))" Style="@col.Style" @key="@col" ColumnIndex=@(colIndex+1) TItem="TItem">
+                <SayehDataGridCell Class="@("grid-cell-placeholder " + ColumnJustifyClass(col))" Style="@col.Style" @key="@col" ColumnIndex=@(colIndex + 1) TItem="TItem">
                     @((RenderFragment)(__builder => col.RenderPlaceholderContent(__builder, placeholderContext)))
                 </SayehDataGridCell>
             }
@@ -142,7 +144,7 @@
         {
             var col = _columns[colIndex];
             string CellId = Identifier.NewId();
-            
+
             <SayehDataGridCell @key="@col"
                                TItem="TItem"
                                ColumnIndex=@(colIndex)

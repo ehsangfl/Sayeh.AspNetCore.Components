@@ -205,6 +205,7 @@ export function enableColumnResizing(gridElement, resizeColumnOnAllRows = true) 
         // add a new resize div
         const div = createDiv(resizeHandleHeight, isRTL);
         header.appendChild(div);
+        header.style.position = 'relative';
         setListeners(div, isRTL);
     });
 
@@ -289,7 +290,7 @@ export function enableColumnResizing(gridElement, resizeColumnOnAllRows = true) 
         div.style.position = 'absolute';
         div.style.cursor = 'col-resize';
         div.style.userSelect = 'none';
-        div.style.height = height + 'px';
+        div.style.height = (height - 5) + 'px';
         div.style.width = '6px';
         div.style.opacity = 'var(--fluent-data-grid-header-opacity)'
 

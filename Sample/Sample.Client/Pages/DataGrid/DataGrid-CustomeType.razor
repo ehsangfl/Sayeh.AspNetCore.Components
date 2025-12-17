@@ -1,0 +1,42 @@
+﻿@page "/datagrid-cutomeType"
+@using System.Collections.ObjectModel
+@inject NavigationManager nav
+<h3>DataGrid</h3>
+@if (items is null)
+{
+    <p>loading ...</p>
+}
+else
+{
+    <label>custom type</label>
+    <SayehDataGrid TItem="CustomTypeModel" Items="items" IsReadonly=true >
+       <SayehPropertyColumn Property="p=> p.Order" />
+        <SayehDatePickerColumn Property="p=> p.Date" />
+        <SayehPropertyColumn TItem="CustomTypeModel" TValue="DateTime?" PropertyName="DateTimeProperty"/>
+       
+    </SayehDataGrid>
+
+}
+@code {
+
+    private IEnumerable<CustomTypeModel>? items { get; set; }
+
+    private IEnumerable<WeatherForeacast>? weathers { get; set; }
+
+    protected override void OnInitialized()
+    {
+        weathers = WeatherForeacast.GenerateItems();
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            items = await Task.Run<IEnumerable<CustomTypeModel>>(() => CustomTypeModel.GenerateItems(weathers));
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

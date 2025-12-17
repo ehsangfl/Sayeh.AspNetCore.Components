@@ -44,7 +44,7 @@
                         <FluentSearch type="search" Autofocus=true @bind-Value=TextFilter @onchange="OnTextFilterSetted" />
                     </div>
                 }
-                else if (propertyType == typeof(DateTime))
+                else if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
                 {
                     <DateRangePicker FromDate=FromDate ToDate=ToDate RangeSelected=DateRangeSelected></DateRangePicker>
                 }

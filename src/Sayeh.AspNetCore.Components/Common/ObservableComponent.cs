@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using System.ComponentModel;
+using System.Reflection.Metadata;
 
 namespace Sayeh.AspNetCore.Components;
 
@@ -10,6 +11,9 @@ public class ObservableComponent<T> : ComponentBase, IDisposable
     private T? _itemSource;
     [Parameter]
     public T? ItemSource { get; set; }
+
+    [Parameter]
+    public string? PropertyName { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
@@ -43,7 +47,8 @@ public class ObservableComponent<T> : ComponentBase, IDisposable
     private void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         Console.WriteLine($"{e.PropertyName?.ToString()} change detected for {ItemSource?.GetType().FullName}");
-        InvokeAsync(StateHasChanged);
+        if (PropertyName.None() || (e.PropertyName?.Equals(PropertyName) ?? true))
+            InvokeAsync(StateHasChanged);
     }
 
     protected override void BuildRenderTree(RenderTreeBuilder builder)

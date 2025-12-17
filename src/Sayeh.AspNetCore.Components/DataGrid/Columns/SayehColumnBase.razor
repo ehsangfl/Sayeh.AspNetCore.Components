@@ -14,7 +14,7 @@
 
 @code
 {
-
+    bool isRTL = System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
     private void RenderDefaultHeaderContent(RenderTreeBuilder __builder)
     {
         @if (HeaderCellItemTemplate is not null)
@@ -26,7 +26,7 @@
             @if (this.SortingIsEnable())
             {
                 var sortableColumn = this as ISortableColumn<TItem>;
-                @if ((!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.Start) || (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.End))
+                @if ((!isRTL && Align == Align.Start) || (isRTL && Align == Align.End))
                 {
                     RenderFilterPart(__builder);
                 }
@@ -47,7 +47,7 @@
                     }
                 </FluentButton>
 
-                @if ((!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.End) || (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.Start))
+                @if ((!isRTL && Align == Align.End) || (isRTL && Align == Align.Start))
                 {
                     RenderFilterPart(__builder);
                 }
@@ -55,12 +55,12 @@
             else
             {
                 <div class="col-title" title="@tooltip">
-                    @if (Align == Align.Start || (!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.Start) || (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.End))
+                    @if (Align == Align.Start || (!isRTL && Align == Align.Start) || (isRTL && Align == Align.End))
                     {
                         RenderFilterPart(__builder);
                     }
                     <div class="col-title-text">@Title</div>
-                    @if (Align == Align.End || (!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.End) || (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft && Align == Align.Start))
+                    @if (Align == Align.End || (!isRTL && Align == Align.End) || (isRTL && Align == Align.Start))
                     {
                         RenderFilterPart(__builder);
                     }

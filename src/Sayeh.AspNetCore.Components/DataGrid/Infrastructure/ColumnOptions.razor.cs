@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.AspNetCore.Components;
 using Sayeh.AspNetCore.Components.DataGrid.Infrastructure;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -91,7 +93,7 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
             return Source;
         if (propertyType == typeof(string))
             return applyTextFilter(Source);
-        else if (propertyType == typeof(DateTime))
+        else if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
             return applyDateTimeFilter(Source);
         else if (propertyType == typeof(int) || propertyType == typeof(short) || propertyType == typeof(decimal) || propertyType == typeof(double)
                 || propertyType == typeof(Single))
@@ -124,7 +126,7 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
 
     private void prepaireDistictList()
     {
-        if (COwnerColumn is null)
+        if (DistinctList is not null || COwnerColumn is null)
             return;
         var filterFunc = COwnerColumn.FilterProperty?.Compile();
         if (filterFunc is not null)
@@ -318,27 +320,27 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
             if (pExpression is null || bindingExpression is null)
                 return Ok();
 
-            //ParameterExpression ExpParam = Expression.Parameter(typeof(TGridItem), "w");
-            var RightExp = Expression.Constant(value, pInfo.PropertyType);
+            // use the bindingExpression (it already represents the property access).
+            // ensure constants use the same type as the binding expression to avoid mismatched types.
+            var targetType = bindingExpression.Type;
+            var RightExp = Expression.Constant(Convert.ChangeType(value, targetType), targetType);
 
             Expression result;
-            if (pInfo.PropertyType == typeof(string))
+            if (targetType == typeof(string))
             {
-                var propertyExpression = Expression.Property(pExpression, pInfo);
-                var nullCheck = Expression.NotEqual(propertyExpression, Expression.Constant(null, pInfo.PropertyType));
-                //remove spaces
+                var propertyExpression = bindingExpression; // re-use previously captured expression
+                var nullCheck = Expression.NotEqual(propertyExpression, Expression.Constant(null, targetType));
+                // remove spaces + tolower
                 var LeftExp = Expression.Call(propertyExpression, ToLowerMethod);
-                //run tolower method
                 LeftExp = Expression.Call(LeftExp, ReplaceMethod, new ConstantExpression[] { OneSpace, Empty });
                 result = Expression.AndAlso(nullCheck, Expression.Call(LeftExp, ContainsMethod, new ConstantExpression[] { RightExp }));
             }
             else
             {
-                //var LeftExp = (Expression)Expression.Property(ExpParam, pInfo);
+                // compare using the bindingExpression (already built safely for dynamic properties)
                 result = Expression.Equal(bindingExpression, RightExp);
             }
 
-            //return Expression.Call(typeof(Queryable), "Where", new Type[] { source.ElementType }, source.Expression, Expression.Lambda(Deleg, Result, new ParameterExpression[] { ExpParam }));
             return Expression.Lambda<Func<TItem, bool>>(result, new ParameterExpression[] { pExpression }).Compile();
         }
         catch (Exception)
@@ -356,31 +358,40 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
                 return Ok();
 
             var pInfo = COwnerColumn.PropertyInfo!;
-            //ParameterExpression ExpParam = Expression.Parameter(typeof(TGridItem), pName);
-
             Expression? Result = null;
             Expression? nullCheck = null;
-            if (pInfo.PropertyType.IsNullableType())
-                nullCheck = Expression.NotEqual(Expression.Property(pExpression, pInfo), Expression.Constant(null, pInfo.PropertyType));
+
+            var targetType = bindingExpression.Type;
+            var isNullable = targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            Expression valueExpr = bindingExpression;
+            Type compareType = targetType;
+            if (isNullable)
+            {
+                compareType = Nullable.GetUnderlyingType(targetType)!;
+                // access .Value for comparisons
+                valueExpr = Expression.Property(bindingExpression, "Value");
+                nullCheck = Expression.NotEqual(bindingExpression, Expression.Constant(null, targetType));
+            }
             else
+            {
                 nullCheck = Expression.Constant(true);
+            }
 
             if (fromValue is not null)
             {
-                var fromExpr = Expression.Constant(Convert.ChangeType(fromValue, pInfo.PropertyType), pInfo.PropertyType);
-                Result = Expression.AndAlso(nullCheck, Expression.GreaterThanOrEqual(bindingExpression, fromExpr));
+                var fromExpr = Expression.Constant(Convert.ChangeType(fromValue, compareType), compareType);
+                Result = Expression.AndAlso(nullCheck, Expression.GreaterThanOrEqual(valueExpr, fromExpr));
             }
             if (toValue is not null)
             {
-                var toExpr = Expression.Constant(Convert.ChangeType(toValue, pInfo.PropertyType), pInfo.PropertyType);
-                var toWehreC = Expression.AndAlso(nullCheck, Expression.LessThanOrEqual(bindingExpression, toExpr));
+                var toExpr = Expression.Constant(Convert.ChangeType(toValue, compareType), compareType);
+                var toWhereC = Expression.AndAlso(nullCheck, Expression.LessThanOrEqual(valueExpr, toExpr));
                 if (Result is null)
-                    Result = toWehreC;
+                    Result = toWhereC;
                 else
-                    Result = Expression.AndAlso(Result, toWehreC);
+                    Result = Expression.AndAlso(Result, toWhereC);
             }
-            //var Deleg = typeof(Func<,>).MakeGenericType(source.ElementType, typeof(bool));
-            //return Expression.Call(typeof(Queryable), "Where", new Type[] { source.ElementType }, source.Expression, Expression.Lambda(Deleg, Result!, new ParameterExpression[] { ExpParam }));
+
             return Expression.Lambda<Func<TItem, bool>>(Result!, new[] { pExpression }).Compile();
 
         }
@@ -393,16 +404,18 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
     private ParameterExpression? GetTypeParameterExpressionName()
     {
         GetBindignExpression();
-        if (bindingExpression is MemberExpression)
-        {
-            var paramExpression = ((MemberExpression)bindingExpression).Expression;
-            while (paramExpression is MemberExpression)
-            {
-                paramExpression = ((MemberExpression)paramExpression).Expression;
-            }
-            if (paramExpression is ParameterExpression)
-                return ((ParameterExpression)paramExpression);
-        }
+
+        if (bindingExpression is null)
+            return null;
+
+        // Find any ParameterExpression used inside the bindingExpression.
+        // This covers MemberExpression, InvocationExpression, Call, Convert, etc.
+        var finder = new ParameterFinder();
+        finder.Visit(bindingExpression);
+        if (finder.Found is not null)
+            return finder.Found;
+
+        // If none found, create a fresh parameter (expression body may not need one).
         return Expression.Parameter(typeof(TItem), "w");
     }
 
@@ -426,6 +439,21 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
 
     #endregion
 
+
+    /// <summary>
+    /// Visits an expression tree and captures the first ParameterExpression encountered.
+    /// </summary>
+    private class ParameterFinder : ExpressionVisitor
+    {
+        public ParameterExpression? Found { get; private set; }
+
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            if (Found is null)
+                Found = node;
+            return base.VisitParameter(node);
+        }
+    }
 }
 
 public abstract class ColumnOptionsBase<TGridItem> : ComponentBase

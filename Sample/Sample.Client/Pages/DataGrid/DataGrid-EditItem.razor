@@ -28,7 +28,7 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            weatherForeacasts = new WeatherForecastModel().GetItems();
+            weatherForeacasts = WeatherForeacast.GenerateItems();
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);
