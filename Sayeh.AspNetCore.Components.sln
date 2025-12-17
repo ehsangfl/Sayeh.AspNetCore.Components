@@ -24,6 +24,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{F52F3F0A-38A4-47D3-B6D3-8254C9BEB430}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sayeh.AspNetCore.Components.Test", "Test\Sayeh.AspNetCore.Components.Test\Sayeh.AspNetCore.Components.Test\Sayeh.AspNetCore.Components.Test.csproj", "{61F15011-4EDC-4175-8423-B2CEF2E7D707}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +58,10 @@ Global
 		{811CC480-72CE-4163-AD06-144D95A20ACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{811CC480-72CE-4163-AD06-144D95A20ACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{811CC480-72CE-4163-AD06-144D95A20ACA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61F15011-4EDC-4175-8423-B2CEF2E7D707}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61F15011-4EDC-4175-8423-B2CEF2E7D707}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61F15011-4EDC-4175-8423-B2CEF2E7D707}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61F15011-4EDC-4175-8423-B2CEF2E7D707}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +72,7 @@ Global
 		{33F890FF-89DB-42F5-9D55-AC8BB741B8F8} = {5742872B-ACC8-4CAB-BEDA-0096D8C9615C}
 		{3AD0152C-0D2F-4983-B733-7EC15F8FEED6} = {33F890FF-89DB-42F5-9D55-AC8BB741B8F8}
 		{811CC480-72CE-4163-AD06-144D95A20ACA} = {33F890FF-89DB-42F5-9D55-AC8BB741B8F8}
+		{61F15011-4EDC-4175-8423-B2CEF2E7D707} = {F52F3F0A-38A4-47D3-B6D3-8254C9BEB430}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {39E7FDE3-DE0E-4FB6-B742-F6BE8D386BDF}

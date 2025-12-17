@@ -6,6 +6,9 @@ fluent-anchor.disabled::part(control) {
     text-decoration: none;
     color: var(--neutral-foreground-rest);
 }
+fluent-anchor {
+    height: calc((var(--base-height-multiplier) + var(--density)) * var(--design-unit) * 1px);
+}
 /*fluent-tooltip.invalid {
     background: var(--error);
     color: var(--neutral-foreground-rest);

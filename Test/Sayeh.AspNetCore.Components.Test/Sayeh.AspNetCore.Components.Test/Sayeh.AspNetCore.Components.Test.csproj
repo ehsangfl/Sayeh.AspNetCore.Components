@@ -1,0 +1,29 @@
+<Project Sdk="MSTest.Sdk/3.6.4">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseVSTest>true</UseVSTest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\Sample\Sample.Client\Model\CustomTypeModel.cs" Link="Model\CustomTypeModel.cs" />
+    <Compile Include="..\..\..\Sample\Sample.Client\Model\WeatherForecastModel.cs" Link="Model\WeatherForecastModel.cs" />
+    <Compile Include="..\..\..\Sample\Sample.Client\Model\WeatherForecastModel.NotifyPropertyChanged.cs" Link="Model\WeatherForecastModel.NotifyPropertyChanged.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Model\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="bunit" Version="2.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Sayeh.AspNetCore.Components\Sayeh.AspNetCore.Components.csproj" />
+  </ItemGroup>
+
+</Project>

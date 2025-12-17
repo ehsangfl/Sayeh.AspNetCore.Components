@@ -33,7 +33,7 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            weatherForeacasts =new ObservableCollection<WeatherForeacast>(new WeatherForecastModel().GetItems());
+            weatherForeacasts = new ObservableCollection<WeatherForeacast>(WeatherForeacast.GenerateItems());
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);

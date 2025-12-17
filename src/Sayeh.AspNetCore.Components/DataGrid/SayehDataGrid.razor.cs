@@ -85,6 +85,7 @@ namespace Sayeh.AspNetCore.Components
         bool ImplementedIEditableObject = false;
         bool observableHandled = false;
         IEnumerable<TItem> _oldItems;
+        SayehDataGridRowsPart? RowsPart;
 
         #endregion
 
@@ -370,6 +371,7 @@ namespace Sayeh.AspNetCore.Components
         private async void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             await RefreshDataCoreAsync();
+            await InvokeAsync(StateHasChanged);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -532,7 +534,8 @@ namespace Sayeh.AspNetCore.Components
                 }
                 _internalGridContext.ResetRowIndexes(startIndex);
             }
-            StateHasChanged();
+            //StateHasChanged();
+            RowsPart?.ReRender();
         }
 
         private async ValueTask<ItemsProviderResult<(int, TItem)>> ProvideVirtualizedItemsAsync(ItemsProviderRequest request)
