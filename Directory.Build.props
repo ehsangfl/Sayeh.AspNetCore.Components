@@ -12,9 +12,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <!--packages of projects-->
-    <DotnetVersion>8.0.19</DotnetVersion>
+    <DotnetVersion>8.0.22</DotnetVersion>
     <FluentVersion>4.12.1</FluentVersion>
     <LoggingVersion>8.0.1</LoggingVersion>
-    <PackageVersion>2.5.1.0</PackageVersion>
+    <PackageVersion>2.5.1.1</PackageVersion>
   </PropertyGroup>
 </Project>
