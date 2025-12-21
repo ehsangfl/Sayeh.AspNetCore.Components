@@ -6,3 +6,6 @@
     cursor: pointer;
     background-color: var(--datagrid-hover-color, var(--neutral-fill-stealth-hover));
 }
+.active ::deep td {
+    background-color: var(--neutral-fill-stealth-hover-on-neutral-fill-layer-rest);
+}

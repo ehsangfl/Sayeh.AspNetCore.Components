@@ -153,6 +153,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
         {
             await Grid.OnRowFocus.InvokeAsync(this);
         }
+        await GridContext.Grid.OnRowFocusAsync(this);
     }
 
     internal async Task HandleOnRowDoubleClickAsync(string rowId)
@@ -188,14 +189,6 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
             {
                 await GridContext.Grid.OnRowClick.InvokeAsync(row);
             }
-        }
-    }
-
-    internal async Task HandleOnRowFocusAsync(string rowId)
-    {
-        if (GridContext.Grid.OnRowFocus.HasDelegate)
-        {
-            await GridContext.Grid.OnRowFocus.InvokeAsync(this);
         }
     }
 
