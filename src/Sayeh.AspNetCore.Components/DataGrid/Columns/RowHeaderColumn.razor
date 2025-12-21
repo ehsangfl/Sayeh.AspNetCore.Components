@@ -1,0 +1,32 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@namespace Sayeh.AspNetCore.Components
+@typeparam TItem 
+@inherits SayehColumnBase<TItem>
+@{
+    InternalGridContext.Grid.AddColumn(this);
+}
+@code {
+
+    protected internal override void CellContent(RenderTreeBuilder __builder, TItem item)
+    {
+        if (item == Grid.SelectedItem)
+        {
+            if (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft)
+            {
+                <FluentIcon Value="new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size12.ChevronLeft()" />
+            }
+            else
+            {
+                <FluentIcon Value="new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size12.ChevronRight()" />
+            }
+        }
+    }
+
+    public void CellEditContent(RenderTreeBuilder __builder)
+    {
+        <FluentIcon Value="new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size12.Edit()" />
+    }
+
+  
+
+}

@@ -30,6 +30,7 @@ namespace Sample.Client.Model
         public DayType Type { get; set; }
         [Range(0, 200)]
         public int Tempreture { get; set; }
+        [Display(Name ="Temprature (F)")]
         public double TemporatureF => (Tempreture * 9.5) + 32;
         public string? DayofWeek { get; set; }
         [Required]

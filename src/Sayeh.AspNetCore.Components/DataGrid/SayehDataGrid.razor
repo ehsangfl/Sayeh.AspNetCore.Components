@@ -11,6 +11,7 @@
     }
     @if (!_manualGrid)
     {
+        <RowHeaderColumn TItem="TItem" @ref=_rowHeader Width="1.5rem"/>
         @ChildContent
     }
     <Defer>
@@ -21,9 +22,8 @@
         <table @ref=_gridReference
                no-tabbing=@NoTabbing
                generate-header="none"
-               grid-template-columns=@("20px " + _internalGridTemplateColumns)
                class="@GridClass()"
-               style="@Style"
+               style="@StyleValue"
                aria-rowcount="@(_ariaBodyRowCount + 1)"
                @onclosecolumnoptions="CloseColumnOptions"
                @attributes="AdditionalAttributes"
@@ -34,7 +34,7 @@
                 if (GenerateHeader == GenerateHeaderOption.Sticky)
                     headerType = DataGridRowType.StickyHeader;
                 <thead>
-                    <SayehDataGridRow RowType=@headerType TItem=TItem>
+                    <SayehDataGridRow RowType=@headerType TItem=TItem ShowRowHeaders=ShowRowHeaders>
                         @_renderColumnHeaders
                     </SayehDataGridRow>
                 </thead>
@@ -114,7 +114,7 @@
                           Style="@rowStyle"
                           Class="@rowClass"
                           TItem="TItem"
-                          Options=@(new DataGridRowOptions<TItem>(rowIndex,item,GridTemplateColumns,_columns))>
+                          Options=@(new DataGridRowOptions<TItem>(rowIndex,item,GridTemplateColumns,_columns,ShowRowHeaders))>
 
         </SayehDataGridRow>
 
@@ -123,12 +123,11 @@
     private void RenderPlaceholderRow(RenderTreeBuilder __builder, PlaceholderContext placeholderContext)
     {
         string? _rowsDataSize = $"height: {ItemSize}px";
-
-        <SayehDataGridRow GridTemplateColumns=@GridTemplateColumns aria-rowindex="@(placeholderContext.Index + 1)" Style="@_rowsDataSize" TItem="TItem">
-            @for (var colIndex = 0; colIndex < _columns.Count; colIndex++)
+        var startingColIndex = 0;
+        <SayehDataGridRow GridTemplateColumns=@GridTemplateColumns aria-rowindex="@(placeholderContext.Index + 1)" Style="@_rowsDataSize" TItem="TItem" ShowRowHeaders=ShowRowHeaders>
+            @for (var colIndex = startingColIndex; colIndex < _columns.Count; colIndex++)
             {
                 var col = _columns[colIndex];
-
                 <SayehDataGridCell Class="@("grid-cell-placeholder " + ColumnJustifyClass(col))" Style="@col.Style" @key="@col" ColumnIndex=@(colIndex + 1) TItem="TItem">
                     @((RenderFragment)(__builder => col.RenderPlaceholderContent(__builder, placeholderContext)))
                 </SayehDataGridCell>
@@ -138,12 +137,10 @@
 
     private void RenderColumnHeaders(RenderTreeBuilder __builder)
     {
-        // var firstColStyle = $"grid-column: 1; height: 32px; min-height: 44px; z-index: {_columns.Count + 2};width:20px";
-        // <th col-index="1" class="column-header col-justify-start" style=@firstColStyle scope="col"></th>
-        @for (var colIndex = 0; colIndex < _columns.Count; colIndex++)
+        var firstColStyle = $"grid-column: 1; height: 32px; min-height: 44px; z-index: {_columns.Count + 2};width:20px";
+        @for (var colIndex = 0; colIndex < _columns.Count ; colIndex++)
         {
             var col = _columns[colIndex];
-            string CellId = Identifier.NewId();
 
             <SayehDataGridCell @key="@col"
                                TItem="TItem"

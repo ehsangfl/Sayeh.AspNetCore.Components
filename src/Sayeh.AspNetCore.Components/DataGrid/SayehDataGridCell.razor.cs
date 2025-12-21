@@ -104,6 +104,7 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem 
         .AddStyle("display", "flex", ShouldHaveDisplayFlex())
         .AddStyle("z-index", (Grid._columns.Count + 2 - this.ColumnIndex).ToString(), CellType == DataGridCellType.ColumnHeader && Grid._columns.Count > 0)
         .AddStyle(Owner.Style)
+        .AddStyle(Column?.Style)
         .Build();
 
     //protected override void OnInitialized()
