@@ -542,7 +542,7 @@ namespace Sayeh.AspNetCore.Components
             RowsPart?.ReRender();
         }
 
-        private async ValueTask<ItemsProviderResult<(int, TItem)>> ProvideVirtualizedItemsAsync(ItemsProviderRequest request)
+        async ValueTask<ItemsProviderResult<(int, TItem)>> ProvideVirtualizedItemsAsync(ItemsProviderRequest request)
         {
             _lastRefreshedPaginationStateHash = Pagination?.GetHashCode();
             await Task.Delay(100);
@@ -587,7 +587,7 @@ namespace Sayeh.AspNetCore.Components
         }
 
         // Normalizes all the different ways of configuring a data source so they have common GridItemsProvider-shaped API
-        private async ValueTask<GridItemsProviderResult<TItem>> ResolveItemsRequestAsync(GridItemsProviderRequest<TItem> request)
+        async ValueTask<GridItemsProviderResult<TItem>> ResolveItemsRequestAsync(GridItemsProviderRequest<TItem> request)
         {
             if (ItemsProvider is not null)
             {
