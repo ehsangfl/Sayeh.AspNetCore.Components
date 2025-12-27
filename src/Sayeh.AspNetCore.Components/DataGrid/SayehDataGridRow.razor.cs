@@ -19,6 +19,8 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     private readonly Dictionary<string, SayehDataGridCell<TItem>> cells = [];
     private SayehDataGridCell<TItem>? selectCell;
     private SayehDataGrid<TItem> Grid => GridContext.Grid;
+    internal SayehDataGridCell<TItem>? CurrentCell { get; set; }
+    private RowHeaderColumn<TItem>? _rowHeader;
 
     #endregion
 
@@ -74,7 +76,8 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     [Parameter]
     public DataGridRowOptions<TItem>? Options { get; set; }
 
-    internal SayehDataGridCell<TItem>? CurrentCell { get; set; }
+    [Parameter]
+    public bool ShowRowHeaders { get; set; }
 
     #endregion
 
@@ -106,6 +109,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
             Item = Options?.Item;
             GridTemplateColumns = Options?.GridTemplateColumns;
             Columns = Options?.Columns;
+            ShowRowHeaders = Options?.ShowRowHeaders ?? false;
         }
     }
 
@@ -113,7 +117,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
 
     protected string? ClassValue => new CssBuilder(Class)
         .AddClass("hover", when: GridContext.Grid.ShowHover)
-        .AddClass("edit-mode",when: Mode == DataGridItemMode.Edit)
+        .AddClass("edit-mode", when: Mode == DataGridItemMode.Edit)
         .Build();
 
     protected string? StyleValue => new StyleBuilder(Style)
@@ -125,7 +129,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
 
     public void Dispose() => GridContext.Unregister(this);
 
-    internal void Register(SayehDataGridCell<TItem> cell)           
+    internal void Register(SayehDataGridCell<TItem> cell)
     {
         cell.CellId = $"c{GridContext.GetNextCellId()}";
         cells.Add(cell.CellId, cell);
@@ -149,6 +153,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
         {
             await Grid.OnRowFocus.InvokeAsync(this);
         }
+        await GridContext.Grid.OnRowFocusAsync(this);
     }
 
     internal async Task HandleOnRowDoubleClickAsync(string rowId)
@@ -187,13 +192,6 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
         }
     }
 
-    internal async Task HandleOnRowFocusAsync(string rowId) {
-        if (GridContext.Grid.OnRowFocus.HasDelegate)
-        {
-            await GridContext.Grid.OnRowFocus.InvokeAsync(this);
-        }
-    }
-
     /// <summary />
     internal void HandleOnRowKeyDown(string rowId, KeyboardEventArgs e)
     {
@@ -215,6 +213,12 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
             .AddClass("col-justify-center", column.Align == Align.Center)
             .AddClass("col-justify-end", column.Align == Align.End)
             .Build();
+    }
+
+    internal void ReRenderHeaderRow()
+    {
+        if (ShowRowHeaders)
+            cells.First().Value.RaiseStateHasChanged();
     }
 
     /// <summary />

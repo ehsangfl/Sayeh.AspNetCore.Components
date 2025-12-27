@@ -9,6 +9,7 @@ export function init(gridElement, autoFocus) {
     enableColumnResizing(gridElement);
 
     let start = gridElement.querySelector('td:first-child');
+    let currentRow;
 
     if (autoFocus) {
         start.focus();
@@ -26,6 +27,17 @@ export function init(gridElement, autoFocus) {
     };
     const keyboardNavigation = (sibling) => {
         if (sibling !== null) {
+            if (currentRow) {
+                currentRow.classList.remove("active");
+                currentRow.dispatchEvent(new CustomEvent("focus"), { Rowid: currentRow.dataset.row_Id });
+            }
+            currentRow = sibling.closest("tr");
+            if (currentRow) {
+                currentRow.classList.add("active");
+                currentRow.dispatchEvent(new CustomEvent("focus"), { Rowid: currentRow.dataset.row_Id });
+            }
+
+            start.closest("tr");
             start.focus();
             sibling.focus();
             start = sibling;

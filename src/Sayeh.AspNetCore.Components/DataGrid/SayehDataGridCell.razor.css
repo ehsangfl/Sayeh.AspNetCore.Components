@@ -9,7 +9,9 @@ td {
     white-space: nowrap;
     align-content: center;
 }
-
+    td.row-header {
+        padding: 6px 2px;
+    }
 
     td.col-justify-center {
         text-align: center;

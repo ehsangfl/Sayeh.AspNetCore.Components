@@ -81,11 +81,13 @@ namespace Sayeh.AspNetCore.Components
         private readonly EventCallbackSubscriber<PaginationState> _currentPageItemsChanged;
 
         private SayehDataGridRow<TItem>? _currentRow { get; set; }
+        internal RowHeaderColumn<TItem>? _rowHeader;
 
         bool ImplementedIEditableObject = false;
         bool observableHandled = false;
         IEnumerable<TItem> _oldItems;
         SayehDataGridRowsPart? RowsPart;
+        bool _showRowHeaders;
 
         #endregion
 
@@ -276,6 +278,9 @@ namespace Sayeh.AspNetCore.Components
         /// </summary>
         [Parameter]
         public bool AutoFit { get; set; }
+
+        [Parameter]
+        public bool ShowRowHeaders { get; set; } = true;
 
         #endregion
 
@@ -671,6 +676,16 @@ namespace Sayeh.AspNetCore.Components
             return sortDirection.HasValue ? (sortDirection.Value == ListSortDirection.Ascending ? "ascending" : "descending") : "none";
         }
 
+        private string? StyleValue => new StyleBuilder(Style)
+       .AddStyle("grid-template-columns", _internalGridTemplateColumns, !string.IsNullOrWhiteSpace(_internalGridTemplateColumns) && DisplayMode == DataGridDisplayMode.Grid)
+       //.AddStyle("grid-template-rows", "auto 1fr", (_internalGridContext.TotalItemCount == 0 || Items is null) && DisplayMode == DataGridDisplayMode.Grid)
+       //.AddStyle("height", "100%", _internalGridContext.TotalItemCount == 0)
+       .AddStyle("border-collapse", "separate", GenerateHeader == GenerateHeaderOption.Sticky)
+       .AddStyle("border-spacing", "0", GenerateHeader == GenerateHeaderOption.Sticky)
+       .AddStyle("width", "100%", DisplayMode == DataGridDisplayMode.Table)
+       .Build();
+
+
         //private string? columnheaderclass(sayehcolumnbase<titem> column)
         //{
         //    listsortdirection? sortdirection = null;
@@ -690,7 +705,7 @@ namespace Sayeh.AspNetCore.Components
             {
                 sortDirection = ((ISortableColumn<TItem>)column).SortDirection!.Value;
             }
-            return new CssBuilder(Class)
+            return new CssBuilder(column.Class)
                .AddClass(ColumnJustifyClass(column))
                .AddClass("col-sort-asc", sortDirection.HasValue && sortDirection.Value == ListSortDirection.Ascending)
                .AddClass("col-sort-desc", sortDirection.HasValue && sortDirection.Value == ListSortDirection.Descending)
@@ -778,7 +793,10 @@ namespace Sayeh.AspNetCore.Components
                 SelectedItem = row.Item;
             else
                 SelectedItem = null;
+            if (_currentRow is not null)
+                _currentRow.ReRenderHeaderRow();
             _currentRow = row;
+            _currentRow.ReRenderHeaderRow();
             await OnRowFocus.InvokeAsync(row);
         }
 
