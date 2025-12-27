@@ -11,7 +11,10 @@
     }
     @if (!_manualGrid)
     {
-        <RowHeaderColumn TItem="TItem" @ref=_rowHeader Width="1.5rem"/>
+        if (ShowRowHeaders)
+        {
+            <RowHeaderColumn TItem="TItem" @ref=_rowHeader/>
+        }
         @ChildContent
     }
     <Defer>
@@ -138,7 +141,7 @@
     private void RenderColumnHeaders(RenderTreeBuilder __builder)
     {
         var firstColStyle = $"grid-column: 1; height: 32px; min-height: 44px; z-index: {_columns.Count + 2};width:20px";
-        @for (var colIndex = 0; colIndex < _columns.Count ; colIndex++)
+        @for (var colIndex = 0; colIndex < _columns.Count; colIndex++)
         {
             var col = _columns[colIndex];
 

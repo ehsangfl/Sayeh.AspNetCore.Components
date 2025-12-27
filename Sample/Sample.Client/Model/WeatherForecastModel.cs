@@ -7,7 +7,7 @@ namespace Sample.Client.Model
     public class WeatherForeacast
     {
 
-        public static IEnumerable<WeatherForeacast> GenerateItems()
+        public static IList<WeatherForeacast> GenerateItems()
         {
             return new List<WeatherForeacast> {
                 new WeatherForeacast(){ Order =1,  Date = DateTime.Now, DayofWeek = "the today", Tempreture = -5 , Type = DayType.Snowy,Description = "no reason" },

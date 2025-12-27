@@ -7,19 +7,20 @@
 else
 {
     <label>editable datagrid</label>
-    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts">
-        <SayehPropertyColumn Property="p=> p.Order" />
-        <SayehDatePickerColumn Property="p=> p.Date" />
-        <SayehPropertyColumn Property="p=> p.DayofWeek" />
-        <SayehComboboxColumn Property="p=> p.Type" Items="DayTypes" ValueMember="v=> v" />
-        <SayehNumericTextboxColumn Property="p=> p.Tempreture" />
-        <SayehPropertyColumn Property="p=> p.TemporatureF" />
-        <SayehTextboxColumn Property="p=> p.Description" />
+    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts" RowsDelete="OnRowsDeleted">
+        <SayehSelectColumn Property="p => p.IsSelected" />
+        <SayehPropertyColumn Property="p => p.Order" />
+        <SayehDatePickerColumn Property="p => p.Date" />
+        <SayehPropertyColumn Property="p => p.DayofWeek" />
+        <SayehComboboxColumn Property="p => p.Type" Items="DayTypes" ValueMember="v => v" />
+        <SayehNumericTextboxColumn Property="p => p.Tempreture" />
+        <SayehPropertyColumn Property="p => p.TemporatureF" />
+        <SayehTextboxColumn Property="p => p.Description" />
     </SayehDataGrid>
 }
 @code {
 
-    private IEnumerable<WeatherForeacast>? weatherForeacasts { get; set; }
+    private IList<WeatherForeacast>? weatherForeacasts { get; set; }
 
     private DayType[]? DayTypes { get; set; }
 
@@ -32,6 +33,14 @@ else
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);
+    }
+
+    protected void OnRowsDeleted(IEnumerable<WeatherForeacast> list)
+    {
+        foreach (var item in list)
+        {
+            weatherForeacasts!.Remove(item);
+        }
     }
 
 }

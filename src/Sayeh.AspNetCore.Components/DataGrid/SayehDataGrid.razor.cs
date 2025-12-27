@@ -81,13 +81,13 @@ namespace Sayeh.AspNetCore.Components
         private readonly EventCallbackSubscriber<PaginationState> _currentPageItemsChanged;
 
         private SayehDataGridRow<TItem>? _currentRow { get; set; }
-        internal RowHeaderColumn<TItem>? _rowHeader;
 
         bool ImplementedIEditableObject = false;
         bool observableHandled = false;
         IEnumerable<TItem> _oldItems;
         SayehDataGridRowsPart? RowsPart;
         bool _showRowHeaders;
+        RowHeaderColumn<TItem> _rowHeader;
 
         #endregion
 
@@ -374,10 +374,7 @@ namespace Sayeh.AspNetCore.Components
         }
 
         private async void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            await RefreshDataCoreAsync();
-            await InvokeAsync(StateHasChanged);
-        }
+        => await RefreshDataCoreAsync();
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -407,6 +404,8 @@ namespace Sayeh.AspNetCore.Components
             _filterableColumns.Clear();
             _collectingColumns = true;
             _internalGridContext.SelectColumn = null;
+            if (_rowHeader is not null)
+                AddColumn(_rowHeader);
         }
 
         private void FinishCollectingColumns()
@@ -816,6 +815,7 @@ namespace Sayeh.AspNetCore.Components
                 //  Resize column up
                 await SetColumnWidthAsync(10);
             }
+            OnKeyPress(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs() { Key = args.Value });
             //return Task.CompletedTask;
         }
 
