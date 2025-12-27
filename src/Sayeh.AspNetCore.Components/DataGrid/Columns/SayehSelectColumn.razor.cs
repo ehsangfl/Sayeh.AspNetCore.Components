@@ -70,6 +70,7 @@ namespace Sayeh.AspNetCore.Components
         public SayehSelectColumn()
         {
             Width = "50px";
+            MinWidth = "50px";
             HeaderContent = GetHeaderContent();
             IsEditable = false;
         }
