@@ -7,7 +7,7 @@ namespace Sample.Client.Model
     public class WeatherForeacast
     {
 
-        public static IEnumerable<WeatherForeacast> GenerateItems()
+        public static IList<WeatherForeacast> GenerateItems()
         {
             return new List<WeatherForeacast> {
                 new WeatherForeacast(){ Order =1,  Date = DateTime.Now, DayofWeek = "the today", Tempreture = -5 , Type = DayType.Snowy,Description = "no reason" },
@@ -15,7 +15,7 @@ namespace Sample.Client.Model
                 new WeatherForeacast(){ Order =3, Date = DateTime.Now.AddDays(2), DayofWeek = DateTime.Now.AddDays(2).DayOfWeek.ToString(), Tempreture = -2 , Type = DayType.Rainy },
                 new WeatherForeacast(){ Order =4, Date = DateTime.Now.AddDays(3), DayofWeek = DateTime.Now.AddDays(3).DayOfWeek.ToString(), Tempreture = 10 , Type = DayType.Sunny },
                 new WeatherForeacast(){ Order =5, Date = DateTime.Now.AddDays(4), DayofWeek = DateTime.Now.AddDays(4).DayOfWeek.ToString(), Tempreture = 5 , Type = DayType.Sunny },
-                new WeatherForeacast(){ Order =4, Date = DateTime.Now.AddDays(5), DayofWeek = DateTime.Now.AddDays(5).DayOfWeek.ToString(), Tempreture = 3 , Type = DayType.Rainy}
+                new WeatherForeacast(){ Order =6, Date = DateTime.Now.AddDays(5), DayofWeek = DateTime.Now.AddDays(5).DayOfWeek.ToString(), Tempreture = 3 , Type = DayType.Rainy}
     };
         }
 

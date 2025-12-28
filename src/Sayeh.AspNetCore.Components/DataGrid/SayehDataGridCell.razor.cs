@@ -7,7 +7,7 @@ using Sayeh.AspNetCore.Components.DataGrid.Infrastructure;
 
 namespace Sayeh.AspNetCore.Components;
 
-public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem : class
+public partial class SayehDataGridCell<TItem> : FluentComponentBase, IDisposable where TItem : class
 {
 
     #region Fields
@@ -90,15 +90,16 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem 
         .Build();
 
     protected string? StyleValue => new StyleBuilder(Style)
-        .AddStyle("grid-column", (ColumnIndex+1).ToString(), () => (Grid.Items is not null) || Grid.Virtualize)
+        .AddStyle("grid-column", Column?.ToString(), () => (Grid.Items is not null || Grid.ItemsProvider is not null) && GridContext.TotalItemCount > 0 && Grid.DisplayMode == DataGridDisplayMode.Grid)
         .AddStyle("text-align", "center", Column is SelectColumn<TItem>)
         .AddStyle("align-content", "center", Column is SelectColumn<TItem>)
+        .AddStyle("min-width", Column?.MinWidth, Owner.RowType is DataGridRowType.Header or DataGridRowType.StickyHeader)
         .AddStyle("padding-inline-start", "calc(((var(--design-unit)* 3) + var(--focus-stroke-width) - var(--stroke-width))* 1px)", Column is SelectColumn<TItem> && Owner.RowType == DataGridRowType.Default)
         .AddStyle("padding-top", "calc(var(--design-unit) * 2.5px)", Column is SelectColumn<TItem> && (Grid.RowSize == DataGridRowSize.Medium || Owner.RowType == DataGridRowType.Header))
         .AddStyle("padding-top", "calc(var(--design-unit) * 1.5px)", Column is SelectColumn<TItem> && Grid.RowSize == DataGridRowSize.Small && Owner.RowType == DataGridRowType.Default)
         .AddStyle("width", Column?.Width, !string.IsNullOrEmpty(Column?.Width) && Grid.DisplayMode == DataGridDisplayMode.Table)
         .AddStyle("height", $"{Grid.ItemSize:0}px", () => Grid.Virtualize && Owner.RowType == DataGridRowType.Default)
-        .AddStyle("height", $"{(int)Grid.RowSize}px", () => !Grid.Virtualize && !Grid.MultiLine && (Grid.Items is not null || Grid.ItemsProvider is not null))
+        .AddStyle("height", $"{(int)Grid.RowSize}px", () => !Grid.Virtualize && !Grid.MultiLine && (Grid.Items is not null || Grid.ItemsProvider is not null) && GridContext.TotalItemCount > 0)
         .AddStyle("height", "100%", Grid.MultiLine)
         .AddStyle("min-height", "44px", Owner.RowType != DataGridRowType.Default)
         .AddStyle("display", "flex", ShouldHaveDisplayFlex())

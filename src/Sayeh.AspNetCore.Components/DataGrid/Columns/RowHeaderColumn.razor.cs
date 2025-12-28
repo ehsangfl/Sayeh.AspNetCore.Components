@@ -8,10 +8,10 @@ partial class RowHeaderColumn<TItem> : SayehColumnBase<TItem>, IEditableColumn<T
     public RowHeaderColumn()
     {
         Class = "row-header";
+        Width = "1.5rem";
+        Width = "1.5rem";
     }
 
-    [Parameter]
-    public SayehDataGridRow<TItem> Row { get; set; } = default!;
     public bool IsReadonly { get => true; set { } }
 
     public void BeginEdit(TItem Item)

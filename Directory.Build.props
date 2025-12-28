@@ -13,8 +13,8 @@
 
     <!--packages of projects-->
     <DotnetVersion>8.0.22</DotnetVersion>
-    <FluentVersion>4.12.1</FluentVersion>
+    <FluentVersion>4.13.2</FluentVersion>
     <LoggingVersion>8.0.1</LoggingVersion>
-    <PackageVersion>2.6.0.0</PackageVersion>
+    <PackageVersion>2.6.1.0</PackageVersion>
   </PropertyGroup>
 </Project>

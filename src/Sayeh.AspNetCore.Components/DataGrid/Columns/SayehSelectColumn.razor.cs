@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Sayeh.AspNetCore.Components.Infrastructure;
 using System.Reflection;
 
@@ -69,6 +70,7 @@ namespace Sayeh.AspNetCore.Components
         public SayehSelectColumn()
         {
             Width = "50px";
+            MinWidth = "50px";
             HeaderContent = GetHeaderContent();
             IsEditable = false;
         }
@@ -93,7 +95,7 @@ namespace Sayeh.AspNetCore.Components
         {
             if (PropertyInfo is null)
                 return false;
-            return (bool?)PropertyInfo.GetValue(item) ?? false;
+            return _compiledProperty?.Invoke(item) ?? false;
         }
 
         private RenderFragment GetHeaderContent()
@@ -137,9 +139,7 @@ namespace Sayeh.AspNetCore.Components
         internal async Task OnCheckAllChangeAsync(bool? e)
         {
             if (Grid == null || SelectAllDisabled || Grid.Items is null)
-            {
                 return;
-            }
             if (Grid.Virtualize)
             {
                 foreach (var item in Grid.Items)
@@ -148,9 +148,9 @@ namespace Sayeh.AspNetCore.Components
             }
             else
                 InternalGridContext.ApplySelectedItems(e == true);
-          
+
             if (e == true)
-                _selectedItemsCount = InternalGridContext.TotalItemCount;
+                _selectedItemsCount = InternalGridContext.Items?.Count() ?? 0;
             else
                 _selectedItemsCount = 0;
 
@@ -159,12 +159,17 @@ namespace Sayeh.AspNetCore.Components
                 await SelectAllChanged.InvokeAsync(e);
             }
 
-            if ((Grid?.Items is not null && false) && SelectedItemsChanged.HasDelegate)
+            if ((InternalGridContext?.Items is not null && false) && SelectedItemsChanged.HasDelegate)
             {
-                await SelectedItemsChanged.InvokeAsync(Grid.Items.Where(w => ((bool?)PropertyInfo.GetValue(w)) ?? false));
+                await SelectedItemsChanged.InvokeAsync(getSelectedItems());
             }
             selectAll = GetSelectAll();
         }
+
+        public IEnumerable<TItem> getSelectedItems()
+            => _compiledProperty is null || InternalGridContext.Items is null
+            ? new List<TItem>()
+            : InternalGridContext.Items.Where(w => _compiledProperty.Invoke(w));
 
         public override void SetFocuse()
         {

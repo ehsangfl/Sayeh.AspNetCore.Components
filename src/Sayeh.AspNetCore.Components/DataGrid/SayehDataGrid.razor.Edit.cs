@@ -64,7 +64,7 @@ partial class SayehDataGrid<TItem>
     /// raised when user pressed Delete button on keboard
     /// </summary>
     [Parameter]
-    public EventCallback<TItem> RowDelete { get; set; }
+    public EventCallback<IEnumerable<TItem>> RowsDelete { get; set; }
 
     #endregion
 
@@ -157,14 +157,25 @@ partial class SayehDataGrid<TItem>
 
     private void raiseRowDelete()
     {
-        if (SelectedItem is null)
-            return;
-        OnRowDelete(SelectedItem);
-        if (RowDelete.HasDelegate)
-            RowDelete.InvokeAsync(SelectedItem);
+        if (RowsDelete.HasDelegate)
+        {
+            IEnumerable<TItem> selectedItems = new List<TItem>();
+
+            if (_internalGridContext.SelectColumn is not null)
+                selectedItems = _internalGridContext.SelectColumn.getSelectedItems();
+
+            if (selectedItems.None() && SelectedItem is not null)
+                selectedItems = new List<TItem>() { SelectedItem };
+            if (selectedItems.Any())
+            {
+                OnRowsDelete(selectedItems);
+                RowsDelete.InvokeAsync(selectedItems);
+            }
+        }
+
     }
 
-    protected virtual void OnRowDelete(TItem Item)
+    protected virtual void OnRowsDelete(IEnumerable<TItem> Item)
     {
 
     }

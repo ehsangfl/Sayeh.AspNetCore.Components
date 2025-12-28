@@ -11,7 +11,10 @@
     }
     @if (!_manualGrid)
     {
-        <RowHeaderColumn TItem="TItem" @ref=_rowHeader Width="1.5rem"/>
+        if (ShowRowHeaders)
+        {
+            <RowHeaderColumn TItem="TItem" @ref=_rowHeader />
+        }
         @ChildContent
     }
     <Defer>
@@ -24,7 +27,7 @@
                generate-header="none"
                class="@GridClass()"
                style="@StyleValue"
-               aria-rowcount="@(_ariaBodyRowCount + 1)"
+               aria-rowcount="@(_internalGridContext.TotalItemCount + 1)"
                @onclosecolumnoptions="CloseColumnOptions"
                @attributes="AdditionalAttributes"
                @onkeydown=OnKeyPress>
@@ -49,7 +52,7 @@
                     {
                         @if (Virtualize)
                         {
-                            if (_ariaBodyRowCount == 0)
+                            if (_internalGridContext.TotalItemCount == 0)
                             {
                                 @_renderEmptyContent
                             }
@@ -89,10 +92,10 @@
     {
         var initialRowIndex = (GenerateHeader != GenerateHeaderOption.None) ? 2 : 1; // aria-rowindex is 1-based, plus 1 if there is a header
         var rowIndex = initialRowIndex;
-        if (_internalItemsSource is not null && _internalItemsSource.Any())
+        if (_internalGridContext.Items is not null)
         {
             Loading = false;
-            foreach (var item in _internalItemsSource)
+            foreach (var item in _internalGridContext.Items)
             {
                 RenderRow(__builder, rowIndex++, item);
             }
@@ -138,7 +141,7 @@
     private void RenderColumnHeaders(RenderTreeBuilder __builder)
     {
         var firstColStyle = $"grid-column: 1; height: 32px; min-height: 44px; z-index: {_columns.Count + 2};width:20px";
-        @for (var colIndex = 0; colIndex < _columns.Count ; colIndex++)
+        @for (var colIndex = 0; colIndex < _columns.Count; colIndex++)
         {
             var col = _columns[colIndex];
 
@@ -152,12 +155,26 @@
                 @col.HeaderContent
                 @if (col == _displayOptionsForColumn)
                 {
-                    <div class="col-options">@col.ColumnOptions</div>
+                    <div class="col-options">
+                        <FluentStack Orientation="Orientation.Vertical">
+
+                            <ColumnResizeOptions Column="@colIndex" ResizeType=@DataGridResizeType.Exact TGridItem="TItem" />
+                            @if (@col.ColumnOptions is not null)
+                            {
+                                <FluentDivider Role="DividerRole.Separator" Style="width: 100%;" />
+                            }
+
+                            @col.ColumnOptions
+                        </FluentStack>
+                    </div>
                 }
+
                 @if (ResizableColumns)
                 {
-                    <FluentDivider Class="resize-handle" Orientation="Orientation.Vertical" Role="DividerRole.Separator" />
+                    var top = DisplayMode == DataGridDisplayMode.Table ? "top: 4px;" : "top: 2px;";
+                    <div class="resize-handle" style="@top"></div>
                 }
+
             </SayehDataGridCell>
         }
     }
