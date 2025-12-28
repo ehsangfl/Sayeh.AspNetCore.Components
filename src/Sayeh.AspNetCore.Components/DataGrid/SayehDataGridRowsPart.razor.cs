@@ -13,6 +13,6 @@ partial class SayehDataGridRowsPart
     public RenderFragment ChildContent { get; set; } = default!;
 
     public void ReRender() {
-        //InvokeAsync(StateHasChanged);
+        InvokeAsync(StateHasChanged);
     }
 }

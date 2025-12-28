@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.FluentUI.AspNetCore.Components.DataGrid.Infrastructure;
 using Microsoft.FluentUI.AspNetCore.Components.Utilities;
 using Microsoft.JSInterop;
 using Sayeh.AspNetCore.Components.DataGrid.Infrastructure;
@@ -12,6 +13,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using static Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size20;
 using static Microsoft.FluentUI.AspNetCore.Components.Icons.Light.Size32;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Sayeh.AspNetCore.Components
 {
@@ -31,10 +33,9 @@ namespace Sayeh.AspNetCore.Components
         [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
         [Inject] private IKeyCodeService KeyCodeService { get; set; } = default!;
 
-        internal IEnumerable<TItem>? _internalItemsSource;
         private ElementReference? _gridReference;
         private Virtualize<(int, TItem)>? _virtualizeComponent;
-        private int _ariaBodyRowCount;
+        private AsyncServiceScope? _scope;
 
         // We cascade the InternalGridContext to descendants, which in turn call it to add themselves to _columns
         // This happens on every render so that the column list can be updated dynamically
@@ -44,6 +45,7 @@ namespace Sayeh.AspNetCore.Components
 
         // Tracking state for options and sorting
         private SayehColumnBase<TItem>? _displayOptionsForColumn;
+        private SayehColumnBase<TItem>? _displayResizeForColumn;
         private List<SayehColumnBase<TItem>> _sortableColumns;
         private List<SayehColumnBase<TItem>> _filterableColumns;
 
@@ -51,8 +53,8 @@ namespace Sayeh.AspNetCore.Components
         //for single column sort or no sort, we dont display sort order part.we can achieve this on each column, but this can be caused a performance issue
         internal bool multiColumnSorted;
 
-        //private bool _sortByAscending;
         private bool _checkColumnOptionsPosition;
+        private bool _checkColumnResizePosition;
         private bool _manualGrid;
 
         // The associated ES6 module, which uses document-level event listeners
@@ -73,8 +75,9 @@ namespace Sayeh.AspNetCore.Components
         // We only re-query when the developer calls RefreshDataAsync, or if we know something's changed, such
         // as sort order, the pagination state, or the data source itself. These fields help us detect when
         // things have changed, and to discard earlier load attempts that were superseded.
-        private int? _lastRefreshedPaginationStateHash;
-        private object? _lastAssignedItemsOrProvider;
+        private PaginationState? _lastRefreshedPaginationState;
+        private IEnumerable<TItem>? _lastAssignedItems;
+        private GridItemsProvider<TItem>? _lastAssignedItemsProvider;
         private CancellationTokenSource? _pendingDataLoadCancellationTokenSource;
 
         // If the PaginationState mutates, it raises this event. We use it to trigger a re-render.
@@ -88,6 +91,12 @@ namespace Sayeh.AspNetCore.Components
         SayehDataGridRowsPart? RowsPart;
         bool _showRowHeaders;
         RowHeaderColumn<TItem> _rowHeader;
+        /// <summary>
+        /// Gets or sets a value indicating whether the grid's dataset is not expected to change during its lifetime.
+        /// When set to true, reduces automatic refresh checks for better performance with static datasets.
+        /// Default is false to maintain backward compatibility.
+        /// </summary>
+        bool _isFixed { get; set; }
 
         #endregion
 
@@ -279,8 +288,13 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public bool AutoFit { get; set; }
 
+        /// <summary>
+        /// Show or hide the RowHeaders column
+        /// Row headers is a additional column with display the row state
+        /// </summary>
         [Parameter]
         public bool ShowRowHeaders { get; set; } = true;
+
 
         #endregion
 
@@ -354,18 +368,26 @@ namespace Sayeh.AspNetCore.Components
                 {
                     _oldItems = Items;
                     Items.As<INotifyCollectionChanged>().CollectionChanged += OnItemsChanged;
+                    _isFixed = false;
                 }
+                else
+                    _isFixed = true;
             }
-            if (_oldItems != Items)
-                _lastAssignedItemsOrProvider = null;
-
-            var _newItemsOrItemsProvider = Items ?? (object?)ItemsProvider;
-            var dataSourceHasChanged = _newItemsOrItemsProvider != _lastAssignedItemsOrProvider;
+            // Perform a re-query only if the data source or something else has changed
+            var dataSourceHasChanged = !Equals(ItemsProvider, _lastAssignedItemsProvider) || !ReferenceEquals(Items, _lastAssignedItems);
             if (dataSourceHasChanged)
-                _lastAssignedItemsOrProvider = _newItemsOrItemsProvider;
+            {
+                _scope?.Dispose();
+                _scope = ScopeFactory.CreateAsyncScope();
+                _lastAssignedItemsProvider = ItemsProvider;
+                _lastAssignedItems = Items;
+            }
 
-            var mustRefreshData = dataSourceHasChanged
-           || (Pagination?.GetHashCode() != _lastRefreshedPaginationStateHash);
+            var paginationStateHasChanged =
+                Pagination?.ItemsPerPage != _lastRefreshedPaginationState?.ItemsPerPage
+                || Pagination?.CurrentPageIndex != _lastRefreshedPaginationState?.CurrentPageIndex;
+
+            var mustRefreshData = dataSourceHasChanged || paginationStateHasChanged ;
 
             // We don't want to trigger the first data load until we've collected the initial set of columns,
             // because they might perform some action like setting the default sort order, so it would be wasteful
@@ -394,6 +416,16 @@ namespace Sayeh.AspNetCore.Components
             {
                 _checkColumnOptionsPosition = false;
                 _ = Module?.InvokeVoidAsync("checkColumnOptionsPosition", _gridReference, ".col-options").AsTask();
+            }
+            if (_checkColumnResizePosition && _displayResizeForColumn is not null)
+            {
+                _checkColumnResizePosition = false;
+                _ = Module?.InvokeVoidAsync("checkColumnPopupPosition", _gridReference, ".col-resize").AsTask();
+            }
+
+            if (AutoFit && _gridReference is not null)
+            {
+                _ = Module?.InvokeVoidAsync("autoFitGridColumns", _gridReference, _columns.Count).AsTask();
             }
         }
 
@@ -478,6 +510,8 @@ namespace Sayeh.AspNetCore.Components
             }
         }
 
+        #region Column Optopns
+
         /// <summary>
         /// Displays the <see cref="ColumnBase{TGridItem}.ColumnOptions"/> UI for the specified column, closing any other column
         /// options UI that was previously displayed.
@@ -491,10 +525,88 @@ namespace Sayeh.AspNetCore.Components
             _checkColumnOptionsPosition = true; // Triggers a call to JSRuntime to position the options element, apply autofocus, and any other setup
             return Task.FromResult(true);
         }
+
+        /// <summary>
+        /// Displays the <see cref="ColumnBase{TGridItem}.ColumnOptions"/> UI for the specified column <paramref name="title"/> found first,
+        /// closing any other column options UI that was previously displayed. If the title is not found, nothing happens.
+        /// </summary>
+        /// <param name="title">The column title whose options UI is to be displayed.</param>
+        /// <returns>A <see cref="Task"/> representing the completion of the operation.</returns>
+        public Task ShowColumnOptionsAsync(string title)
+        {
+            var column = _columns.FirstOrDefault(c => c.Title?.Equals(title, StringComparison.InvariantCultureIgnoreCase) ?? false);
+            return (column is not null) ? ShowColumnOptionsAsync(column) : Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Displays the <see cref="ColumnBase{TGridItem}.ColumnOptions"/> UI for the specified column <paramref name="index"/>,
+        /// closing any other column options UI that was previously displayed. If the index is out of range, nothing happens.
+        /// </summary>
+        /// <param name="index">The column index whose options UI is to be displayed.</param>
+        /// <returns>A <see cref="Task"/> representing the completion of the operation.</returns>
+        public Task ShowColumnOptionsAsync(int index)
+        {
+            return (index >= 0 && index < _columns.Count) ? ShowColumnOptionsAsync(_columns[index]) : Task.CompletedTask;
+        }
+
+        internal void CloseColumnOptions()
+        {
+            if (_displayOptionsForColumn is not null)
+            {
+                _displayOptionsForColumn.CloseFilter();
+                _displayOptionsForColumn = null;
+            }
+        }
+
+        #endregion
+
+        #region Column Resize
+
+        /// <summary>
+        /// Displays the column resize UI for the specified column, closing any other column
+        /// resize UI that was previously displayed.
+        /// </summary>
+        /// <param name="column">The column whose resize UI is to be displayed.</param>
+        /// <returns>A <see cref="Task"/> representing the completion of the operation.</returns>
+        public Task ShowColumnResizeAsync(SayehColumnBase<TItem> column)
+        {
+            _displayResizeForColumn = column;
+            _checkColumnResizePosition = true; // Triggers a call to JSRuntime to position the options element, apply autofocus, and any other setup
+            StateHasChanged();
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Displays the column resize UI for the specified column, closing any other column
+        /// resize UI that was previously displayed.
+        /// </summary>
+        /// <param name="title">The column title whose resize UI is to be displayed.</param>
+        /// <returns>A <see cref="Task"/> representing the completion of the operation.</returns>
+        public Task ShowColumnResizeAsync(string title)
+        {
+            var column = _columns.FirstOrDefault(c => c.Title?.Equals(title, StringComparison.InvariantCultureIgnoreCase) ?? false);
+            return (column is not null) ? ShowColumnResizeAsync(column) : Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Displays the column resize UI for the specified column, closing any other column
+        /// resize UI that was previously displayed.
+        /// </summary>
+        /// <param name="index">The column index whose resize UI is to be displayed.</param>
+        /// <returns>A <see cref="Task"/> representing the completion of the operation.</returns>
+        public Task ShowColumnResizeAsync(int index)
+        {
+            return (index >= 0 && index < _columns.Count) ? ShowColumnResizeAsync(_columns[index]) : Task.CompletedTask;
+        }
+
+        #endregion
+
         public void SetLoadingState(bool loading)
         {
             Loading = loading;
         }
+
+        #region Data source
 
         /// <summary>
         /// Instructs the grid to re-fetch and render the current data from the supplied data source
@@ -521,30 +633,27 @@ namespace Sayeh.AspNetCore.Components
                 await _virtualizeComponent.RefreshDataAsync();
                 _pendingDataLoadCancellationTokenSource = null;
             }
-            else
+
+            // If we're not using Virtualize, we build and execute a request against the items provider directly
+            var startIndex = Pagination is null ? 0 : (Pagination.CurrentPageIndex * Pagination.ItemsPerPage);
+            GridItemsProviderRequest<TItem> request = new (startIndex, Pagination?.ItemsPerPage, _sortableColumns, _filterableColumns, thisLoadCts.Token);
+            _lastRefreshedPaginationState = Pagination;
+            var result = await ResolveItemsRequestAsync(request);
+            if (!thisLoadCts.IsCancellationRequested)
             {
-                // If we're not using Virtualize, we build and execute a request against the items provider directly
-                _lastRefreshedPaginationStateHash = Pagination?.GetHashCode();
-                var startIndex = Pagination is null ? 0 : (Pagination.CurrentPageIndex * Pagination.ItemsPerPage);
-                var request = new GridItemsProviderRequest<TItem>(startIndex, Pagination?.ItemsPerPage, _sortableColumns, _filterableColumns, thisLoadCts.Token);
-                var result = await ResolveItemsRequestAsync(request);
-                if (!thisLoadCts.IsCancellationRequested)
-                {
-                    _internalItemsSource = result.Items;
-                    _ariaBodyRowCount = _internalItemsSource.Count();
-                    _internalGridContext.TotalItemCount = _ariaBodyRowCount;
-                    Pagination?.SetTotalItemCountAsync(result.TotalItemCount);
-                    _pendingDataLoadCancellationTokenSource = null;
-                }
-                _internalGridContext.ResetRowIndexes(startIndex);
+                _internalGridContext.Items = result.Items;
+                _internalGridContext.TotalItemCount = result.TotalItemCount;
+                Pagination?.SetTotalItemCountAsync(_internalGridContext.TotalItemCount);
+                _pendingDataLoadCancellationTokenSource = null;
             }
-            //StateHasChanged();
-            RowsPart?.ReRender();
+            _internalGridContext.ResetRowIndexes(startIndex);
+            //await InvokeAsync(StateHasChanged);
+            //RowsPart?.ReRender();
         }
 
         async ValueTask<ItemsProviderResult<(int, TItem)>> ProvideVirtualizedItemsAsync(ItemsProviderRequest request)
         {
-            _lastRefreshedPaginationStateHash = Pagination?.GetHashCode();
+            _lastRefreshedPaginationState = Pagination;
             await Task.Delay(100);
             if (request.CancellationToken.IsCancellationRequested)
             {
@@ -570,16 +679,22 @@ namespace Sayeh.AspNetCore.Components
                     // the current viewport. In the case where you're also paginating then it means what's conceptually on the current page.
                     // TODO: This currently assumes we always want to expand the last page to have ItemsPerPage rows, but the experience might
                     //       be better if we let the last page only be as big as its number of actual rows.
-                    _ariaBodyRowCount = Pagination is null ? providerResult.TotalItemCount : Pagination.ItemsPerPage;
-                    _internalGridContext.TotalItemCount = _ariaBodyRowCount;
+                    _internalGridContext.TotalItemCount = providerResult.TotalItemCount;
+                    _internalGridContext.TotalViewItemCount = Pagination?.ItemsPerPage ?? providerResult.TotalItemCount;
                     Pagination?.SetTotalItemCountAsync(providerResult.TotalItemCount);
+
+                    if ((_internalGridContext.TotalItemCount > 0 && Loading != false))
+                    {
+                        Loading = false;
+                        //this.RowsPart?.ReRender();
+                    }
 
                     // We're supplying the row _index along with each row's data because we need it for aria-rowindex, and we have to account for
                     // the virtualized start _index. It might be more performant just to have some _latestQueryRowStartIndex field, but we'd have
                     // to make sure it doesn't get out of sync with the rows being rendered.
                     return new ItemsProviderResult<(int, TItem)>(
                          items: providerResult.Items.Select((x, i) => ValueTuple.Create(i + request.StartIndex + 2, x)),
-                         totalItemCount: _ariaBodyRowCount);
+                         totalItemCount: _internalGridContext.TotalViewItemCount);
 
                 }
             }
@@ -601,23 +716,18 @@ namespace Sayeh.AspNetCore.Components
             else if (Items is not null)
             {
                 var totalItemCount = Items.Count();
-                _ariaBodyRowCount = totalItemCount;
                 _internalGridContext.TotalItemCount = totalItemCount;
                 var result = request.ApplyFilterAndSorting(Items)?.Skip(request.StartIndex);
-                if (result is null)
-                    return GridItemsProviderResult.From(Array.Empty<TItem>(), 0);
-                if (request.Count.HasValue)
-                {
-                    result = result.Take(request.Count.Value);
-                }
-                var resultArray = result.ToArray();
-                return GridItemsProviderResult.From(resultArray, totalItemCount);
+                return GridItemsProviderResult.From([.. result], totalItemCount);
             }
             else
             {
                 return GridItemsProviderResult.From(Array.Empty<TItem>(), 0);
             }
         }
+
+        #endregion
+
 
         /// <summary>
         /// apply sort to the specified <paramref name="column"/>.
@@ -754,15 +864,6 @@ namespace Sayeh.AspNetCore.Components
             {
                 // The JSRuntime side may routinely be gone already if the reason we're disposing is that
                 // the client disconnected. This is not an error.
-            }
-        }
-
-        internal void CloseColumnOptions()
-        {
-            if (_displayOptionsForColumn is not null)
-            {
-                _displayOptionsForColumn.CloseFilter();
-                _displayOptionsForColumn = null;
             }
         }
 

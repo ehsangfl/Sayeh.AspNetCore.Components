@@ -7,7 +7,7 @@ using Sayeh.AspNetCore.Components.DataGrid.Infrastructure;
 
 namespace Sayeh.AspNetCore.Components;
 
-public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem : class
+public partial class SayehDataGridCell<TItem> : FluentComponentBase, IDisposable where TItem : class
 {
 
     #region Fields
@@ -99,7 +99,7 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase where TItem 
         .AddStyle("padding-top", "calc(var(--design-unit) * 1.5px)", Column is SelectColumn<TItem> && Grid.RowSize == DataGridRowSize.Small && Owner.RowType == DataGridRowType.Default)
         .AddStyle("width", Column?.Width, !string.IsNullOrEmpty(Column?.Width) && Grid.DisplayMode == DataGridDisplayMode.Table)
         .AddStyle("height", $"{Grid.ItemSize:0}px", () => Grid.Virtualize && Owner.RowType == DataGridRowType.Default)
-       .AddStyle("height", $"{(int)Grid.RowSize}px", () => !Grid.EffectiveLoadingValue && !Grid.Virtualize && !Grid.MultiLine && (Grid.Items is not null || Grid.ItemsProvider is not null) && GridContext.TotalItemCount > 0)
+        .AddStyle("height", $"{(int)Grid.RowSize}px", () => !Grid.Virtualize && !Grid.MultiLine && (Grid.Items is not null || Grid.ItemsProvider is not null) && GridContext.TotalItemCount > 0)
         .AddStyle("height", "100%", Grid.MultiLine)
         .AddStyle("min-height", "44px", Owner.RowType != DataGridRowType.Default)
         .AddStyle("display", "flex", ShouldHaveDisplayFlex())

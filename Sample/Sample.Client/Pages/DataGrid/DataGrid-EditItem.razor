@@ -1,4 +1,5 @@
 ﻿@page "/datagrid-edit"
+@using System.Collections.ObjectModel
 <h3>DataGrid</h3>
 @if (weatherForeacasts is null)
 {
@@ -29,7 +30,7 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            weatherForeacasts = WeatherForeacast.GenerateItems();
+            weatherForeacasts =  new ObservableCollection<WeatherForeacast>(WeatherForeacast.GenerateItems());
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);

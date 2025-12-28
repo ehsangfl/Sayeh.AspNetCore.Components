@@ -15,6 +15,7 @@ internal sealed class InternalGridContext<TItem> where TItem : class
     public Dictionary<string, SayehDataGridRow<TItem>> Rows { get; set; } = [];
     public int TotalItemCount { get; set; }
     public int TotalViewItemCount { get; set; }
+    public IEnumerable<TItem> Items { get; set; }
 
     public SayehDataGrid<TItem> Grid { get; }
     public EventCallbackSubscribable<object?> ColumnsFirstCollected { get; } = new();

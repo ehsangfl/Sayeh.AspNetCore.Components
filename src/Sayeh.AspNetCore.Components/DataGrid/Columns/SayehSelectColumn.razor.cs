@@ -150,7 +150,7 @@ namespace Sayeh.AspNetCore.Components
                 InternalGridContext.ApplySelectedItems(e == true);
 
             if (e == true)
-                _selectedItemsCount = Grid._internalItemsSource?.Count() ?? 0;
+                _selectedItemsCount = InternalGridContext.Items?.Count() ?? 0;
             else
                 _selectedItemsCount = 0;
 
@@ -159,7 +159,7 @@ namespace Sayeh.AspNetCore.Components
                 await SelectAllChanged.InvokeAsync(e);
             }
 
-            if ((Grid?._internalItemsSource is not null && false) && SelectedItemsChanged.HasDelegate)
+            if ((InternalGridContext?.Items is not null && false) && SelectedItemsChanged.HasDelegate)
             {
                 await SelectedItemsChanged.InvokeAsync(getSelectedItems());
             }
@@ -167,9 +167,9 @@ namespace Sayeh.AspNetCore.Components
         }
 
         public IEnumerable<TItem> getSelectedItems()
-            => _compiledProperty is null || Grid._internalItemsSource is null
+            => _compiledProperty is null || InternalGridContext.Items is null
             ? new List<TItem>()
-            : Grid._internalItemsSource.Where(w => _compiledProperty.Invoke(w));
+            : InternalGridContext.Items.Where(w => _compiledProperty.Invoke(w));
 
         public override void SetFocuse()
         {

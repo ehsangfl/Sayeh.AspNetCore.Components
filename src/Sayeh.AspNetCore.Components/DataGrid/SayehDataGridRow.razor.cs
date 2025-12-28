@@ -142,10 +142,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     }
 
     internal void Unregister(SayehDataGridCell<TItem> cell)
-    {
-        cells.Remove(cell.CellId!);
-        cell.Dispose();
-    }
+        => cells.Remove(cell.CellId!);
 
     internal async Task HandleOnRowFocusAsync()
     {
@@ -199,13 +196,6 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
             BeginEdit();
     }
 
-    private static string? ColumnClass(SayehColumnBase<TItem> column) => column.Align switch
-    {
-        Align.Center => $"col-justify-center {column.Class}",
-        Align.End => $"col-justify-end {column.Class}",
-        _ => column.Class,
-    };
-
     private static string? ColumnJustifyClass(SayehColumnBase<TItem> column)
     {
         return new CssBuilder(column.Class)
@@ -218,7 +208,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     internal void ReRenderHeaderRow()
     {
         if (ShowRowHeaders)
-            cells.First().Value.RaiseStateHasChanged();
+            cells.FirstOrDefault().Value?.RaiseStateHasChanged();
     }
 
     /// <summary />
