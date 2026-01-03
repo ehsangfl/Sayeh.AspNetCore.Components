@@ -76,6 +76,16 @@
     width: 6px;
     border-inline-end: var(--fluent-data-grid-resize-handle-width) solid var(--fluent-data-grid-resize-handle-color);
     opacity: var(--fluent-data-grid-header-opacity);
+    display:none;
+}
+
+::deep .resize-handle:hover {
+    display:block;
+}
+
+[dir=rtl] * ::deep .resize-handle {
+    right: unset;
+    left: 0;
 }
 
 .header {

@@ -295,6 +295,11 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public bool ShowRowHeaders { get; set; } = true;
 
+        /// <summary>
+        /// (Aria) Labels used in the column resize UI.
+        /// </summary>
+        [Parameter]
+        public ColumnResizeLabels ColumnResizeLabels { get; set; } = ColumnResizeLabels.Default;
 
         #endregion
 
@@ -728,6 +733,38 @@ namespace Sayeh.AspNetCore.Components
 
         #endregion
 
+        #region Column Resize
+
+        /// <summary>
+        /// Resizes the column width by a discrete amount.
+        /// </summary>
+        /// <param name="columnIndex">The column to be resized</param>
+        /// <param name="widthChange">The amount of pixels to change width with</param>
+        /// <returns></returns>
+        public async Task SetColumnWidthDiscreteAsync(int? columnIndex, float widthChange)
+        {
+            if (_gridReference is not null && Module is not null)
+            {
+                await Module.InvokeVoidAsync("resizeColumnDiscrete", _gridReference, columnIndex, widthChange);
+            }
+        }
+
+        /// <summary>
+        /// Resizes the column width to the exact width specified (in pixels).
+        /// </summary>
+        /// <param name="columnIndex">The column to be resized</param>
+        /// <param name="width">The new width in pixels</param>
+        /// <returns></returns>
+        public async Task SetColumnWidthExactAsync(int columnIndex, int width)
+        {
+            if (_gridReference is not null && Module is not null)
+            {
+                await Module.InvokeVoidAsync("resizeColumnExact", _gridReference, columnIndex, width);
+            }
+        }
+
+        #endregion
+
 
         /// <summary>
         /// apply sort to the specified <paramref name="column"/>.
@@ -928,7 +965,7 @@ namespace Sayeh.AspNetCore.Components
             }
         }
 
-        private async Task ResetColumnWidthsAsync()
+        internal async Task ResetColumnWidthsAsync()
         {
             if (_gridReference is not null && Module is not null)
             {

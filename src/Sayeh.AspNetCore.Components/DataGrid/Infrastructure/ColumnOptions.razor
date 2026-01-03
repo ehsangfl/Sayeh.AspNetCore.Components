@@ -9,66 +9,65 @@
 @if (OwnerColumn is not null)
 {
     getPropertyType();
-    <div>
-        <FluentButton Appearance=@(hasFilter ? Appearance.Stealth : Appearance.Neutral) aria-haspopup="true" OnClick="@openPopupClicked">
-            <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Filter())" />
-        </FluentButton>
-        @if (dropDownIsOpen)
-        {
-            <div class="col-options">
-                @if (IsSortable)
-                {
-                    <FluentAnchor Appearance="Appearance.Hypertext" OnClick=ApplySort Href="#">
-                        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSortUp())" />
-                        @Resources.Ascending
-                    </FluentAnchor>
+    <FluentButton Appearance=@(hasFilter? Appearance.Neutral: Appearance.Stealth) aria-haspopup="true" OnClick="@openPopupClicked">
+        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Filter())" />
+    </FluentButton>
+    @if (dropDownIsOpen)
+    {
+        <div class="col-options">
+            @if (IsSortable)
+            {
+                <FluentAnchor Appearance="Appearance.Hypertext" OnClick=ApplySort Href="#">
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSortUp())" />
+                    @Resources.Ascending
+                </FluentAnchor>
 
-                    <FluentAnchor Appearance="Appearance.Hypertext" OnClick=ApplySortDescending Href="#">
-                        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSortDown())" />
-                        @Resources.Descending
-                    </FluentAnchor>
+                <FluentAnchor Appearance="Appearance.Hypertext" OnClick=ApplySortDescending Href="#">
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSortDown())" />
+                    @Resources.Descending
+                </FluentAnchor>
 
-                    <FluentAnchor Appearance="Appearance.Hypertext" OnClick=RemoveSort Href="#">
-                        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSort())" />
-                        @Resources.RemoveSort
-                    </FluentAnchor>
+                <FluentAnchor Appearance="Appearance.Hypertext" OnClick=RemoveSort Href="#">
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowSort())" />
+                    @Resources.RemoveSort
+                </FluentAnchor>
 
-                    <FluentAnchor Appearance="Appearance.Hypertext" OnClick=RemoveFilter Href="#">
-                        <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Filter())" />
-                        @Resources.RemoveFilter
-                    </FluentAnchor>
-                }
-                @if (propertyType == typeof(string))
-                {
-                    <div class="search-box">
-                        <FluentSearch type="search" Autofocus=true @bind-Value=TextFilter @onchange="OnTextFilterSetted" />
-                    </div>
-                }
-                else if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
-                {
-                    <DateRangePicker FromDate=FromDate ToDate=ToDate RangeSelected=DateRangeSelected></DateRangePicker>
-                }
-                else if (propertyType == typeof(int) || propertyType == typeof(short) || propertyType == typeof(decimal) || propertyType == typeof(double)
-                || propertyType == typeof(Single) || propertyType == typeof(int?) || propertyType == typeof(short?) || propertyType == typeof(decimal?) || propertyType == typeof(double?)
-                || propertyType == typeof(Single?))
-                {
-                    <NumberRangePicker FromNumber=FromNumber ToNumber=ToNumber RangeSelected="NumberRangeSelected" />
-                }
-                else if (propertyType == typeof(bool))
-                {
-                    <FluentListbox TOption="bool" ValueChanged=@OnBoolSelectedChanged Value="Bool">
-                        <FluentOption Value="true">True</FluentOption>
-                        <FluentOption Value="false">False</FluentOption>
-                    </FluentListbox>
-                }
-                else if (propertyType.IsClass)
-                {
-                    prepaireDistictList();
-                    <FluentListbox TOption="TValue" SelectedOption=SelectedItem SelectedOptionChanged="OnSelectedItemChanged"
-                                   Items="DistinctList" OptionValue="s=> s.ToString()" OptionText="s=> s.ToString()">
-                    </FluentListbox>
-                }
-            </div>
-        }
-    </div>
+                <FluentAnchor Appearance="Appearance.Hypertext" OnClick=RemoveFilter Href="#">
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Filter())" />
+                    @Resources.RemoveFilter
+                </FluentAnchor>
+            }
+            @if (propertyType == typeof(string))
+            {
+                <div class="search-box">
+                    <FluentSearch type="search" Autofocus=true @bind-Value=TextFilter @onchange="OnTextFilterSetted" />
+                </div>
+            }
+            else if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
+            {
+                <DateRangePicker FromDate=FromDate ToDate=ToDate RangeSelected=DateRangeSelected></DateRangePicker>
+            }
+            else if (propertyType == typeof(int) || propertyType == typeof(short) || propertyType == typeof(decimal) || propertyType == typeof(double)
+            || propertyType == typeof(Single) || propertyType == typeof(int?) || propertyType == typeof(short?) || propertyType == typeof(decimal?) || propertyType == typeof(double?)
+            || propertyType == typeof(Single?))
+            {
+                <NumberRangePicker FromNumber=FromNumber ToNumber=ToNumber RangeSelected="NumberRangeSelected" />
+            }
+            else if (propertyType == typeof(bool))
+            {
+                <FluentListbox TOption="bool" ValueChanged=@OnBoolSelectedChanged Value="Bool">
+                    <FluentOption Value="true">True</FluentOption>
+                    <FluentOption Value="false">False</FluentOption>
+                </FluentListbox>
+            }
+            else if (propertyType.IsClass)
+            {
+                prepaireDistictList();
+                <FluentListbox TOption="TValue" SelectedOption=SelectedItem SelectedOptionChanged="OnSelectedItemChanged"
+                               Items="DistinctList" OptionValue="s=> s.ToString()" OptionText="s=> s.ToString()">
+                </FluentListbox>
+            }
+        </div>
+    }
+
 }
