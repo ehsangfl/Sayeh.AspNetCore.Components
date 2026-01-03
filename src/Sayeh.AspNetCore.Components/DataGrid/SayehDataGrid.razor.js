@@ -176,6 +176,7 @@ export function checkColumnPopupPosition(gridElement, selector) {
 export function enableColumnResizing(gridElement, resizeColumnOnAllRows = true) {
     const columns = [];
     const headers = gridElement.querySelectorAll('.column-header.resizable');
+    const hasHeaderRow = gridElement.querySelectorAll('.column-header.row-header')[0] != null;
 
     if (headers.length === 0) {
         return;
@@ -218,7 +219,7 @@ export function enableColumnResizing(gridElement, resizeColumnOnAllRows = true) 
         const div = createDiv(resizeHandleHeight, isRTL);
         header.appendChild(div);
         header.style.position = 'relative';
-        setListeners(div, isRTL);
+        setListeners(div, isRTL, hasHeaderRow);
     });
 
     let initialWidths;
@@ -237,11 +238,11 @@ export function enableColumnResizing(gridElement, resizeColumnOnAllRows = true) 
         grids.push({
             id,
             columns,
-            initialWidths,
+            initialWidths
         });
     }
 
-    function setListeners(div, isRTL) {
+    function setListeners(div, isRTL,hasHeaderRow) {
         let pageX, curCol, curColWidth;
 
         div.addEventListener('pointerdown', function (e) {
@@ -279,8 +280,9 @@ export function enableColumnResizing(gridElement, resizeColumnOnAllRows = true) 
                         }
                     });
 
+                    const templatePrefix = hasHeaderRow ? "1.5rem " : "";
                     if (isGrid) {
-                        gridElement.style.gridTemplateColumns = columns
+                        gridElement.style.gridTemplateColumns = templatePrefix + columns
                             .map(({ size }) => size)
                             .join(' ');
                     }

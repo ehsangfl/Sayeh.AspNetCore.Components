@@ -9,7 +9,7 @@ partial class RowHeaderColumn<TItem> : SayehColumnBase<TItem>, IEditableColumn<T
     {
         Class = "row-header";
         Width = "1.5rem";
-        Width = "1.5rem";
+        MinWidth = "1.5rem";
     }
 
     public bool IsReadonly { get => true; set { } }
