@@ -158,7 +158,7 @@
                     <div class="col-options">
                         <FluentStack Orientation="Orientation.Vertical">
 
-                            <ColumnResizeOptions Column="@colIndex" ResizeType=@DataGridResizeType.Exact TGridItem="TItem" />
+                            <SayehColumnResizeOptions Column="@colIndex" ResizeType=@DataGridResizeType.Exact TItem="TItem" />
                             @if (@col.ColumnOptions is not null)
                             {
                                 <FluentDivider Role="DividerRole.Separator" Style="width: 100%;" />

@@ -267,7 +267,8 @@ export function enableColumnResizing(gridElement, resizeColumnOnAllRows = true) 
                 gridElement.style.tableLayout = 'fixed';
 
                 if (curCol) {
-                    const diffX = isRTL ? pageX - e.pageX : e.pageX - pageX;
+                    const rawDiffX = e.pageX - pageX;
+                    const diffX = isRTL ? -rawDiffX : rawDiffX;
                     const column = columns.find(({ header }) => header === curCol);
 
                     column.size = parseInt(Math.max(parseInt(column.header.style.minWidth), curColWidth + diffX), 10) + 'px';
