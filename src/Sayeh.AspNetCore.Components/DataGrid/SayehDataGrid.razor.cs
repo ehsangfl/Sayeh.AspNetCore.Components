@@ -650,6 +650,7 @@ namespace Sayeh.AspNetCore.Components
                 _internalGridContext.TotalItemCount = result.TotalItemCount;
                 Pagination?.SetTotalItemCountAsync(_internalGridContext.TotalItemCount);
                 _pendingDataLoadCancellationTokenSource = null;
+                RowsPart?.ReRender();
             }
             _internalGridContext.ResetRowIndexes(startIndex);
             //await InvokeAsync(StateHasChanged);
