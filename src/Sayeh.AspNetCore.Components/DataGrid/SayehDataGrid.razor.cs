@@ -149,7 +149,7 @@ namespace Sayeh.AspNetCore.Components
         /// each row, allowing the virtualization mechanism to fetch the correct number of items to match the display
         /// size and to ensure accurate scrolling.
         /// </summary>
-        [Parameter] public float ItemSize { get; set; } = 32;
+        [Parameter] public int ItemSize { get; set; } = 32;
 
         /// <summary>
         /// If true, renders draggable handles around the column headers, allowing the user to resize the columns
@@ -489,6 +489,7 @@ namespace Sayeh.AspNetCore.Components
             if (_collectingColumns)
             {
                 _columns.Add(column);
+                column.Index = _columns.Count;
                 if (column.SortingIsEnable())
                 {
                     _sortableColumns.Add(column);
@@ -650,6 +651,7 @@ namespace Sayeh.AspNetCore.Components
                 _internalGridContext.TotalItemCount = result.TotalItemCount;
                 Pagination?.SetTotalItemCountAsync(_internalGridContext.TotalItemCount);
                 _pendingDataLoadCancellationTokenSource = null;
+                RowsPart?.ReRender();
             }
             _internalGridContext.ResetRowIndexes(startIndex);
             //await InvokeAsync(StateHasChanged);
@@ -723,12 +725,16 @@ namespace Sayeh.AspNetCore.Components
                 var totalItemCount = Items.Count();
                 _internalGridContext.TotalItemCount = totalItemCount;
                 var result = request.ApplyFilterAndSorting(Items)?.Skip(request.StartIndex);
-                return GridItemsProviderResult.From([.. result], totalItemCount);
-            }
-            else
-            {
+                if (result is not null)
+                {
+                    if (request.Count.HasValue)
+                        result = result.Take(request.Count.Value);
+                    return GridItemsProviderResult.From([.. result], totalItemCount);
+                }
                 return GridItemsProviderResult.From(Array.Empty<TItem>(), 0);
             }
+            else
+                return GridItemsProviderResult.From(Array.Empty<TItem>(), 0);
         }
 
         #endregion

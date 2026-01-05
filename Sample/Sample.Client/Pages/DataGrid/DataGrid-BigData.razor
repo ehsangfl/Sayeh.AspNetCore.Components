@@ -1,0 +1,44 @@
+﻿@page "/datagrid-bigdata"
+@using System.Collections.ObjectModel
+@inject NavigationManager nav
+<h3>DataGrid</h3>
+@if (items is null)
+{
+    <p>loading ...</p>
+}
+else
+{
+    <label>custom type</label>
+    <SayehDataGrid TItem="CustomTypeModel" Items="items" IsReadonly=true Virtualize=true >
+       <SayehPropertyColumn Property="p=> p.Order" />
+        <SayehDatePickerColumn Property="p=> p.Date" />
+        <SayehPropertyColumn TItem="CustomTypeModel" TValue="DateTime?" PropertyName="DateTimeProperty"/>
+        <SayehPropertyColumn TItem="CustomTypeModel" TValue="bool?" PropertyName="BoolProperty" />
+        <SayehPropertyColumn TItem="CustomTypeModel" TValue="WeatherForeacast?" PropertyName="NavigationProperty" />
+        <SayehPropertyColumn TItem="CustomTypeModel" TValue="int?" PropertyName="IntProperty" />
+    </SayehDataGrid>
+
+}
+@code {
+
+    private IEnumerable<CustomTypeModel>? items { get; set; }
+
+    private IEnumerable<WeatherForeacast>? weathers { get; set; }
+
+    protected override void OnInitialized()
+    {
+        weathers = WeatherForeacast.GenerateItems();
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            items = await Task.Run<IEnumerable<CustomTypeModel>>(() => CustomTypeModel.GenerateItems(weathers,100000));
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

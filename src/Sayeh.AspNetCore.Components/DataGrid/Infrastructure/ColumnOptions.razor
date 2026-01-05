@@ -63,7 +63,7 @@
             else if (propertyType.IsClass)
             {
                 prepaireDistictList();
-                <FluentListbox TOption="TValue" SelectedOption=SelectedItem SelectedOptionChanged="OnSelectedItemChanged"
+                <FluentListbox TOption="TValue" SelectedOption=SelectedItem SelectedOptionChanged="OnSelectedItemChanged" class="distinct-list"
                                Items="DistinctList" OptionValue="s=> s.ToString()" OptionText="s=> s.ToString()">
                 </FluentListbox>
             }

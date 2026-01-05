@@ -130,7 +130,7 @@ partial class ColumnOptions<TItem, TValue> : ColumnOptionsBase<TItem> where TIte
             return;
         var filterFunc = COwnerColumn.FilterProperty?.Compile();
         if (filterFunc is not null)
-            DistinctList = Owner.Grid.Items?.Select(s => filterFunc(s)).Distinct();
+            DistinctList = Owner.Items?.Select(s => filterFunc(s)).Distinct().OrderBy(x=> x?.ToString());
     }
 
     private void RemoveSort()

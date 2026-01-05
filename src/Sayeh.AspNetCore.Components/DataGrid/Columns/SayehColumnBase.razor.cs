@@ -65,6 +65,8 @@ namespace Sayeh.AspNetCore.Components
         /// </summary>
         [Parameter] public string? Title { get; set; }
 
+        public int Index { get; set; }
+
         /// <summary>
         /// An optional CSS class name. If specified, this is included in the class attribute of header and grid cells
         /// for this column.

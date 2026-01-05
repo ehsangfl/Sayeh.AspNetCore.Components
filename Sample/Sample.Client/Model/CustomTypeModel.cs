@@ -130,14 +130,14 @@ namespace Sample.Client.Model
             }
         }
 
-        public static IEnumerable<CustomTypeModel> GenerateItems(IEnumerable<WeatherForeacast> weathers) {
+        public static IEnumerable<CustomTypeModel> GenerateItems(IEnumerable<WeatherForeacast> weathers,int count = 500) {
             var result = new List<CustomTypeModel>();
             CustomTypeModel.AddProperty("BoolProperty", typeof(bool), new() { new DisplayAttribute() { Name = "Boolean property" } });
             CustomTypeModel.AddProperty("DateTimeProperty", typeof(DateTime), new() { new DisplayAttribute() { Name = "Date time property" } });
             CustomTypeModel.AddProperty("NavigationProperty", typeof(WeatherForeacast), new() { new DisplayAttribute() { Name = "Navigation property" } });
             CustomTypeModel.AddProperty("IntProperty", typeof(int), new() { new DisplayAttribute() { Name = "Integer property" } });
           
-            for (var i = 1; i < 500; i++)
+            for (var i = 1; i < count; i++)
             { 
                 var item = new CustomTypeModel() { ID = Guid.NewGuid(),Order = i, Date= DateTime.Now.AddDays(Random.Shared.Next(-500,500)) };
                 item.SetPropertyValue("BoolProperty", Random.Shared.Next(0,1) != 0);
