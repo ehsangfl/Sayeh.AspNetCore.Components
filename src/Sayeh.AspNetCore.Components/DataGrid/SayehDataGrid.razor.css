@@ -1,5 +1,5 @@
 ﻿.fluent-data-grid {
-    --fluent-data-grid-resize-handle-color: var(--accent-fill-rest);
+    --fluent-data-grid-resize-handle-color: var(--neutral-stroke-divider-rest);
     --fluent-data-grid-resize-handle-width: 1px;
     --fluent-data-grid-header-opacity: 0.5;
     width: auto;
@@ -64,7 +64,6 @@
     justify-content: center;
     align-items: center;
 }
-
 ::deep .resize-handle {
     position: absolute;
     top: 5px;
@@ -76,12 +75,11 @@
     width: 6px;
     border-inline-end: var(--fluent-data-grid-resize-handle-width) solid var(--fluent-data-grid-resize-handle-color);
     opacity: var(--fluent-data-grid-header-opacity);
-    display:none;
 }
 
-::deep .resize-handle:hover {
-    display:block;
-}
+    ::deep .resize-handle:hover {
+        --fluent-data-grid-resize-handle-color: var(--accent-fill-hover);
+    }
 
 [dir=rtl] * ::deep .resize-handle {
     right: unset;

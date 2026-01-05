@@ -90,7 +90,7 @@ public partial class SayehDataGridCell<TItem> : FluentComponentBase, IDisposable
         .Build();
 
     protected string? StyleValue => new StyleBuilder(Style)
-        .AddStyle("grid-column", Column?.ToString(), () => (Grid.Items is not null || Grid.ItemsProvider is not null) && GridContext.TotalItemCount > 0 && Grid.DisplayMode == DataGridDisplayMode.Grid)
+        .AddStyle("grid-column", Column?.Index.ToString(), () => (Grid.Items is not null || Grid.ItemsProvider is not null) && GridContext.TotalItemCount > 0 && Grid.DisplayMode == DataGridDisplayMode.Grid)
         .AddStyle("text-align", "center", Column is SelectColumn<TItem>)
         .AddStyle("align-content", "center", Column is SelectColumn<TItem>)
         .AddStyle("min-width", Column?.MinWidth, Owner.RowType is DataGridRowType.Header or DataGridRowType.StickyHeader)
