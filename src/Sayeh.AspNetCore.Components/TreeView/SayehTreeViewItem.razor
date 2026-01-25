@@ -1,0 +1,66 @@
+﻿@namespace Sayeh.AspNetCore.Components
+@inherits FluentComponentBase
+@typeparam TItem
+@if (Item is not null)
+{
+    var txt = Text != null ? Text(Item) : Item.ToString();
+    <CascadingValue Value="this" IsFixed="true">
+        <fluent-tree-item @ref=Element
+                          class="@Class"
+                          aria-label="@txt!"
+                          aria-expanded="@Expanded.ToAttributeValue()"
+                          style="@Style"
+                          id="@Id"
+                          expanded="@Expanded"
+                          selected="@Selected"
+                          disabled="@Disabled"
+                          @onselectedchange="@HandleSelectedChange"
+                          @onexpandedchange="@HandleExpandedChangeAsync"
+                          @attributes="AdditionalAttributes">
+
+            @if (ItemTemplate == null)
+            {
+                <span class="treeitem-text">@txt</span>
+            }
+            else
+            {
+                @ItemTemplate(Item)
+            }
+
+            @if (Owner != null && Children != null)
+            {
+                var items = Children.Invoke(Item);
+                @if (Owner.Virtualize && items.Any() && !Expanded)
+                {
+                    @* Lazy loading required a "fake" sub-item to simulate the [+] *@
+                    <fluent-tree-item>@Resources.Loading</fluent-tree-item>
+                }
+                else
+                {
+                    @if (ChildrenTemplate is null)
+                    {
+                        var selectedItemHashCode = Owner.SelectedItem?.GetHashCode();
+                        foreach (var item in items)
+                        {
+                            var hasCode = item.GetHashCode();
+                            <SayehTreeViewItem Item="item"
+                                               Children="Children"
+                                               InitiallySelected=@(hasCode == selectedItemHashCode)
+                                               ParentItem="ParentItem"
+                                               @key=hasCode
+                                               Text="Text" />
+                        }
+
+                    }
+                    else
+                    {
+                        foreach (var item in items)
+                        {
+                            @ChildrenTemplate(item)
+                        }
+                    }
+                }
+            }
+        </fluent-tree-item>
+    </CascadingValue>
+}

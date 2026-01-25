@@ -1,0 +1,9 @@
+﻿<div class="d-flex flex-column">
+    @if (IsExpanded)
+    {
+        <div Class="ps-3 pt-3">
+            @ChildContent
+        </div>
+    }
+    <FluentButton IconStart="@_expanderIcon" Class="w-100 collapse-btn" Appearance=Appearance.Stealth OnClick=ShowHideExpander></FluentButton>
+</div>

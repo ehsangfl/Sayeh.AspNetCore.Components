@@ -14,7 +14,7 @@ else
         <SayehDatePickerColumn Property="p=> p.Date" />
         <SayehPropertyColumn TItem="CustomTypeModel" TValue="DateTime?" PropertyName="DateTimeProperty"/>
         <SayehPropertyColumn TItem="CustomTypeModel" TValue="bool?" PropertyName="BoolProperty" />
-        <SayehPropertyColumn TItem="CustomTypeModel" TValue="WeatherForeacast?" PropertyName="NavigationProperty" />
+        <SayehPropertyColumn TItem="CustomTypeModel" TValue="WeatherForecast?" PropertyName="NavigationProperty" />
         <SayehPropertyColumn TItem="CustomTypeModel" TValue="int?" PropertyName="IntProperty" />
     </SayehDataGrid>
 
@@ -23,11 +23,11 @@ else
 
     private IEnumerable<CustomTypeModel>? items { get; set; }
 
-    private IEnumerable<WeatherForeacast>? weathers { get; set; }
+    private IEnumerable<WeatherForecast>? weathers { get; set; }
 
     protected override void OnInitialized()
     {
-        weathers = WeatherForeacast.GenerateItems();
+        weathers = WeatherForecast.GenerateItems();
         base.OnInitialized();
     }
 

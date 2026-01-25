@@ -10,8 +10,6 @@ namespace Sayeh.AspNetCore.Components
 
         #region Fields
 
-        private PropertyInfo? _propertyInfo;
-
         private int _selectedItemsCount = 0;
 
         private Nullable<bool> selectAll { get; set; } = false;

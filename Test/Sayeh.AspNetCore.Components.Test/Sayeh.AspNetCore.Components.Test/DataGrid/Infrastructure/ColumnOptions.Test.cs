@@ -9,32 +9,32 @@ public class ColumnOptionsTest : TestBase
     public void ApplyFilterTest_DateTime()
     {
         // Arrange
-        var items = WeatherForeacast.GenerateItems();
+        var items = WeatherForecast.GenerateItems();
         var fromDate = DateTime.Now.AddDays(1);
         var toDate = DateTime.Now.AddDays(2);
 
         // prepare Expression for the property (SayehPropertyColumn expects an Expression<Func<TItem, TValue>>)
-        Expression<Func<WeatherForeacast, DateTime>> expression = x => x.Date;
+        Expression<Func<WeatherForecast, DateTime>> expression = x => x.Date;
         // Build a ChildContent fragment that adds a SayehPropertyColumn with ColumnOptions host inside.
         RenderFragment gridChild = builder =>
         {
             var seq = 0;
-            builder.OpenComponent(seq++, typeof(SayehPropertyColumn<WeatherForeacast, DateTime>));
-            builder.AddAttribute(seq++, nameof(SayehPropertyColumn<WeatherForeacast, DateTime>.Property), expression);
+            builder.OpenComponent(seq++, typeof(SayehPropertyColumn<WeatherForecast, DateTime>));
+            builder.AddAttribute(seq++, nameof(SayehPropertyColumn<WeatherForecast, DateTime>.Property), expression);
             builder.CloseComponent();
         };
 
         // Render the DataGrid hosting the column (the grid must render so the column can instantiate its header options holder)
-        var cut = Render<SayehDataGrid<WeatherForeacast>>(parameters => parameters
+        var cut = Render<SayehDataGrid<WeatherForecast>>(parameters => parameters
             .Add(p => p.Items, items)
             .AddChildContent(gridChild)
         );
 
         // Find the rendered SayehPropertyColumn instance
-        var propertyColumn = cut.FindComponent<SayehPropertyColumn<WeatherForeacast, DateTime>>().Instance;
+        var propertyColumn = cut.FindComponent<SayehPropertyColumn<WeatherForecast, DateTime>>().Instance;
 
         // Find the ColumnOptions instance that SayehColumnBase rendered via DynamicComponent
-        var colOptionsRendered = cut.FindComponent<ColumnOptions<WeatherForeacast, DateTime>>();
+        var colOptionsRendered = cut.FindComponent<ColumnOptions<WeatherForecast, DateTime>>();
         var colOptionsInstance = colOptionsRendered.Instance;
 
         // Set the filter state directly on the rendered ColumnOptions instance (not parameters).
@@ -45,7 +45,7 @@ public class ColumnOptionsTest : TestBase
 
         // Act
         // Call the explicit IFilterableColumn<TItem>.ApplyFilter implementation on the column.
-        var filtered = ((Sayeh.AspNetCore.Components.DataGrid.Infrastructure.IFilterableColumn<WeatherForeacast>)propertyColumn).ApplyFilter(items);
+        var filtered = ((Sayeh.AspNetCore.Components.DataGrid.Infrastructure.IFilterableColumn<WeatherForecast>)propertyColumn).ApplyFilter(items);
 
         // Assert
         Assert.IsTrue(filtered.All(item =>
@@ -58,7 +58,7 @@ public class ColumnOptionsTest : TestBase
     public void ApplyFilterTest_ICustomeTypeProvider_DateTime()
     {
         // Arrange
-        var items = CustomTypeModel.GenerateItems(WeatherForeacast.GenerateItems()).ToList();
+        var items = CustomTypeModel.GenerateItems(WeatherForecast.GenerateItems()).ToList();
         var fromDate = DateTime.Now.AddDays(-5);
         var toDate = DateTime.Now.AddDays(5);
 

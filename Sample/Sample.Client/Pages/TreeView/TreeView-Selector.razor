@@ -1,0 +1,31 @@
+﻿@page "/treeview-selector"
+<h3>Multi select TreeView Hierarchy Source</h3>
+@if (Items is not null)
+{
+    <SayehTreeView Items="Items" 
+        Children="f => f.Children" 
+        ParentItem=@(x=> x.Parent) 
+        Text="f => f.Name" @bind-SelectedItem="SelectedItem" 
+        SelectProperty="f=> f.IsSelected" />
+
+    <label>selected Item is : @SelectedItem?.Name </label>
+}
+
+@code {
+    IEnumerable<HierarchycalItem>? Items { get; set; }
+    HierarchycalItem SelectedItem { get; set; }
+
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Items = HierarchycalItem.GetHierarchycalItems(5, 3);
+            SelectedItem = Items.First().Children.Skip(1).First();
+            StateHasChanged();
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+
+}

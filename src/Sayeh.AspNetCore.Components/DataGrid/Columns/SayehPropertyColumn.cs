@@ -40,10 +40,10 @@ public partial class SayehPropertyColumn<[DynamicallyAccessedMembers(Dynamically
     public PropertyInfo? PropertyInfo { get; protected set; }
 
     /// <inheritdoc />
-    [Parameter] public Expression<Func<TItem, TValue>>? Property { get; set; } = default!;
+    [Parameter] public Expression<Func<TItem, TValue>> Property { get; set; } = default!;
 
-    string _propertyName;
-    [Parameter] public string PropertyName { get; set; } = default!;
+    string? _propertyName;
+    [Parameter] public string? PropertyName { get; set; }
 
     /// <summary>
     /// Optionally specifies a format string for the value.

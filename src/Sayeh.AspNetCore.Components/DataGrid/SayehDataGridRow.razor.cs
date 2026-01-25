@@ -20,7 +20,6 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     private SayehDataGridCell<TItem>? selectCell;
     private SayehDataGrid<TItem> Grid => GridContext.Grid;
     internal SayehDataGridCell<TItem>? CurrentCell { get; set; }
-    private RowHeaderColumn<TItem>? _rowHeader;
 
     #endregion
 
