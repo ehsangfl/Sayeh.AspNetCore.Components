@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Sayeh.AspNetCore.Components.Infrastructure {
+namespace Sayeh.AspNetCore.Components {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Sayeh.AspNetCore.Components.Infrastructure {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Sayeh.AspNetCore.Components.Infrastructure.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Sayeh.AspNetCore.Components.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -79,11 +79,47 @@ namespace Sayeh.AspNetCore.Components.Infrastructure {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} item/s found.
+        /// </summary>
+        internal static string FoundedItemCount {
+            get {
+                return ResourceManager.GetString("FoundedItemCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to From.
         /// </summary>
         internal static string FromValue {
             get {
                 return ResourceManager.GetString("FromValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading ....
+        /// </summary>
+        internal static string Loading {
+            get {
+                return ResourceManager.GetString("Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Next.
+        /// </summary>
+        internal static string Next {
+            get {
+                return ResourceManager.GetString("Next", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Previous.
+        /// </summary>
+        internal static string Previous {
+            get {
+                return ResourceManager.GetString("Previous", resourceCulture);
             }
         }
         
@@ -111,6 +147,15 @@ namespace Sayeh.AspNetCore.Components.Infrastructure {
         internal static string Search {
             get {
                 return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Searching.
+        /// </summary>
+        internal static string SearchingMessage {
+            get {
+                return ResourceManager.GetString("SearchingMessage", resourceCulture);
             }
         }
         

@@ -1,13 +1,13 @@
 ﻿@page "/datagrid-selectrows"
 <h3>DataGrid</h3>
-@if (weatherForeacasts is null)
+@if (weatherForecasts is null)
 {
     <p>loading ...</p>
 }
 else
 {
     <label>multi selection</label>
-    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts" IsReadonly="true">
+    <SayehDataGrid TItem="WeatherForecast" Items="weatherForecasts" IsReadonly="true">
         <SayehSelectColumn Property="p=> p.IsSelected" />
         <SayehPropertyColumn Property="p=> p.Order" />
         <SayehDatePickerColumn Property="p=> p.Date" />
@@ -20,7 +20,7 @@ else
 }
 @code {
 
-    private IEnumerable<WeatherForeacast>? weatherForeacasts { get; set; }
+    private IEnumerable<WeatherForecast>? weatherForecasts { get; set; }
 
     private DayType[]? DayTypes { get; set; }
 
@@ -29,7 +29,7 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            weatherForeacasts = WeatherForeacast.GenerateItems();
+            weatherForecasts = WeatherForecast.GenerateItems();
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);

@@ -1,0 +1,67 @@
+﻿@namespace Sayeh.AspNetCore.Components
+@inherits FluentComponentBase
+@typeparam TItem
+<div style="background-color:var(--neutral-fill-stealth-rest)">
+    <SayehExpander>
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="4">
+            <FluentSearch ValueChanged="DoSearch"></FluentSearch>
+            <FluentButton Id="tvSearch_PreviuseBtn" OnClick=selectPrevious IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronCircleRight())" dir="ltr" />
+            <FluentTooltip Anchor="tvSearch_PreviuseBtn" UseTooltipService="false" Position=TooltipPosition.Start>@Resources.Previous</FluentTooltip>
+            <FluentButton Id="tvSearch_NextBtn" OnClick=selectNext IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronCircleLeft())" dir="ltr" />
+            <FluentTooltip Anchor="tvSearch_NextBtn" UseTooltipService="false" Position=TooltipPosition.Start>@Resources.Next</FluentTooltip>
+        </FluentStack>
+        @if (_searchResult.HasValue())
+        {
+            <FluentLabel>@_searchResult</FluentLabel>
+        }
+    </SayehExpander>
+</div>
+<CascadingValue Value="this" IsFixed="true">
+    <fluent-tree-view @ref=Element
+                      class="@Class"
+                      style="@Style"
+                      @onselectedchange="@HandleCurrentSelectedChange"
+                      @attributes="AdditionalAttributes">
+        @if (Items != null)
+        {
+            var selectedItemHashCode = SelectedItem?.GetHashCode();
+            if (ItemTemplate is null)
+            {
+                if (SelectProperty is null)
+                {
+                    foreach (var item in Items)
+                    {
+                        var itemHashCode = item.GetHashCode();
+                        <SayehTreeViewItem Item="item"
+                                           InitiallySelected=@(itemHashCode == selectedItemHashCode)
+                                           Children="Children"
+                                           ParentItem="ParentItem"
+                                           @key=itemHashCode
+                                           Text="Text" />
+                    }
+                }
+                else
+                {
+                    foreach (var item in Items)
+                    {
+                        var itemHashCode = item.GetHashCode();
+                        <SayehTreeViewCheckboxItem Item="item"
+                                                   InitiallySelected=@(itemHashCode == selectedItemHashCode)
+                                                   Children="Children"
+                                                   ParentItem="ParentItem"
+                                                   @key=itemHashCode
+                                                   Text="Text" />
+                    }
+
+                }
+            }
+            else
+            {
+                foreach (var item in Items)
+                {
+                    @ItemTemplate(item)
+                }
+            }
+        }
+    </fluent-tree-view>
+</CascadingValue>

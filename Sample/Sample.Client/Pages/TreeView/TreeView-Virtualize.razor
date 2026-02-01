@@ -1,0 +1,28 @@
+﻿@page "/treeview-virtual"
+<h3>TreeView virtualization</h3>
+@if (Items is not null)
+{
+    <SayehTreeView Items="Items" Children="f => f.Children" ParentItem=@(x=> x.Parent) Text="f => f.Name" @bind-SelectedItem="SelectedItem"
+                   Filter="(f, txt) => f.Name.Contains(txt)" Virtualize=true/>
+
+    <label>selected Item is : @SelectedItem?.Name </label>
+}
+
+@code {
+    IEnumerable<HierarchycalItem>? Items { get; set; }
+    HierarchycalItem SelectedItem { get; set; }
+
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Items = HierarchycalItem.GetHierarchycalItems(8, 4);
+            SelectedItem = Items.First().Children.Skip(1).First();
+            StateHasChanged();
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+
+}

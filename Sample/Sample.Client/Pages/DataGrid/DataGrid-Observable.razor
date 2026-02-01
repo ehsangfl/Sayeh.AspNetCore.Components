@@ -2,14 +2,14 @@
 @using System.Collections.ObjectModel
 @inject NavigationManager nav
 <h3>DataGrid</h3>
-@if (weatherForeacasts is null)
+@if (WeatherForecasts is null)
 {
     <p>loading ...</p>
 }
 else
 {
     <label>all columns  sample</label>
-    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts" IsReadonly=true>
+    <SayehDataGrid TItem="WeatherForecast" Items="WeatherForecasts" IsReadonly=true>
         <SayehPropertyColumn Property="p=> p.Order" />
         <SayehDatePickerColumn Property="p=> p.Date" />
         <SayehPropertyColumn Property="p=> p.DayofWeek" />
@@ -23,7 +23,7 @@ else
 }
 @code {
 
-    private ObservableCollection<WeatherForeacast>? weatherForeacasts { get; set; }
+    private ObservableCollection<WeatherForecast>? WeatherForecasts { get; set; }
 
     private DayType[]? DayTypes { get; set; }
 
@@ -33,7 +33,7 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            weatherForeacasts = new ObservableCollection<WeatherForeacast>(WeatherForeacast.GenerateItems());
+            WeatherForecasts = new ObservableCollection<WeatherForecast>(WeatherForecast.GenerateItems());
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);
@@ -41,9 +41,9 @@ else
 
     void addNewItem()
     {
-        var order = weatherForeacasts?.Max(s => s.Order) + 1 ?? 10;
-        var newItem = new WeatherForeacast() { Order = order, Date = DateTime.Now.AddDays(order), DayofWeek = DateTime.Now.AddDays(order).DayOfWeek.ToString(), Tempreture = -5, Type = DayType.Snowy };
-        weatherForeacasts?.Add(newItem);
+        var order = WeatherForecasts?.Max(s => s.Order) + 1 ?? 10;
+        var newItem = new WeatherForecast() { Order = order, Date = DateTime.Now.AddDays(order), DayofWeek = DateTime.Now.AddDays(order).DayOfWeek.ToString(), Tempreture = -5, Type = DayType.Snowy };
+        WeatherForecasts?.Add(newItem);
     }
 
 }

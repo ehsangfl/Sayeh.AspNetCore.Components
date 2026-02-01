@@ -1,0 +1,26 @@
+﻿using Microsoft.FluentUI.AspNetCore.Components;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Sayeh.AspNetCore.Components
+{
+    partial class SayehExpander
+    {
+
+       Icon _expanderIcon = new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size12.ChevronDown();
+
+        public bool IsExpanded { get; set; }
+
+        [EditorRequired]
+        [Parameter]
+        public RenderFragment ChildContent { get; set; } = default!;
+
+        void ShowHideExpander() {
+            IsExpanded = !IsExpanded;
+            _expanderIcon = IsExpanded ? new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size12.ChevronUp() : new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size12.ChevronDown();
+        }
+    }
+}

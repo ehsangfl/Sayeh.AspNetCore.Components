@@ -2,14 +2,14 @@
 @using System.Text
 @inject NavigationManager nav
 <h3>DataGrid</h3>
-@if (weatherForeacasts is null)
+@if (weatherForecasts is null)
 {
     <p>loading ...</p>
 }
 else
 {
     <label>all columns  sample</label>
-    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts" IsReadonly=true ResizableColumns=true>
+    <SayehDataGrid TItem="WeatherForecast" Items="weatherForecasts" IsReadonly=true ResizableColumns=true>
         <SayehPropertyColumn Property="p=> p.Order" />
         <SayehDatePickerColumn Property="p=> p.Date" />
         <SayehPropertyColumn Property="p=> p.DayofWeek" />
@@ -26,18 +26,18 @@ else
 }
 @code {
 
-    private IEnumerable<WeatherForeacast>? weatherForeacasts { get; set; }
+    private IEnumerable<WeatherForecast>? weatherForecasts { get; set; }
 
     private DayType[]? DayTypes { get; set; }
 
     RelayCommand GoToGoogle { get; set; } = default!;
-    RelayCommand<WeatherForeacast> ButtonCommand { get; set; } = default!;
+    RelayCommand<WeatherForecast> ButtonCommand { get; set; } = default!;
     public StringBuilder Action { get; set; } = new StringBuilder();
 
     protected override void OnInitialized()
     {
         GoToGoogle = new RelayCommand(GoToGoogle_Sub);
-        ButtonCommand = new RelayCommand<WeatherForeacast>(ButtonCommand_Sub);
+        ButtonCommand = new RelayCommand<WeatherForecast>(ButtonCommand_Sub);
         base.OnInitialized();
     }
 
@@ -46,7 +46,7 @@ else
         nav.NavigateTo("Https://microsoft.com");
     }
 
-    void ButtonCommand_Sub(WeatherForeacast? e)
+    void ButtonCommand_Sub(WeatherForecast? e)
     {
         Action.AppendLine($"button command executed with {e.ToString()} parameter");
         StateHasChanged();
@@ -57,7 +57,7 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            weatherForeacasts = WeatherForeacast.GenerateItems();
+            weatherForecasts = WeatherForecast.GenerateItems();
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);

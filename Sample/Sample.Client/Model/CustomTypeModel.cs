@@ -130,11 +130,11 @@ namespace Sample.Client.Model
             }
         }
 
-        public static IEnumerable<CustomTypeModel> GenerateItems(IEnumerable<WeatherForeacast> weathers,int count = 500) {
+        public static IEnumerable<CustomTypeModel> GenerateItems(IEnumerable<WeatherForecast> weathers,int count = 500) {
             var result = new List<CustomTypeModel>();
             CustomTypeModel.AddProperty("BoolProperty", typeof(bool), new() { new DisplayAttribute() { Name = "Boolean property" } });
             CustomTypeModel.AddProperty("DateTimeProperty", typeof(DateTime), new() { new DisplayAttribute() { Name = "Date time property" } });
-            CustomTypeModel.AddProperty("NavigationProperty", typeof(WeatherForeacast), new() { new DisplayAttribute() { Name = "Navigation property" } });
+            CustomTypeModel.AddProperty("NavigationProperty", typeof(WeatherForecast), new() { new DisplayAttribute() { Name = "Navigation property" } });
             CustomTypeModel.AddProperty("IntProperty", typeof(int), new() { new DisplayAttribute() { Name = "Integer property" } });
           
             for (var i = 1; i < count; i++)

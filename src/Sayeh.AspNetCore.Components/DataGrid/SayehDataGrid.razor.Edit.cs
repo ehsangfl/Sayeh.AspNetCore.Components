@@ -157,20 +157,18 @@ partial class SayehDataGrid<TItem>
 
     private void raiseRowDelete()
     {
-        if (RowsDelete.HasDelegate)
+        IEnumerable<TItem> selectedItems = new List<TItem>();
+
+        if (_internalGridContext.SelectColumn is not null)
+            selectedItems = _internalGridContext.SelectColumn.getSelectedItems();
+
+        if (selectedItems.None() && SelectedItem is not null)
+            selectedItems = new List<TItem>() { SelectedItem };
+        if (selectedItems.Any())
         {
-            IEnumerable<TItem> selectedItems = new List<TItem>();
-
-            if (_internalGridContext.SelectColumn is not null)
-                selectedItems = _internalGridContext.SelectColumn.getSelectedItems();
-
-            if (selectedItems.None() && SelectedItem is not null)
-                selectedItems = new List<TItem>() { SelectedItem };
-            if (selectedItems.Any())
-            {
-                OnRowsDelete(selectedItems);
+            OnRowsDelete(selectedItems);
+            if (RowsDelete.HasDelegate)
                 RowsDelete.InvokeAsync(selectedItems);
-            }
         }
 
     }

@@ -1,0 +1,69 @@
+﻿@page "/treeview-itemtemplate"
+<h3>TreeView Hierarchy Source</h3>
+@if (Items is not null)
+{
+    <SayehTreeView TItem="object" Items="Items" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem">
+        <ItemTemplate>
+            @{
+                var item = (WeatherForecastGroup)context;
+            }
+            <SayehTreeViewItem TItem="object"
+                               Item="item"
+                               InitiallySelected=false
+                               Children="f=> ((WeatherForecastGroup)f).Items"
+                               Text="f=> ((WeatherForecastGroup)f).Name">
+                <ItemTemplate Context="groupContext">
+                    @{
+                        var groupItem = groupContext as WeatherForecastGroup;
+                    }
+                    <span class="treeitem-text">@groupItem!.Name - (@groupItem!.Items.Count())</span>
+                </ItemTemplate>
+                <ChildrenTemplate Context="weatherContext">
+                    @{
+                        var weatherItem = (WeatherForecast)weatherContext;
+                    }
+                    <SayehTreeViewItem TItem="object"
+                                       ParentItem="p=> (p as WeatherForecast)?.Group"
+                                       Item="weatherItem"
+                                       InitiallySelected="weatherItem == SelectedItem">
+                        <ItemTemplate Context="wtiContext">
+                            @{
+                                var whiItem = wtiContext as WeatherForecast;
+                            }
+                            <span class="treeitem-text">@whiItem!.Date - @whiItem!.Tempreture</span>
+                        </ItemTemplate>
+                    </SayehTreeViewItem>
+
+                </ChildrenTemplate>
+            </SayehTreeViewItem>
+        </ItemTemplate>
+    </SayehTreeView>
+
+    <label>selected Item is : @SelectedItem?.ToString() </label>
+}
+
+@code {
+    IEnumerable<WeatherForecastGroup>? Items { get; set; }
+    WeatherForecast? SelectedItem { get; set; }
+
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Items = WeatherForecast.GenerateGroupedItems(); 
+            SelectedItem = Items.First().Items.FirstOrDefault();
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    void setSelectedItem(object item)
+    {
+        this.SelectedItem = item as WeatherForecast;
+        InvokeAsync(StateHasChanged);
+    }
+
+    
+
+}

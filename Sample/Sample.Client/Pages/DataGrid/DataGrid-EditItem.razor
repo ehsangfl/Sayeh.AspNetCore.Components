@@ -1,14 +1,14 @@
 ﻿@page "/datagrid-edit"
 @using System.Collections.ObjectModel
 <h3>DataGrid</h3>
-@if (weatherForeacasts is null)
+@if (WeatherForecasts is null)
 {
     <p>loading ...</p>
 }
 else
 {
     <label>editable datagrid</label>
-    <SayehDataGrid TItem="WeatherForeacast" Items="weatherForeacasts" RowsDelete="OnRowsDeleted">
+    <SayehDataGrid TItem="WeatherForecast" Items="WeatherForecasts" RowsDelete="OnRowsDeleted">
         <SayehSelectColumn Property="p => p.IsSelected" />
         <SayehPropertyColumn Property="p => p.Order" />
         <SayehDatePickerColumn Property="p => p.Date" />
@@ -21,7 +21,7 @@ else
 }
 @code {
 
-    private IList<WeatherForeacast>? weatherForeacasts { get; set; }
+    private IList<WeatherForecast>? WeatherForecasts { get; set; }
 
     private DayType[]? DayTypes { get; set; }
 
@@ -30,17 +30,17 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            weatherForeacasts =  new ObservableCollection<WeatherForeacast>(WeatherForeacast.GenerateItems());
+            WeatherForecasts =  new ObservableCollection<WeatherForecast>(WeatherForecast.GenerateItems());
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);
     }
 
-    protected void OnRowsDeleted(IEnumerable<WeatherForeacast> list)
+    protected void OnRowsDeleted(IEnumerable<WeatherForecast> list)
     {
         foreach (var item in list)
         {
-            weatherForeacasts!.Remove(item);
+            WeatherForecasts!.Remove(item);
         }
     }
 
