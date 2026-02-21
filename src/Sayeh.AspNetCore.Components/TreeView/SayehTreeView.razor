@@ -24,19 +24,20 @@
                       @attributes="AdditionalAttributes">
         @if (Items != null)
         {
-            var selectedItemHashCode = SelectedItem?.GetHashCode();
+            var selectedItemID = _selectedItem is not null ? IDProperty.Invoke(_selectedItem).ToString() : null;
             if (ItemTemplate is null)
             {
                 if (SelectProperty is null)
                 {
                     foreach (var item in Items)
                     {
-                        var itemHashCode = item.GetHashCode();
+                        var id = IDProperty.Invoke(item).ToString()!;
                         <SayehTreeViewItem Item="item"
-                                           InitiallySelected=@(itemHashCode == selectedItemHashCode)
+                                           InitiallySelected=@(id == selectedItemID)
                                            Children="Children"
                                            ParentItem="ParentItem"
-                                           @key=itemHashCode
+                                           Id="id"
+                                           @key=id
                                            Text="Text" />
                     }
                 }
@@ -44,12 +45,12 @@
                 {
                     foreach (var item in Items)
                     {
-                        var itemHashCode = item.GetHashCode();
+                        var id = IDProperty.Invoke(item).ToString()!;
                         <SayehTreeViewCheckboxItem Item="item"
-                                                   InitiallySelected=@(itemHashCode == selectedItemHashCode)
+                                                   InitiallySelected=@(id == selectedItemID)
                                                    Children="Children"
                                                    ParentItem="ParentItem"
-                                                   @key=itemHashCode
+                                                   @key=id
                                                    Text="Text" />
                     }
 

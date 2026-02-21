@@ -1,8 +1,10 @@
 ﻿@namespace Sayeh.AspNetCore.Components
 @inherits SayehTreeViewItem<TItem>
 @typeparam TItem
-@if (Item is not null)
+@if (Item is not null && Owner is not null)
 {
+    var selectedItemID = Owner.SelectedItem is not null ? Owner.IDProperty.Invoke(Owner.SelectedItem) : null;
+    var id = Owner.IDProperty.Invoke(Item);
     var txt = Text != null ? Text(Item) : Item.ToString();
     <CascadingValue Value="this" IsFixed="true">
         <fluent-tree-item @ref=Element
@@ -10,45 +12,50 @@
                           aria-label="@txt!"
                           aria-expanded="@Expanded.ToAttributeValue()"
                           style="@Style"
-                          id="@Id"
+                          id="@id"
                           expanded="@Expanded"
                           selected="@Selected"
                           disabled="@Disabled"
                           @onselectedchange="@HandleSelectedChange"
                           @onexpandedchange="@HandleExpandedChangeAsync"
                           @attributes="AdditionalAttributes">
-            <FluentCheckbox Value="_selectProperty(Item)" ValueChanged="ItemSelectedChanged">
-                @if (ItemTemplate == null)
-                {
-                    <span class="treeitem-text">@txt</span>
-                }
-                else
-                {
-                    @ItemTemplate(Item)
-                }
-            </FluentCheckbox>
+            @if (Children is not null && Children(Item).Any())
+            {
+                <FluentCheckbox ThreeState="true"
+                                @bind-CheckState:get="@CheckState"
+                                @bind-CheckState:set=CheckedStateChanged>
+                    @checkboxTemplate(txt)
+                </FluentCheckbox>
+            }
+            else
+            {
+                <FluentCheckbox Value="_selectProperty.Invoke(Item)"
+                                ValueChanged="CheckedChanged">
+                    @checkboxTemplate(txt)
+                </FluentCheckbox>
+            }
             @if (Owner != null && Children != null)
             {
                 var items = Children.Invoke(Item);
-                @if (Owner.Virtualize && items.Any() && !Expanded)
+                @if (Owner.Virtualize && items is not null && items.Any() && !Expanded)
                 {
                     @* Lazy loading required a "fake" sub-item to simulate the [+] *@
                     <fluent-tree-item>@FluentTreeView.LoadingMessage</fluent-tree-item>
                 }
-                else
+                else if (items is not null)
                 {
                     @if (ChildrenTemplate is null)
                     {
-                        var selectedItemHashCode = Owner.SelectedItem?.GetHashCode();
+                        var selectedItemHashCode = Owner._selectProperty;
                         foreach (var item in items)
                         {
-                            var hasCode = item.GetHashCode();
+                            var childId = Owner.IDProperty.Invoke(item).ToString()!;
                             <SayehTreeViewCheckboxItem Item="item"
                                                        Children="Children"
                                                        SelectProperty="SelectProperty"
-                                                       InitiallySelected=@(hasCode == selectedItemHashCode)
+                                                       InitiallySelected=@(childId == selectedItemID)
                                                        ParentItem="ParentItem"
-                                                       @key=hasCode
+                                                       @key=childId
                                                        Text="Text" />
                         }
 
@@ -64,4 +71,17 @@
             }
         </fluent-tree-item>
     </CascadingValue>
+}
+@code {
+    RenderFragment checkboxTemplate(string txt) => __builder =>
+    {
+        @if (ItemTemplate == null)
+        {
+            <span class="treeitem-text">@txt</span>
+        }
+        else
+        {
+            @ItemTemplate(Item!)
+        }
+    };
 }

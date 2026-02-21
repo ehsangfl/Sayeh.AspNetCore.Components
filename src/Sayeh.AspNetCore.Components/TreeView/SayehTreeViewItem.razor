@@ -1,8 +1,10 @@
 ﻿@namespace Sayeh.AspNetCore.Components
 @inherits FluentComponentBase
 @typeparam TItem
-@if (Item is not null)
+@if (Item is not null && Owner is not null)
 {
+    var selectedItemID = Owner.SelectedItem is not null ? Owner.IDProperty.Invoke(Owner.SelectedItem) : null;
+    var id = Owner.IDProperty.Invoke(Item);
     var txt = Text != null ? Text(Item) : Item.ToString();
     <CascadingValue Value="this" IsFixed="true">
         <fluent-tree-item @ref=Element
@@ -10,7 +12,7 @@
                           aria-label="@txt!"
                           aria-expanded="@Expanded.ToAttributeValue()"
                           style="@Style"
-                          id="@Id"
+                          id="@id"
                           expanded="@Expanded"
                           selected="@Selected"
                           disabled="@Disabled"
@@ -39,15 +41,14 @@
                 {
                     @if (ChildrenTemplate is null)
                     {
-                        var selectedItemHashCode = Owner.SelectedItem?.GetHashCode();
                         foreach (var item in items)
                         {
-                            var hasCode = item.GetHashCode();
+                            var childId = Owner.IDProperty.Invoke(item).ToString()!;
                             <SayehTreeViewItem Item="item"
                                                Children="Children"
-                                               InitiallySelected=@(hasCode == selectedItemHashCode)
+                                               InitiallySelected=@(childId == selectedItemID)
                                                ParentItem="ParentItem"
-                                               @key=hasCode
+                                               @key=childId
                                                Text="Text" />
                         }
 

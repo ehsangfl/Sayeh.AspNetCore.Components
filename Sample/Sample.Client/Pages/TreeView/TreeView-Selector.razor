@@ -6,7 +6,9 @@
         Children="f => f.Children" 
         ParentItem=@(x=> x.Parent) 
         Text="f => f.Name" @bind-SelectedItem="SelectedItem" 
-        SelectProperty="f=> f.IsSelected" />
+        SelectProperty="f=> f.IsSelected" 
+        Virtualize=false
+                   IDProperty="i => i.ID" />
 
     <label>selected Item is : @SelectedItem?.Name </label>
 }

@@ -20,7 +20,7 @@ namespace Sayeh.AspNetCore.Components
 
         readonly Dictionary<string, SayehTreeViewItem<TItem>> _allItems = [];
         readonly Debounce _currentSelectedChangedDebounce = new();
-        SayehTreeViewItem<TItem>? _selectedNode;
+        internal  SayehTreeViewItem<TItem>? _selectedNode;
         bool _disposed;
         TItem? _selectedItem;
         Expression<Func<TItem, bool>> _selectPropertyExpression;
@@ -53,6 +53,10 @@ namespace Sayeh.AspNetCore.Components
 
         [Parameter]
         public Expression<Func<TItem, bool>> SelectProperty { get; set; }
+
+        [Parameter]
+        [EditorRequired]
+        public Func<TItem, object> IDProperty { get; set; }
 
         #endregion
 
@@ -104,7 +108,7 @@ namespace Sayeh.AspNetCore.Components
 
         #region Functions
 
-        internal async Task ItemSelectedChangeAsync(FluentTreeItem item)
+        internal async Task ItemSelectedChangeAsync(SayehTreeViewItem<TItem> item)
         {
             //if (OnSelectedChange.HasDelegate)
             //{
@@ -165,14 +169,14 @@ namespace Sayeh.AspNetCore.Components
         internal void Register(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _allItems[treeItem.Id!] = treeItem;
+            _allItems[IDProperty.Invoke(treeItem.Item!).ToString()!] = treeItem;
             treeItem.Parent?.Register(treeItem);
         }
 
         internal void Unregister(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _allItems.Remove(treeItem.Id!);
+            _allItems.Remove(IDProperty.Invoke(treeItem.Item!).ToString()!);
             treeItem.Parent?.Unregister(treeItem);
         }
 
@@ -245,7 +249,7 @@ namespace Sayeh.AspNetCore.Components
                             if (_selectedNode is not null)
                                 _selectedNode.SetSelected(false);
                             _selectedNode = lastParent._children.FirstOrDefault(w => w.Value.Item == selectedItem).Value;
-                            _selectedNode.SetSelected(true);
+                            _selectedNode?.SetSelected(true);
                         }
 
                     }
@@ -296,6 +300,13 @@ namespace Sayeh.AspNetCore.Components
 
             _disposed = true;
         }
+
+
+        #endregion
+
+        #region API
+
+        public SayehTreeViewItem<TItem> GetNode(TItem item) => _allItems.FirstOrDefault(f => f.Value.Item == item).Value;
 
         #endregion
 

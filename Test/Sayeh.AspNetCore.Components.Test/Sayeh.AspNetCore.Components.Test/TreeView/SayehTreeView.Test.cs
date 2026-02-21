@@ -1,4 +1,5 @@
-﻿using Sample.Client.Model;
+using Microsoft.AspNetCore.Components.Web.Virtualization;
+using Sample.Client.Model;
 using System.Collections;
 using System.Threading.Tasks;
 namespace Sayeh.AspNetCore.Components.Test;
@@ -317,6 +318,214 @@ public class SayehTreeViewTest : TestBase
         Assert.AreEqual(firstItem, cut.Instance.SelectedItem);
 
     }
+
+    #endregion
+
+    #region Multi Select
+
+    [TestMethod]
+    [DataRow(false)]
+    public void TreeViewCheckboxItem_GetIsChecked(bool virtualize)
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(4, 4);
+
+        var firstLevelItem = items.FirstOrDefault(i => i.Children != null && i.Children.Count() > 1)
+                             ?? items.First();
+        var secondLevelItem = firstLevelItem.Children.Skip(Random.Shared.Next(0, firstLevelItem.Children.Count() - 1)).First();
+        var thirdLevelItem = secondLevelItem.Children.Skip(Random.Shared.Next(0, secondLevelItem.Children.Count() - 1)).First();
+        var forthLevelItem = thirdLevelItem.Children.Skip(Random.Shared.Next(0, thirdLevelItem.Children.Count() - 1)).First();
+
+        forthLevelItem.IsSelected = true;
+        //forthLevelItem.Id = 1102794386;
+
+        Assert.IsNotNull(items);
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.ParentItem, x => x.Parent)
+        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Virtualize, virtualize)
+        .Add(p => p.SelectProperty, s => s.IsSelected)
+        .Add(p => p.IDProperty, s => s.ID)
+        );
+
+        var pov = new PrivateObject(cut.Instance);
+        var firstLevelNodes = pov.GetField("_allItems") as Dictionary<string, SayehTreeViewItem<HierarchycalItem>>;
+        Assert.IsNotNull(firstLevelNodes);
+
+        var firstLevelNode = firstLevelNodes.First(f => f.Value.Item == firstLevelItem);
+        var firstLevelNodePov = new PrivateObject(firstLevelNode.Value);
+        if ((firstLevelNodePov.GetFieldOrProperty("_children") as Dictionary<string, SayehTreeViewItem<HierarchycalItem>>)!.Count() > 1)
+            Assert.IsNull(firstLevelNodePov.Invoke("GetIsChecked").As<bool?>());
+        else
+            Assert.IsTrue(firstLevelNodePov.Invoke("GetIsChecked").As<bool>());
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    public void TreeViewCheckboxItem_HasBothCheckedUncheckedChild(bool virtualize)
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(4, 4);
+
+        var firstLevelItem = items.FirstOrDefault(i => i.Children != null && i.Children.Count() > 1)
+                             ?? items.First();
+        var secondLevelItem = firstLevelItem.Children.Skip(Random.Shared.Next(0, firstLevelItem.Children.Count() - 1)).First();
+        var thirdLevelItem = secondLevelItem.Children.Skip(Random.Shared.Next(0, secondLevelItem.Children.Count() - 1)).First();
+        var forthLevelItem = thirdLevelItem.Children.Skip(Random.Shared.Next(0, thirdLevelItem.Children.Count() - 1)).First();
+
+        forthLevelItem.IsSelected = true;
+        //forthLevelItem.Id = 1102794386;
+
+        Assert.IsNotNull(items);
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.ParentItem, x => x.Parent)
+        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Virtualize, virtualize)
+        .Add(p => p.SelectProperty, s => s.IsSelected)
+        .Add(p => p.IDProperty, s => s.ID)
+        );
+
+        var pov = new PrivateObject(cut.Instance);
+        var firstLevelNode = cut.Instance.GetNode(firstLevelItem);
+        Assert.IsNotNull(firstLevelNode);
+        var secondLevelNode = firstLevelNode.GetNode(secondLevelItem);
+        Assert.IsNotNull(secondLevelNode);
+        var thirdLevelNode = secondLevelNode.GetNode(thirdLevelItem);
+        Assert.IsNotNull(thirdLevelNode);
+        if (thirdLevelNode._children.Count == 1)
+            Assert.IsTrue(((SayehTreeViewCheckboxItem<HierarchycalItem>)thirdLevelNode!).CheckState);
+        else
+            Assert.IsNull(((SayehTreeViewCheckboxItem<HierarchycalItem>)thirdLevelNode!).CheckState);
+
+        if (secondLevelNode._children.Count > 1 || ((SayehTreeViewCheckboxItem<HierarchycalItem>)thirdLevelNode!).CheckState is null)
+            Assert.IsNull(((SayehTreeViewCheckboxItem<HierarchycalItem>)secondLevelNode!).CheckState);
+        else
+            Assert.IsTrue(((SayehTreeViewCheckboxItem<HierarchycalItem>)secondLevelNode!).CheckState);
+
+        Assert.IsNull(((SayehTreeViewCheckboxItem<HierarchycalItem>)firstLevelNode!).CheckState);
+
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    public void TreeViewCheckboxItem_SetParentOfCheckedItemToNull(bool virtualize)
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(4, 4);
+
+        var firstLevelItem = items.FirstOrDefault(i => i.Children != null && i.Children.Count() > 1)
+                             ?? items.First();
+        var secondLevelItem = firstLevelItem.Children.Skip(Random.Shared.Next(0, firstLevelItem.Children.Count() - 1)).First();
+        var thirdLevelItem = secondLevelItem.Children.Skip(Random.Shared.Next(0, secondLevelItem.Children.Count() - 1)).First();
+        var forthLevelItem = thirdLevelItem.Children.Skip(Random.Shared.Next(0, thirdLevelItem.Children.Count() - 1)).First();
+
+        forthLevelItem.IsSelected = true;
+        //forthLevelItem.Id = 1102794386;
+
+        Assert.IsNotNull(items);
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.ParentItem, x => x.Parent)
+        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Virtualize, virtualize)
+        .Add(p => p.SelectProperty, s => s.IsSelected)
+        .Add(p => p.IDProperty, s => s.ID)
+        );
+
+        var pov = new PrivateObject(cut.Instance);
+        var firstLevelNode = cut.Instance.GetNode(firstLevelItem) as SayehTreeViewCheckboxItem<HierarchycalItem>;
+        Assert.IsNotNull(firstLevelNode);
+        var firstLevelNodePov = new PrivateObject(firstLevelNode);
+
+        if ((firstLevelNodePov.GetFieldOrProperty("_children") as Dictionary<string, SayehTreeViewItem<HierarchycalItem>>)!.Count() > 1)
+        {
+            Assert.IsNull(firstLevelNodePov.GetFieldOrProperty("CheckState").As<bool?>());
+            Assert.IsFalse(firstLevelNode._selectProperty.Invoke(firstLevelItem).As<bool>());
+        }
+        else
+        {
+            Assert.IsTrue(firstLevelNodePov.GetFieldOrProperty("CheckState").As<bool>());
+            Assert.IsFalse(firstLevelNode._selectProperty.Invoke(firstLevelItem).As<bool>());
+        }
+
+        Assert.IsFalse(firstLevelNode.InitiallySelected);
+
+        var secondLevelNode = firstLevelNode.GetNode(secondLevelItem) as SayehTreeViewCheckboxItem<HierarchycalItem>;
+        Assert.IsNotNull(secondLevelNode);
+        var secondLevelNodePov = new PrivateObject(secondLevelNode);
+
+        if ((secondLevelNodePov.GetFieldOrProperty("_children") as Dictionary<string, SayehTreeViewItem<HierarchycalItem>>)!.Count() > 1)
+        {
+            Assert.IsNull(secondLevelNodePov.GetFieldOrProperty("CheckState").As<bool?>());
+            Assert.IsFalse(secondLevelNode._selectProperty.Invoke(firstLevelItem).As<bool>());
+        }
+        else
+        {
+            Assert.IsTrue(secondLevelNodePov.GetFieldOrProperty("CheckState").As<bool?>());
+            Assert.IsFalse(secondLevelNode._selectProperty.Invoke(firstLevelItem).As<bool>());
+        }
+
+        var thirdLevelNode = secondLevelNode.GetNode(thirdLevelItem) as SayehTreeViewCheckboxItem<HierarchycalItem>;
+        Assert.IsNotNull(thirdLevelNode);
+        var thirdLevelNodePov = new PrivateObject(thirdLevelNode);
+        if ((thirdLevelNodePov.GetFieldOrProperty("_children") as Dictionary<string, SayehTreeViewItem<HierarchycalItem>>)!.Count() > 1)
+        {
+            Assert.IsNull(thirdLevelNodePov.GetFieldOrProperty("CheckState").As<bool?>());
+            Assert.IsFalse(thirdLevelNode._selectProperty.Invoke(firstLevelItem).As<bool>());
+        }
+        else
+        {
+            Assert.IsTrue(thirdLevelNodePov.GetFieldOrProperty("CheckState").As<bool?>());
+            Assert.IsFalse(thirdLevelNode._selectProperty.Invoke(firstLevelItem).As<bool>());
+        }
+    }
+
+    //[TestMethod]
+    //[DataRow(false)]
+    public void TreeViewCheckboxItem_SetParentOfCheckedItemToFalse(bool virtualize)
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(4, 4);
+
+        var firstLevelItem = items.FirstOrDefault(i => i.Children != null && i.Children.Count() > 1)
+                             ?? items.First();
+        var first2ndLevelItem = items.FirstOrDefault(i => i.Children != null && i.Children.Count() > 1)
+                             ?? items.Skip(1).First();
+        var secondLevelItem = firstLevelItem.Children.Skip(Random.Shared.Next(0, firstLevelItem.Children.Count() - 1)).First();
+        var thirdLevelItem = secondLevelItem.Children.Skip(Random.Shared.Next(0, secondLevelItem.Children.Count() - 1)).First();
+        var forthLevelItem = thirdLevelItem.Children.Skip(Random.Shared.Next(0, thirdLevelItem.Children.Count() - 1)).First();
+
+        forthLevelItem.IsSelected = true;
+        //first2ndLevelItem.Id = 1102794386;
+
+        Assert.IsNotNull(items);
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.ParentItem, x => x.Parent)
+        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Virtualize, virtualize)
+        .Add(p => p.SelectProperty, s => s.IsSelected)
+        .Add(p => p.IDProperty, s => s.ID)
+        );
+
+        var pov = new PrivateObject(cut.Instance);
+        var firstLevelNode = cut.Instance.GetNode(first2ndLevelItem) as SayehTreeViewCheckboxItem<HierarchycalItem>;
+        Assert.IsNotNull(firstLevelNode);
+       
+        Assert.IsNull(firstLevelNode.CheckState);
+        forthLevelItem.IsSelected = false;
+        
+        Assert.IsFalse(firstLevelNode.CheckState);
+
+
+    }
+
 
     #endregion
 }
