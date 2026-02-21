@@ -17,7 +17,7 @@
         {
             var random = new Random((int)DateTime.Now.Ticks + Random.Shared.Next());
             var id = random.Next();
-            var item = new HierarchycalItem(id,$"item {id}",parent);
+            var item = new HierarchycalItem($"item {id}",parent);
             var cdepth = ++currentDepth;
             var elc = currentDepth ==0 ? eachLevelCount : random.Next(1, eachLevelCount);
             if (currentDepth < maxDepth)
@@ -28,9 +28,9 @@
             return item;
         }
 
-        public HierarchycalItem(int id,string name, HierarchycalItem? parent)
+        public HierarchycalItem(string name, HierarchycalItem? parent)
         {
-            Id = id;
+            ID = Guid.NewGuid();
             Name = name;
             Children = new List<HierarchycalItem>();
             Parent = parent;
@@ -38,13 +38,18 @@
 
         public HierarchycalItem? Parent { get; set; }
 
-        public int Id { get; set; }
+        public Guid ID { get; set; }
 
         public string Name { get; set; }
 
         public IList<HierarchycalItem> Children { get; set; }
 
         public bool IsSelected { get; set; }
+
+        public override string ToString()
+        {
+            return ID.ToString();
+        }
 
     }
 }

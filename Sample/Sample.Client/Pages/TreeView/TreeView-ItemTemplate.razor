@@ -2,12 +2,12 @@
 <h3>TreeView Hierarchy Source</h3>
 @if (Items is not null)
 {
-    <SayehTreeView TItem="object" Items="Items" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem">
+    <SayehTreeView TItem="NestedItem" Items="Items" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem" IDProperty="i => i.ID">
         <ItemTemplate>
             @{
                 var item = (WeatherForecastGroup)context;
             }
-            <SayehTreeViewItem TItem="object"
+            <SayehTreeViewItem TItem="NestedItem"
                                Item="item"
                                InitiallySelected=false
                                Children="f=> ((WeatherForecastGroup)f).Items"
@@ -22,7 +22,7 @@
                     @{
                         var weatherItem = (WeatherForecast)weatherContext;
                     }
-                    <SayehTreeViewItem TItem="object"
+                    <SayehTreeViewItem TItem="NestedItem"
                                        ParentItem="p=> (p as WeatherForecast)?.Group"
                                        Item="weatherItem"
                                        InitiallySelected="weatherItem == SelectedItem">

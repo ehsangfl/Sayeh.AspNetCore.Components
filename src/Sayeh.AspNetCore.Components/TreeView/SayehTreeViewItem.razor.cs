@@ -1,4 +1,4 @@
-﻿using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.FluentUI.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +35,7 @@ namespace Sayeh.AspNetCore.Components
         public SayehTreeView<TItem>? Owner { get; set; }
 
         [Parameter]
-        public Func<TItem, TItem?>? ParentItem { get; set; }
+        public Func<TItem, TItem>? ParentItem { get; set; }
 
         [Parameter]
         public Func<TItem, IEnumerable<TItem>>? Children { get; set; }
@@ -153,14 +153,16 @@ namespace Sayeh.AspNetCore.Components
         internal void Register(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _children[treeItem.Id!] = treeItem;
-
+            _children[Owner!.IDProperty.Invoke(treeItem.Item!).ToString()!] = treeItem;
+            var checkboxParent = this as SayehTreeViewCheckboxItem<TItem>;
+            //checkboxParent?.RecalculateState();
+            //checkboxParent?.BubbleRecalculateToParents();
         }
 
-        internal void Unregister(SayehTreeViewItem<TItem> fluentTreeItem)
+        internal void Unregister(SayehTreeViewItem<TItem> treeItem)
         {
-            ArgumentNullException.ThrowIfNull(fluentTreeItem);
-            _children.Remove(fluentTreeItem.Id!);
+            ArgumentNullException.ThrowIfNull(treeItem);
+            _children.Remove(Owner!.IDProperty.Invoke(treeItem.Item!).ToString()!);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -182,6 +184,12 @@ namespace Sayeh.AspNetCore.Components
 
         #endregion
 
+        #region API
+
+
+        public SayehTreeViewItem<TItem>? GetNode(TItem item) => _children.FirstOrDefault(f => f.Value.Item == item).Value;
+
+        #endregion
 
     }
 }

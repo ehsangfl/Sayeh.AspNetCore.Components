@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="..\..\..\Sample\Sample.Client\Model\CustomTypeModel.cs" Link="Model\CustomTypeModel.cs" />
     <Compile Include="..\..\..\Sample\Sample.Client\Model\HierarchycalItem.cs" Link="Model\HierarchycalItem.cs" />
+    <Compile Include="..\..\..\Sample\Sample.Client\Model\NestedItem.cs" Link="Model\NestedItem.cs" />
     <Compile Include="..\..\..\Sample\Sample.Client\Model\WeatherForecastGroup.cs" Link="Model\WeatherForecastGroup.cs" />
     <Compile Include="..\..\..\Sample\Sample.Client\Model\WeatherForecastModel.cs" Link="Model\WeatherForecastModel.cs" />
     <Compile Include="..\..\..\Sample\Sample.Client\Model\WeatherForecastModel.NotifyPropertyChanged.cs" Link="Model\WeatherForecastModel.NotifyPropertyChanged.cs" />

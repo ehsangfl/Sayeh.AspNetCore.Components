@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Sample.Client.Model
 {
 
-    public class WeatherForecast
+    public class WeatherForecast : NestedItem
     {
 
         public static IList<WeatherForecast> GenerateItems()
