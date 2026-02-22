@@ -347,7 +347,6 @@ public class SayehTreeViewTest : TestBase
         .Add(p => p.Text, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
-        .Add(p => p.IDProperty, s => s.ID)
         );
 
         var pov = new PrivateObject(cut.Instance);
@@ -386,7 +385,6 @@ public class SayehTreeViewTest : TestBase
         .Add(p => p.Text, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
-        .Add(p => p.IDProperty, s => s.ID)
         );
 
         var pov = new PrivateObject(cut.Instance);
@@ -434,7 +432,6 @@ public class SayehTreeViewTest : TestBase
         .Add(p => p.Text, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
-        .Add(p => p.IDProperty, s => s.ID)
         );
 
         var pov = new PrivateObject(cut.Instance);
@@ -511,7 +508,6 @@ public class SayehTreeViewTest : TestBase
         .Add(p => p.Text, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
-        .Add(p => p.IDProperty, s => s.ID)
         );
 
         var pov = new PrivateObject(cut.Instance);
