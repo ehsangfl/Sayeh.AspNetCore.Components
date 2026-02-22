@@ -3,8 +3,8 @@
 @typeparam TItem
 @if (Item is not null && Owner is not null)
 {
-    var selectedItemID = Owner.SelectedItem is not null ? Owner.IDProperty.Invoke(Owner.SelectedItem) : null;
-    var id = Owner.IDProperty.Invoke(Item);
+    var selectedItemID = Owner.SelectedItem is not null ? Owner.GetKeyForItem(Owner.SelectedItem) : null;
+    var id = Owner.GetKeyForItem(Item);
     var txt = Text != null ? Text(Item) : Item.ToString();
     <CascadingValue Value="this" IsFixed="true">
         <fluent-tree-item @ref=Element
@@ -49,7 +49,7 @@
                         var selectedItemHashCode = Owner._selectProperty;
                         foreach (var item in items)
                         {
-                            var childId = Owner.IDProperty.Invoke(item).ToString()!;
+                            var childId = Owner.GetKeyForItem(item).ToString()!;
                             <SayehTreeViewCheckboxItem Item="item"
                                                        Children="Children"
                                                        SelectProperty="SelectProperty"

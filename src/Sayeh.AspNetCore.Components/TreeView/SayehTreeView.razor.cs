@@ -3,6 +3,7 @@ using Microsoft.FluentUI.AspNetCore.Components.Utilities;
 using NetTopologySuite.Index.HPRtree;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -25,6 +26,10 @@ namespace Sayeh.AspNetCore.Components
         TItem? _selectedItem;
         Expression<Func<TItem, bool>> _selectPropertyExpression;
         internal Func<TItem, bool> _selectProperty;
+
+        // Keeps one generated key per item instance (does not persist across replacements)
+        private readonly ConditionalWeakTable<TItem, string> _generatedKeys = new();
+
 
         #endregion
 
@@ -55,8 +60,7 @@ namespace Sayeh.AspNetCore.Components
         public Expression<Func<TItem, bool>> SelectProperty { get; set; }
 
         [Parameter]
-        [EditorRequired]
-        public Func<TItem, object> IDProperty { get; set; }
+        public Expression<Func<TItem, object>>? KeySelector { get; set; }
 
         #endregion
 
@@ -169,14 +173,18 @@ namespace Sayeh.AspNetCore.Components
         internal void Register(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _allItems[IDProperty.Invoke(treeItem.Item!).ToString()!] = treeItem;
+            var item = treeItem.Item!;
+            var key = GetKeyForItem(item);
+            _allItems[key] = treeItem;
             treeItem.Parent?.Register(treeItem);
         }
 
         internal void Unregister(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _allItems.Remove(IDProperty.Invoke(treeItem.Item!).ToString()!);
+            var item = treeItem.Item!;
+            var key = GetKeyForItem(item);
+            _allItems.Remove(key);
             treeItem.Parent?.Unregister(treeItem);
         }
 
@@ -301,6 +309,15 @@ namespace Sayeh.AspNetCore.Components
             _disposed = true;
         }
 
+
+        // Call this from your .razor where you currently use @key
+        internal string GetKeyForItem(TItem item)
+        {
+            if (item is null)
+                return Guid.NewGuid().ToString("N");
+
+            return _generatedKeys.GetValue(item, _ => Guid.NewGuid().ToString("N"));
+        }
 
         #endregion
 

@@ -106,8 +106,6 @@ namespace Sayeh.AspNetCore.Components
             IsValid = true;
         }
 
-
-
         private void CheckedChanged(bool value)
         {
             if (_selectorPath is null && _selectPropertyExpression is not null)

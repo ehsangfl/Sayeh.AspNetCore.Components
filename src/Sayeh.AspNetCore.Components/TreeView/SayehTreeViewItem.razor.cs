@@ -153,7 +153,7 @@ namespace Sayeh.AspNetCore.Components
         internal void Register(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _children[Owner!.IDProperty.Invoke(treeItem.Item!).ToString()!] = treeItem;
+            _children[Owner!.GetKeyForItem(treeItem.Item!).ToString()!] = treeItem;
             var checkboxParent = this as SayehTreeViewCheckboxItem<TItem>;
             //checkboxParent?.RecalculateState();
             //checkboxParent?.BubbleRecalculateToParents();
@@ -162,7 +162,7 @@ namespace Sayeh.AspNetCore.Components
         internal void Unregister(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _children.Remove(Owner!.IDProperty.Invoke(treeItem.Item!).ToString()!);
+            _children.Remove(Owner!.GetKeyForItem(treeItem.Item!).ToString()!);
         }
 
         protected virtual void Dispose(bool disposing)
