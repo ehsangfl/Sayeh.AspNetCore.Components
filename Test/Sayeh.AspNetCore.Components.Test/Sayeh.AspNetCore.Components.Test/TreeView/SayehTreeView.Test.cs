@@ -28,8 +28,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.SelectedItem, forthLevelItem)
         .Add(p => p.Virtualize, virtualize)
         );
@@ -68,7 +68,7 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.SelectedItem, forthLevelItem)
         .Add(p => p.Virtualize, virtualize)
         );
@@ -173,8 +173,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Filter, (x, txt) => x.Name.Contains(txt))
         .Add(p => p.Virtualize, virtualize)
         );
@@ -209,8 +209,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Filter, (x, txt) => x.Name.Contains(txt))
         .Add(p => p.Virtualize, virtualize)
         );
@@ -258,8 +258,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Filter, (x, txt) => x.Name.Contains(txt))
         .Add(p => p.Virtualize, virtualize)
         );
@@ -301,8 +301,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Filter, (x, txt) => x.Name.Contains(txt))
         .Add(p => p.Virtualize, virtualize)
         );
@@ -343,8 +343,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
         );
@@ -381,8 +381,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
         );
@@ -428,8 +428,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
         );
@@ -504,8 +504,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
         );

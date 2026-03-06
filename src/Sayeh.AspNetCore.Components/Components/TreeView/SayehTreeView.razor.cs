@@ -38,8 +38,17 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public IEnumerable<TItem>? Items { get; set; }
 
+        /// <summary>
+        /// SayehTreeview finds children of each item and render child nodes
+        /// </summary>
         [Parameter]
         public Func<TItem, IEnumerable<TItem>>? Children { get; set; }
+
+        /// <summary>
+        /// With this property, SayehTreeview finds parent item of the each item to can keep sync the state of parent and childs
+        /// </summary>
+        [Parameter]
+        public Func<TItem, TItem?>? Parent { get; set; }
 
         [Parameter]
         public TItem? SelectedItem { get; set; }
@@ -50,17 +59,14 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public bool Virtualize { get; set; }
 
+        /// <summary>
+        /// if ItemTemplate does not setted, SayehTreeView uses this property to render a text for each node
+        /// </summary>
         [Parameter]
-        public Func<TItem, string>? Text { get; set; }
-
-        [Parameter]
-        public Func<TItem, TItem?>? ParentItem { get; set; }
+        public Func<TItem, string>? DisplayText { get; set; }
 
         [Parameter]
         public Expression<Func<TItem, bool>> SelectProperty { get; set; }
-
-        [Parameter]
-        public Expression<Func<TItem, object>>? KeySelector { get; set; }
 
         #endregion
 
@@ -80,6 +86,13 @@ namespace Sayeh.AspNetCore.Components
         /// </summary>
         [Parameter]
         public EventCallback<TItem> OnExpandedChange { get; set; }
+
+        [Parameter]
+        public EventCallback<TItem> ItemChecked { get; set; }
+
+        [Parameter]
+        public EventCallback<TItem> ItemUnchecked { get; set; }
+
 
         #endregion
 
@@ -173,19 +186,19 @@ namespace Sayeh.AspNetCore.Components
         internal void Register(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
+            ArgumentNullException.ThrowIfNull(treeItem.Id);
             var item = treeItem.Item!;
-            var key = GetKeyForItem(item);
-            _allItems[key] = treeItem;
-            treeItem.Parent?.Register(treeItem);
+            _allItems[treeItem.Id] = treeItem;
+            treeItem.ParentNode?.Register(treeItem);
         }
 
         internal void Unregister(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
+            ArgumentNullException.ThrowIfNull(treeItem.Id);
             var item = treeItem.Item!;
-            var key = GetKeyForItem(item);
-            _allItems.Remove(key);
-            treeItem.Parent?.Unregister(treeItem);
+            _allItems.Remove(treeItem.Id);
+            treeItem.ParentNode?.Unregister(treeItem);
         }
 
         private void SetSelectedNode(SayehTreeViewItem<TItem> node)
@@ -197,7 +210,7 @@ namespace Sayeh.AspNetCore.Components
                 _selectedNode.SetSelected(false);
             node.SetSelected(true);
             _selectedNode = node;
-            if (node.Expanded || (node.Parent?.Expanded ?? true))
+            if (node.Expanded || (node.ParentNode?.Expanded ?? true))
                 return;
             var parentsNode = findCollapsedParents(node);
             foreach (var item in parentsNode)
@@ -209,12 +222,12 @@ namespace Sayeh.AspNetCore.Components
         private Stack<SayehTreeViewItem<TItem>> findCollapsedParents(SayehTreeViewItem<TItem> node)
         {
             var parents = new Stack<SayehTreeViewItem<TItem>>();
-            if (node.Parent is null)
+            if (node.ParentNode is null)
                 return parents;
-            if (!node.Parent.Expanded)
+            if (!node.ParentNode.Expanded)
             {
-                parents.Push(node.Parent);
-                foreach (var pr in findCollapsedParents(node.Parent).Reverse())
+                parents.Push(node.ParentNode);
+                foreach (var pr in findCollapsedParents(node.ParentNode).Reverse())
                     parents.Push(pr);
             }
             return parents;
@@ -225,7 +238,7 @@ namespace Sayeh.AspNetCore.Components
             _selectedItem = selectedItem;
             if (selectedItem is null)
                 return;
-            if (this.ParentItem is not null)
+            if (this.Parent is not null)
             {
                 var parents = findParents(selectedItem);
                 if (parents.Count > 0)
@@ -243,7 +256,12 @@ namespace Sayeh.AspNetCore.Components
                         SayehTreeViewItem<TItem>? lastParent = firstNode.Value;
                         while (parents.TryPop(out var item))
                         {
-                            var parent = lastParent._children.First(f => f.Value.Item == item);
+                            if (lastParent._children.Count == 0 && Children is not null)
+                            {
+                                if (Children.Invoke(firtParent).Count() > 0)
+                                    await Task.Delay(100);
+                            }
+                            var parent = lastParent._children.FirstOrDefault(f => f.Value.Item == item);
                             lastParent = parent.Value;
                             if (!lastParent.Expanded)
                             {
@@ -274,9 +292,9 @@ namespace Sayeh.AspNetCore.Components
 
         private Stack<TItem> findParents(TItem item)
         {
-            ArgumentNullException.ThrowIfNull(ParentItem);
+            ArgumentNullException.ThrowIfNull(Parent);
             var parents = new Stack<TItem>();
-            var parent = ParentItem(item);
+            var parent = Parent(item);
             if (parent is not null)
             {
                 parents.Push(parent);
@@ -310,7 +328,6 @@ namespace Sayeh.AspNetCore.Components
         }
 
 
-        // Call this from your .razor where you currently use @key
         internal string GetKeyForItem(TItem item)
         {
             if (item is null)

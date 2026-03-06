@@ -150,6 +150,12 @@
   <data name="SearchingMessage" xml:space="preserve">
     <value>Searching</value>
   </data>
+  <data name="Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="SelectFromTree" xml:space="preserve">
+    <value>Select from tree</value>
+  </data>
   <data name="ToValue" xml:space="preserve">
     <value>To</value>
   </data>

@@ -2,7 +2,7 @@
 <h3>TreeView Hierarchy Source</h3>
 @if (Items is not null)
 {
-    <SayehTreeView TItem="NestedItem" Items="Items" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem" IDProperty="i => i.ID">
+    <SayehTreeView TItem="NestedItem" Items="Items" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem">
         <ItemTemplate>
             @{
                 var item = (WeatherForecastGroup)context;

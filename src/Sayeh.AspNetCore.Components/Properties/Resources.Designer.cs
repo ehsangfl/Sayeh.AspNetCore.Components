@@ -160,6 +160,24 @@ namespace Sayeh.AspNetCore.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select.
+        /// </summary>
+        internal static string Select {
+            get {
+                return ResourceManager.GetString("Select", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select from tree.
+        /// </summary>
+        internal static string SelectFromTree {
+            get {
+                return ResourceManager.GetString("SelectFromTree", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To.
         /// </summary>
         internal static string ToValue {

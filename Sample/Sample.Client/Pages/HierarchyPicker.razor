@@ -1,0 +1,18 @@
+﻿@page "/hierarchy-picker"
+<SayehHierarchyPicker 
+    Items="Items" 
+    OptionText="f=> f.Name" 
+    ParentItem="f=> f.Parent" 
+    Children="f=> f.Children"
+    OptionValue="f=> f.ID.ToString()"/>
+
+@code{
+    public IEnumerable<HierarchycalItem> Items { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        var source = HierarchycalItem.GetHierarchycalItems(4, 4);
+        Items = source.Flatten();
+        base.OnInitialized();
+    }
+}

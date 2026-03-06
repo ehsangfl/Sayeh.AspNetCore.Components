@@ -150,6 +150,12 @@
   <data name="SearchingMessage" xml:space="preserve">
     <value>درحال جستجو</value>
   </data>
+  <data name="Select" xml:space="preserve">
+    <value>انتخاب</value>
+  </data>
+  <data name="SelectFromTree" xml:space="preserve">
+    <value>انتخاب از ساختار درختی</value>
+  </data>
   <data name="ToValue" xml:space="preserve">
     <value>تا</value>
   </data>

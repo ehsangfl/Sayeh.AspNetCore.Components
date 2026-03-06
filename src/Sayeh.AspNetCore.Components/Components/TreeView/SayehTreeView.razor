@@ -35,10 +35,9 @@
                         <SayehTreeViewItem Item="item"
                                            InitiallySelected=@(id == selectedItemID)
                                            Children="Children"
-                                           ParentItem="ParentItem"
-                                           Id="id"
+                                           ParentItem="Parent"
                                            @key=id
-                                           Text="Text" />
+                                           Text="DisplayText" />
                     }
                 }
                 else
@@ -49,9 +48,9 @@
                         <SayehTreeViewCheckboxItem Item="item"
                                                    InitiallySelected=@(id == selectedItemID)
                                                    Children="Children"
-                                                   ParentItem="ParentItem"
+                                                   ParentItem="Parent"
                                                    @key=id
-                                                   Text="Text" />
+                                                   Text="DisplayText" />
                     }
 
                 }
