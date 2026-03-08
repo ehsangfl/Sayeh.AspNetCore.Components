@@ -20,13 +20,13 @@
                           @onexpandedchange="@HandleExpandedChangeAsync"
                           @attributes="AdditionalAttributes">
 
-            @if (ItemTemplate == null)
+            @if (Template == null)
             {
                 <span class="treeitem-text">@txt</span>
             }
             else
             {
-                @ItemTemplate(Item)
+                @Template(Item)
             }
 
             @if (Owner != null && Children != null)
@@ -39,7 +39,7 @@
                 }
                 else
                 {
-                    @if (ChildrenTemplate is null)
+                    @if (ChildContent is null)
                     {
                         foreach (var item in items)
                         {
@@ -48,6 +48,7 @@
                                                Children="Children"
                                                InitiallySelected=@(childId == selectedItemID)
                                                ParentItem="ParentItem"
+                                               Template="Template"
                                                @key=childId
                                                Text="Text" />
                         }
@@ -55,10 +56,7 @@
                     }
                     else
                     {
-                        foreach (var item in items)
-                        {
-                            @ChildrenTemplate(item)
-                        }
+                        @ChildContent(Item)
                     }
                 }
             }

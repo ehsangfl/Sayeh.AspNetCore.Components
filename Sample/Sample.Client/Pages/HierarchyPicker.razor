@@ -4,7 +4,14 @@
     OptionText="f=> f.Name" 
     ParentItem="f=> f.Parent" 
     Children="f=> f.Children"
-    OptionValue="f=> f.ID.ToString()"/>
+    OptionValue="f=> f.ID.ToString()">
+    <ItemTemplate>
+        <div>act @context.Name</div>
+    </ItemTemplate>
+    <TreeItemTemplate>
+        <div>tv @context.Name</div>
+    </TreeItemTemplate>
+</SayehHierarchyPicker>
 
 @code{
     public IEnumerable<HierarchycalItem> Items { get; set; } = default!;

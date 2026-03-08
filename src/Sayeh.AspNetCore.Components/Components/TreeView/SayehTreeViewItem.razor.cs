@@ -26,16 +26,16 @@ namespace Sayeh.AspNetCore.Components
         public TItem? Item { get; set; }
 
         [Parameter]
-        public RenderFragment<TItem>? ItemTemplate { get; set; }
+        public RenderFragment<TItem>? Template { get; set; }
 
         [Parameter]
-        public RenderFragment<TItem>? ChildrenTemplate { get; set; }
+        public RenderFragment<TItem>? ChildContent { get; set; }
 
         [CascadingParameter]
         public SayehTreeView<TItem>? Owner { get; set; }
 
         [Parameter]
-        public Func<TItem, TItem>? ParentItem { get; set; }
+        public Func<TItem, TItem>? Parent { get; set; }
 
         [Parameter]
         public Func<TItem, IEnumerable<TItem>>? Children { get; set; }

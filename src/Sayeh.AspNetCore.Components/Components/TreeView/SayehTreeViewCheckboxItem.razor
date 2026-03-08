@@ -44,7 +44,7 @@
                 }
                 else if (items is not null)
                 {
-                    @if (ChildrenTemplate is null)
+                    @if (ChildContent is null)
                     {
                         var selectedItemHashCode = Owner._selectProperty;
                         foreach (var item in items)
@@ -55,6 +55,7 @@
                                                        SelectProperty="SelectProperty"
                                                        InitiallySelected=@(childId == selectedItemID)
                                                        ParentItem="ParentItem"
+                                                       Template="Template"
                                                        @key=childId
                                                        Text="Text" />
                         }
@@ -62,10 +63,7 @@
                     }
                     else
                     {
-                        foreach (var item in items)
-                        {
-                            @ChildrenTemplate(item)
-                        }
+                        @ChildContent(Item)
                     }
                 }
             }
@@ -75,13 +73,13 @@
 @code {
     RenderFragment checkboxTemplate(string txt) => __builder =>
     {
-        @if (ItemTemplate == null)
+        @if (Template == null)
         {
             <span class="treeitem-text">@txt</span>
         }
         else
         {
-            @ItemTemplate(Item!)
+            @Template(Item!)
         }
     };
 }

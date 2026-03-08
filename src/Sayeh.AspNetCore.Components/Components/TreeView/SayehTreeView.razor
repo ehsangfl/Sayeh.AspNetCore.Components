@@ -22,46 +22,43 @@
                       style="@Style"
                       @onselectedchange="@HandleCurrentSelectedChange"
                       @attributes="AdditionalAttributes">
-        @if (Items != null)
+        @if (Items != null && ChildContent is null)
         {
             var selectedItemID = _selectedItem is not null ? GetKeyForItem(_selectedItem).ToString() : null;
-            if (ItemTemplate is null)
-            {
-                if (SelectProperty is null)
-                {
-                    foreach (var item in Items)
-                    {
-                        var id = GetKeyForItem(item).ToString()!;
-                        <SayehTreeViewItem Item="item"
-                                           InitiallySelected=@(id == selectedItemID)
-                                           Children="Children"
-                                           ParentItem="Parent"
-                                           @key=id
-                                           Text="DisplayText" />
-                    }
-                }
-                else
-                {
-                    foreach (var item in Items)
-                    {
-                        var id = GetKeyForItem(item).ToString()!;
-                        <SayehTreeViewCheckboxItem Item="item"
-                                                   InitiallySelected=@(id == selectedItemID)
-                                                   Children="Children"
-                                                   ParentItem="Parent"
-                                                   @key=id
-                                                   Text="DisplayText" />
-                    }
 
+            if (SelectProperty is null)
+            {
+                foreach (var item in Items)
+                {
+                    var id = GetKeyForItem(item).ToString()!;
+                    <SayehTreeViewItem Item="item"
+                                       InitiallySelected=@(id == selectedItemID)
+                                       Children="Children"
+                                       ParentItem="Parent"
+                                       Template="ItemTemplate"
+                                       @key=id
+                                       Text="DisplayText" />
                 }
             }
             else
             {
                 foreach (var item in Items)
                 {
-                    @ItemTemplate(item)
+                    var id = GetKeyForItem(item).ToString()!;
+                    <SayehTreeViewCheckboxItem Item="item"
+                                               InitiallySelected=@(id == selectedItemID)
+                                               Children="Children"
+                                               Template="ItemTemplate"
+                                               ParentItem="Parent"
+                                               @key=id
+                                               Text="DisplayText" />
                 }
+
             }
+        }
+        else if (ChildContent is not null)
+        {
+            @ChildContent
         }
     </fluent-tree-view>
 </CascadingValue>

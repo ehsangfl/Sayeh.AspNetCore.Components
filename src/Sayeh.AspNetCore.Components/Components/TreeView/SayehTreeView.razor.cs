@@ -68,6 +68,9 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public Expression<Func<TItem, bool>> SelectProperty { get; set; }
 
+        [Parameter]
+        public RenderFragment? ChildContent { get; set; }
+
         #endregion
 
         #region Events
@@ -233,59 +236,64 @@ namespace Sayeh.AspNetCore.Components
             return parents;
         }
 
-        private async ValueTask DisplaySelectedItem(TItem? selectedItem)
+        private ValueTask DisplaySelectedItem(TItem? selectedItem)
         {
             _selectedItem = selectedItem;
             if (selectedItem is null)
-                return;
+                return ValueTask.CompletedTask;
+
             if (this.Parent is not null)
+               return DisplaySelectedItemBasedOnItems(selectedItem);
+            else if (!Virtualize)
             {
-                var parents = findParents(selectedItem);
-                if (parents.Count > 0)
+                var node = GetNode(selectedItem);
+                if (node is not null)
                 {
-                    var firtParent = parents.Pop();
-                    var firstNode = _allItems.FirstOrDefault(f => f.Value.Item == firtParent);
-                    if (firstNode.Value is not null)
+                    SetSelectedNode(node);
+                }
+            }
+            return ValueTask.CompletedTask;
+        }
+
+        private async ValueTask DisplaySelectedItemBasedOnItems(TItem? selectedItem) {
+            var parents = findParents(selectedItem);
+            if (parents.Count > 0)
+            {
+                var firtParent = parents.Pop();
+                var firstNode = _allItems.FirstOrDefault(f => f.Value.Item == firtParent);
+                if (firstNode.Value is not null)
+                {
+                    if (!firstNode.Value.Expanded)
                     {
-                        if (!firstNode.Value.Expanded)
+                        firstNode.Value.SetExpanded(true);
+                        if (Virtualize)
+                            await Task.Delay(100);
+                    }
+                    SayehTreeViewItem<TItem>? lastParent = firstNode.Value;
+                    while (parents.TryPop(out var item))
+                    {
+                        if (lastParent._children.Count == 0 && Children is not null)
                         {
-                            firstNode.Value.SetExpanded(true);
+                            if (Children.Invoke(firtParent).Count() > 0)
+                                await Task.Delay(100);
+                        }
+                        var parent = lastParent._children.FirstOrDefault(f => f.Value.Item == item);
+                        lastParent = parent.Value;
+                        if (!lastParent.Expanded)
+                        {
+                            lastParent.SetExpanded(true);
                             if (Virtualize)
                                 await Task.Delay(100);
                         }
-                        SayehTreeViewItem<TItem>? lastParent = firstNode.Value;
-                        while (parents.TryPop(out var item))
-                        {
-                            if (lastParent._children.Count == 0 && Children is not null)
-                            {
-                                if (Children.Invoke(firtParent).Count() > 0)
-                                    await Task.Delay(100);
-                            }
-                            var parent = lastParent._children.FirstOrDefault(f => f.Value.Item == item);
-                            lastParent = parent.Value;
-                            if (!lastParent.Expanded)
-                            {
-                                lastParent.SetExpanded(true);
-                                if (Virtualize)
-                                    await Task.Delay(100);
-                            }
-                        }
-                        if (lastParent is not null)
-                        {
-                            if (_selectedNode is not null)
-                                _selectedNode.SetSelected(false);
-                            _selectedNode = lastParent._children.FirstOrDefault(w => w.Value.Item == selectedItem).Value;
-                            _selectedNode?.SetSelected(true);
-                        }
-
                     }
-                }
-            }
-            else if (!Virtualize)
-            {
-               var  node = _allItems.FirstOrDefault(f => f.Value.Item == SelectedItem).Value;
-                if (node is not null) {
-                    SetSelectedNode(node);
+                    if (lastParent is not null)
+                    {
+                        if (_selectedNode is not null)
+                            _selectedNode.SetSelected(false);
+                        _selectedNode = lastParent._children.FirstOrDefault(w => w.Value.Item == selectedItem).Value;
+                        _selectedNode?.SetSelected(true);
+                    }
+
                 }
             }
         }

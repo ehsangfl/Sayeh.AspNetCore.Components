@@ -2,40 +2,12 @@
 <h3>TreeView Hierarchy Source</h3>
 @if (Items is not null)
 {
-    <SayehTreeView TItem="NestedItem" Items="Items" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem">
+    <SayehTreeView Items="Items" @bind-SelectedItem="SelectedItem" Children="f=> f?.Children" Parent="p=> p?.Parent">
         <ItemTemplate>
             @{
-                var item = (WeatherForecastGroup)context;
+                var item = context as HierarchycalItem;
             }
-            <SayehTreeViewItem TItem="NestedItem"
-                               Item="item"
-                               InitiallySelected=false
-                               Children="f=> ((WeatherForecastGroup)f).Items"
-                               Text="f=> ((WeatherForecastGroup)f).Name">
-                <ItemTemplate Context="groupContext">
-                    @{
-                        var groupItem = groupContext as WeatherForecastGroup;
-                    }
-                    <span class="treeitem-text">@groupItem!.Name - (@groupItem!.Items.Count())</span>
-                </ItemTemplate>
-                <ChildrenTemplate Context="weatherContext">
-                    @{
-                        var weatherItem = (WeatherForecast)weatherContext;
-                    }
-                    <SayehTreeViewItem TItem="NestedItem"
-                                       ParentItem="p=> (p as WeatherForecast)?.Group"
-                                       Item="weatherItem"
-                                       InitiallySelected="weatherItem == SelectedItem">
-                        <ItemTemplate Context="wtiContext">
-                            @{
-                                var whiItem = wtiContext as WeatherForecast;
-                            }
-                            <span class="treeitem-text">@whiItem!.Date - @whiItem!.Tempreture</span>
-                        </ItemTemplate>
-                    </SayehTreeViewItem>
-
-                </ChildrenTemplate>
-            </SayehTreeViewItem>
+            <span class="treeitem-text">@item!.Name - (@item!.Children.Count())</span>
         </ItemTemplate>
     </SayehTreeView>
 
@@ -43,27 +15,19 @@
 }
 
 @code {
-    IEnumerable<WeatherForecastGroup>? Items { get; set; }
-    WeatherForecast? SelectedItem { get; set; }
+    IEnumerable<HierarchycalItem>? Items { get; set; }
+    HierarchycalItem? SelectedItem { get; set; }
 
 
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
-            Items = WeatherForecast.GenerateGroupedItems(); 
-            SelectedItem = Items.First().Items.FirstOrDefault();
+            Items = HierarchycalItem.GetHierarchycalItems(4,4);
+            SelectedItem = Items.First().Children.FirstOrDefault();
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);
     }
-
-    void setSelectedItem(object item)
-    {
-        this.SelectedItem = item as WeatherForecast;
-        InvokeAsync(StateHasChanged);
-    }
-
-    
 
 }
