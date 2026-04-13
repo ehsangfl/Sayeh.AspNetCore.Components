@@ -6,7 +6,7 @@
                    Items="Items"
                    Children="f => f.Children"
                    Parent=@(x => x.Parent)
-                   DisplayText="f => f.Name" 
+                   DisplayMember="f => f.Name" 
                    SelectProperty="f => f.IsSelected"
                    Virtualize=false
                    ItemChecked="ItemCheckChanged"

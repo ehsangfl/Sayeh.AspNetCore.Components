@@ -75,7 +75,7 @@ partial class SayehTreeView<TItem>
     {
         if (node.Item is null)
             return;
-        await InvokeAsync(() => _searchResult = Resources.SearchingMessage + " - " + (node.Text is not null ? node.Text(node.Item) : node.Item.ToString()));
+        await InvokeAsync(() => _searchResult = Resources.SearchingMessage + " - " + (node.DisplayMember is not null ? node.DisplayMember(node.Item) : node.Item.ToString()));
         if (Filter.Invoke(node.Item, text))
             _findedNodes.Add(node);
         var expanded = node.Expanded;
@@ -117,7 +117,7 @@ partial class SayehTreeView<TItem>
 
     void searchInItem(TItem item, string text)
     {
-        InvokeAsync(() => _searchResult = Resources.SearchingMessage + " - " + (DisplayText is not null ? DisplayText(item) : item.ToString()));
+        InvokeAsync(() => _searchResult = Resources.SearchingMessage + " - " + (DisplayMember is not null ? DisplayMember(item) : item.ToString()));
         if (Filter.Invoke(item, text))
             _findedItems.Add(item);
         searchInChildItems(item, text);

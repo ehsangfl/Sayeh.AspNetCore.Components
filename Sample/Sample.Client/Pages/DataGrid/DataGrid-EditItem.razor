@@ -1,14 +1,14 @@
 ﻿@page "/datagrid-edit"
 @using System.Collections.ObjectModel
 <h3>DataGrid</h3>
-@if (WeatherForecasts is null)
+@if (weatherForecasts is null)
 {
     <p>loading ...</p>
 }
 else
 {
     <label>editable datagrid</label>
-    <SayehDataGrid TItem="WeatherForecast" Items="WeatherForecasts" RowsDelete="OnRowsDeleted">
+    <SayehDataGrid TItem="WeatherForecast" Items="weatherForecasts" RowsDelete="OnRowsDeleted">
         <SayehSelectColumn Property="p => p.IsSelected" />
         <SayehPropertyColumn Property="p => p.Order" />
         <SayehDatePickerColumn Property="p => p.Date" />
@@ -17,11 +17,20 @@ else
         <SayehNumericTextboxColumn Property="p => p.Tempreture" />
         <SayehPropertyColumn Property="p => p.TemporatureF" />
         <SayehTextboxColumn Property="p => p.Description" />
+        <SayehHierarchyColumn TItem="WeatherForecast" TValue="Guid?" TOption="HierarchycalItem" Items="hierarchycalItems"
+                              ValueMember="v => v.ID"
+                              DisplayMember="f => f?.Name"
+                              Parent="f=> f.Parent"
+                              Children="f=> f.Children"
+                              SelectedItem="f=> f.Hierarchy"
+                              Property="f=> f.F_Hierarchy"
+                              Title="Hierarchy" />
     </SayehDataGrid>
 }
 @code {
 
-    private IList<WeatherForecast>? WeatherForecasts { get; set; }
+    private IList<WeatherForecast>? weatherForecasts { get; set; }
+    private IEnumerable<HierarchycalItem>? hierarchycalItems { get; set; }
 
     private DayType[]? DayTypes { get; set; }
 
@@ -30,7 +39,8 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            WeatherForecasts =  new ObservableCollection<WeatherForecast>(WeatherForecast.GenerateItems());
+            hierarchycalItems = HierarchycalItem.GetHierarchycalItems(3, 4).Flatten();
+            weatherForecasts = WeatherForecast.GenerateItems(hierarchycalItems);
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);
@@ -40,7 +50,7 @@ else
     {
         foreach (var item in list)
         {
-            WeatherForecasts!.Remove(item);
+            weatherForecasts!.Remove(item);
         }
     }
 

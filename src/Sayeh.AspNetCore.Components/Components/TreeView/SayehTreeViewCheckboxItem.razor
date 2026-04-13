@@ -5,7 +5,7 @@
 {
     var selectedItemID = Owner.SelectedItem is not null ? Owner.GetKeyForItem(Owner.SelectedItem) : null;
     //var id = Owner.GetKeyForItem(Item);
-    var txt = Text != null ? Text(Item) : Item.ToString();
+    var txt = DisplayMember != null ? DisplayMember(Item) : Item.ToString();
     <CascadingValue Value="this" IsFixed="true">
         <fluent-tree-item @ref=Element
                           class="@Class"
@@ -54,10 +54,10 @@
                                                        Children="Children"
                                                        SelectProperty="SelectProperty"
                                                        InitiallySelected=@(childId == selectedItemID)
-                                                       ParentItem="ParentItem"
+                                                       Parent="Parent"
                                                        Template="Template"
                                                        @key=childId
-                                                       Text="Text" />
+                                                       DisplayMember="DisplayMember" />
                         }
 
                     }

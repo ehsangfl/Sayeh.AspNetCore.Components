@@ -22,7 +22,7 @@
             @HeaderCellItemTemplate(this)
         }
         string? tooltip = Tooltip ? Title : null;
-        <div style="display:flex">
+        <div class="d-flex w-100">
             @if (this.SortingIsEnable())
             {
                 var sortableColumn = this as ISortableColumn<TItem>;

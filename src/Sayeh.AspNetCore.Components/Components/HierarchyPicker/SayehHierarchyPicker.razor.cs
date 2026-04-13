@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.FluentUI.AspNetCore.Components;
 using Sayeh.Essentials.Core;
+using System.Linq;
 
 namespace Sayeh.AspNetCore.Components;
 
@@ -31,7 +32,7 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     public bool Virtualize { get; set; }
 
     [Parameter]
-    public Func<TItem, TItem?>? ParentItem { get; set; }
+    public Func<TItem, TItem?>? Parent { get; set; }
 
     [Inject]
     public IDialogService DialogService { get; set; } = default!;
@@ -43,7 +44,7 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     // Summary:
     //     Gets or sets the function used to determine which text to display for each option.
     [Parameter]
-    public virtual Func<TItem, string?> OptionText { get; set; } = default!;
+    public virtual Func<TItem, string?> DisplayMember { get; set; } = default!;
 
     //
     // Summary:
@@ -52,11 +53,18 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     //     components.
     [Parameter]
     [EditorRequired]
-    public virtual Func<TItem, string?>? OptionValue { get; set; } = default!;
+    public virtual Func<TItem, string?>? ValueMember { get; set; } = default!;
 
     [Parameter]
     [EditorRequired]
     public IEnumerable<TItem> Items { get; set; } = default!;
+
+    #endregion
+
+    #region Events
+
+    [Parameter]
+    public EventCallback<TItem?> SelectedItemChanged { get; set; }
 
     #endregion
 
@@ -66,20 +74,21 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
 
     #region Functions
 
-    async void OpenDialog() {
+    async void OpenDialog()
+    {
         await _autocomplete.CloseDropdownAsync();
-        var parameter = new DialogParameters<TItem>() { Modal = true, Content = SelectedItem  };
-        
+        var parameter = new DialogParameters<TItem>() { Modal = true, Content = SelectedItem };
+
         parameter["Parameters"] = new HierarchyDialog<TItem>.Parameters(
-            Items?.Where(w => ParentItem?.Invoke(w) is null),
-            ParentItem,
+            Items?.Where(w => Parent?.Invoke(w) is null),
+            Parent,
             Children,
             TreeItemTemplate.Or(ItemTemplate),
-            OptionText,
+            DisplayMember,
             Virtualize);
-        
+
         //DialogService.CreateDialogCallback(this, TreeCallback);
-        var reference = await DialogService.ShowPanelAsync<TItem>(typeof(HierarchyDialog<TItem>), SelectedItem!,parameter);
+        var reference = await DialogService.ShowPanelAsync<TItem>(typeof(HierarchyDialog<TItem>), SelectedItem!, parameter);
         var result = await reference.Result;
         await TreeCallback(result);
     }
@@ -88,25 +97,33 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     {
         if (Filter.HasDelegate)
             Filter.InvokeAsync(e);
-        else if (OptionText is not null) {
+        else if (DisplayMember is not null)
+        {
             var txt = e.Text.Remove(" ");
-            e.Items = Items?.Where(w => OptionText.Invoke(w)?.Remove(" ")?.Contains(e.Text, StringComparison.OrdinalIgnoreCase) ?? false);
+            e.Items = Items?.Where(w => DisplayMember.Invoke(w)?.Remove(" ")?.Contains(e.Text, StringComparison.OrdinalIgnoreCase) ?? false);
         }
         else
         {
             var txt = e.Text.Remove(" ");
             e.Items = Items?.Where(w => w?.ToString()?.Remove(" ")?.Contains(e.Text, StringComparison.OrdinalIgnoreCase) ?? false);
         }
-            
+        var items = e.Items;
+        if (SelectedItem is not null && items is not null)
+        {
+            items = new List<TItem>() { SelectedItem }.Union(items);
+        }
+        e.Items = items;
     }
 
-    private Task TreeCallback(DialogResult result)
+    private async Task TreeCallback(DialogResult result)
     {
         if (result.Cancelled)
-            return Task.CompletedTask;
+            return;
         SelectedItem = result.Data as TItem;
-        InvokeAsync(StateHasChanged);
-        return Task.CompletedTask;
+        if (SelectedItem is not null && _autocomplete is not null && _autocomplete.Items is not null && !_autocomplete.Items.Contains(SelectedItem))
+        if (SelectedItemChanged.HasDelegate)
+            await SelectedItemChanged.InvokeAsync(SelectedItem);
+        await InvokeAsync(StateHasChanged);
     }
 
 

@@ -63,7 +63,7 @@ namespace Sayeh.AspNetCore.Components
         /// if ItemTemplate does not setted, SayehTreeView uses this property to render a text for each node
         /// </summary>
         [Parameter]
-        public Func<TItem, string>? DisplayText { get; set; }
+        public Func<TItem, string>? DisplayMember { get; set; }
 
         [Parameter]
         public Expression<Func<TItem, bool>> SelectProperty { get; set; }

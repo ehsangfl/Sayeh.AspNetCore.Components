@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@namespace Sayeh.AspNetCore.Components
+@typeparam TItem
+@typeparam TValue
+@typeparam TOption
+@inherits SayehComboboxColumn<TItem, TValue, TOption>
+@{
+    InternalGridContext.Grid.AddColumn(this);
+}
+
+@code {
+
+    public override void CellEditContent(RenderTreeBuilder __builder)
+    {
+        if (!InternalIsReadonly)
+        {
+            if (DisplayMember is null)
+                DisplayMember = f => f?.ToString()!;
+            <SayehHierarchyPicker TItem="TOption"
+                                  @ref=element
+                                  Items=Items
+                                  Class="w-100"
+                                  DisplayMember=DisplayMember
+                                  ValueMember="f=> ValueMember.Invoke(f)?.ToString()"
+                                  Parent="Parent"
+                                  Children="Children"
+                                  ItemTemplate="ItemTemplate"
+                                  TreeItemTemplate="ItemTemplate"
+                                  Filter="Filter"
+                                  @bind-SelectedItem=_selectedItem
+                                  @bind-Value=_selectedValue />
+        }
+        else
+        {
+            CellContent(__builder, Item!);
+        }
+    }
+
+}

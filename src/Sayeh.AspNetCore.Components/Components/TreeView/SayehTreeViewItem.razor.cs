@@ -41,7 +41,7 @@ namespace Sayeh.AspNetCore.Components
         public Func<TItem, IEnumerable<TItem>>? Children { get; set; }
 
         [Parameter]
-        public Func<TItem, string>? Text { get; set; }
+        public Func<TItem, string>? DisplayMember { get; set; }
 
         [Parameter]
         public bool Disabled { get; set; }

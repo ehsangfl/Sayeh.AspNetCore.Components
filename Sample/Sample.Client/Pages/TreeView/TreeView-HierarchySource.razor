@@ -2,7 +2,7 @@
 <h3>TreeView Hierarchy Source</h3>
 @if (Items is not null)
 {
-    <SayehTreeView Items="Items" Children="f => f.Children" Parent=@(x=> x.Parent) DisplayText="f => f.Name" @bind-SelectedItem="SelectedItem"
+    <SayehTreeView Items="Items" Children="f => f.Children" Parent=@(x=> x.Parent) DisplayMember="f => f.Name" @bind-SelectedItem="SelectedItem"
                    Filter="(f, txt) => f.Name.Contains(txt)"/>
 
     <label>selected Item is : @SelectedItem?.Name </label>

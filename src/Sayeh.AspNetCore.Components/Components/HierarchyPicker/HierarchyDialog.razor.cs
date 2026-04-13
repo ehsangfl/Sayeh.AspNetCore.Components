@@ -5,7 +5,12 @@ namespace Sayeh.AspNetCore.Components;
 partial class HierarchyDialog<TItem> where TItem : class
 {
 
-    internal record Parameters(IEnumerable<TItem>? Items, Func<TItem, TItem?>? ParentItem, Func<TItem, IEnumerable<TItem>>? Children, RenderFragment<TItem>? ItemTemplate, Func<TItem, string>? DisplayText, bool Virtualize);
+    internal record Parameters(IEnumerable<TItem>? Items
+        , Func<TItem, TItem?>? ParentItem
+        , Func<TItem, IEnumerable<TItem>>? Children
+        , RenderFragment<TItem>? ItemTemplate
+        , Func<TItem, string?>? DisplayMember
+        , bool Virtualize);
 
     #region Properties
 
@@ -20,7 +25,9 @@ partial class HierarchyDialog<TItem> where TItem : class
 
     public bool Virtualize { get; set; }
 
-    public Func<TItem, string>? DisplayText { get; set; }
+    public Func<TItem, string>? DisplayMember { get; set; }
+
+    public Func<TItem, string>? ValueMember { get; set; }
 
     public Func<TItem, TItem?>? ParentItem { get; set; }
 
@@ -46,7 +53,7 @@ partial class HierarchyDialog<TItem> where TItem : class
         Children = parameters.Children;
         ItemTemplate = parameters.ItemTemplate;
         Virtualize = parameters.Virtualize;
-        DisplayText = parameters.DisplayText;
+        DisplayMember = parameters.DisplayMember;
         ParentItem = parameters.ParentItem;
     }
 

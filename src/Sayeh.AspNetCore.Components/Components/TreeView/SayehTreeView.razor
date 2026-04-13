@@ -34,10 +34,10 @@
                     <SayehTreeViewItem Item="item"
                                        InitiallySelected=@(id == selectedItemID)
                                        Children="Children"
-                                       ParentItem="Parent"
+                                       Parent="Parent"
                                        Template="ItemTemplate"
                                        @key=id
-                                       Text="DisplayText" />
+                                       DisplayMember="DisplayMember" />
                 }
             }
             else
@@ -49,9 +49,9 @@
                                                InitiallySelected=@(id == selectedItemID)
                                                Children="Children"
                                                Template="ItemTemplate"
-                                               ParentItem="Parent"
+                                               Parent="Parent"
                                                @key=id
-                                               Text="DisplayText" />
+                                               DisplayMember="DisplayMember" />
                 }
 
             }

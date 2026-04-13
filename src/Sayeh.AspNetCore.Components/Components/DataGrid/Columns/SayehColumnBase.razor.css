@@ -1,6 +1,7 @@
 ﻿.col-title {
     padding: 0.4rem 0.8rem;
     user-select: none;
+    width:100%;
 }
 
 .col-title-text {
@@ -8,6 +9,7 @@
     overflow: hidden;
     white-space: nowrap;
     font-weight: 600;
+    width: 100%;
 }
 
 th.col-justify-center svg {

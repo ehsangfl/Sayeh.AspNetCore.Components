@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Sample.Client.Model
 {
@@ -47,6 +48,22 @@ namespace Sample.Client.Model
             return groups;
         }
 
+        public static IList<WeatherForecast> GenerateItems(IEnumerable<HierarchycalItem> hierarchycalItems)
+        {
+            var items = GenerateItems();
+            var h_Item = hierarchycalItems.Skip(hierarchycalItems.Count() / 2).First();
+            var item = items.Skip(items.Count() / 2).First();
+            item.Hierarchy = h_Item;
+            item.F_Hierarchy = h_Item.ID;
+
+
+            h_Item = hierarchycalItems.Take(hierarchycalItems.Count() / 2).First();
+            item = items.Take(items.Count() / 2).First();
+            item.Hierarchy = h_Item;
+            item.F_Hierarchy = h_Item.ID;
+            return items;
+        }
+
         public WeatherForecast()
         {
             ID = Guid.NewGuid();
@@ -65,6 +82,11 @@ namespace Sample.Client.Model
         public string? Description { get; set; }
 
         public WeatherForecastGroup Group { get; set; }
+
+        [Display(Name = "Hierarchycal item")]
+        public Guid? F_Hierarchy { get; set; }
+
+        public HierarchycalItem Hierarchy { get; set; }
 
         public override string ToString()
         {
