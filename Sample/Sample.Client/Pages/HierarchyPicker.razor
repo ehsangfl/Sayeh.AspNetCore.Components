@@ -1,0 +1,28 @@
+﻿@page "/hierarchy-picker"
+<SayehHierarchyPicker 
+    Items="Items" 
+    DisplayMember="f=> f.Name" 
+    Parent="f=> f.Parent" 
+    Children="f=> f.Children"
+    @bind-SelectedItem="Item"
+    ValueMember="f=> f.ID.ToString()">
+    <ItemTemplate>
+        <div>act @context.Name</div>
+    </ItemTemplate>
+    <TreeItemTemplate>
+        <div>tv @context.Name</div>
+    </TreeItemTemplate>
+</SayehHierarchyPicker>
+<div>Selected Item is : "@Item?.Name"</div>
+
+@code{
+    public IEnumerable<HierarchycalItem> Items { get; set; } = default!;
+    public HierarchycalItem Item { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var source = HierarchycalItem.GetHierarchycalItems(4, 4);
+        Items = source.Flatten();
+        base.OnInitialized();
+    }
+}

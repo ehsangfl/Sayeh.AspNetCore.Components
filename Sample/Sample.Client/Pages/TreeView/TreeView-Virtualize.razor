@@ -2,8 +2,8 @@
 <h3>TreeView virtualization</h3>
 @if (Items is not null)
 {
-    <SayehTreeView Items="Items" Children="f => f.Children" ParentItem=@(x=> x.Parent) Text="f => f.Name" @bind-SelectedItem="SelectedItem"
-                   Filter="(f, txt) => f.Name.Contains(txt)" Virtualize=true IDProperty="i => i.ID" />
+    <SayehTreeView Items="Items" Children="f => f.Children" Parent=@(x=> x.Parent) DisplayMember="f => f.Name" @bind-SelectedItem="SelectedItem"
+                   Filter="(f, txt) => f.Name.Contains(txt)" Virtualize=true/>
 
     <label>selected Item is : @SelectedItem?.Name </label>
 }

@@ -4,15 +4,15 @@
 @if (Item is not null && Owner is not null)
 {
     var selectedItemID = Owner.SelectedItem is not null ? Owner.GetKeyForItem(Owner.SelectedItem) : null;
-    var id = Owner.GetKeyForItem(Item);
-    var txt = Text != null ? Text(Item) : Item.ToString();
+    //var id = Owner.GetKeyForItem(Item);
+    var txt = DisplayMember != null ? DisplayMember(Item) : Item.ToString();
     <CascadingValue Value="this" IsFixed="true">
         <fluent-tree-item @ref=Element
                           class="@Class"
                           aria-label="@txt!"
                           aria-expanded="@Expanded.ToAttributeValue()"
                           style="@Style"
-                          id="@id"
+                          id="@Id"
                           expanded="@Expanded"
                           selected="@Selected"
                           disabled="@Disabled"
@@ -20,13 +20,13 @@
                           @onexpandedchange="@HandleExpandedChangeAsync"
                           @attributes="AdditionalAttributes">
 
-            @if (ItemTemplate == null)
+            @if (Template == null)
             {
                 <span class="treeitem-text">@txt</span>
             }
             else
             {
-                @ItemTemplate(Item)
+                @Template(Item)
             }
 
             @if (Owner != null && Children != null)
@@ -39,7 +39,7 @@
                 }
                 else
                 {
-                    @if (ChildrenTemplate is null)
+                    @if (ChildContent is null)
                     {
                         foreach (var item in items)
                         {
@@ -47,18 +47,16 @@
                             <SayehTreeViewItem Item="item"
                                                Children="Children"
                                                InitiallySelected=@(childId == selectedItemID)
-                                               ParentItem="ParentItem"
+                                               Parent="Parent"
+                                               Template="Template"
                                                @key=childId
-                                               Text="Text" />
+                                               DisplayMember="DisplayMember" />
                         }
 
                     }
                     else
                     {
-                        foreach (var item in items)
-                        {
-                            @ChildrenTemplate(item)
-                        }
+                        @ChildContent(Item)
                     }
                 }
             }

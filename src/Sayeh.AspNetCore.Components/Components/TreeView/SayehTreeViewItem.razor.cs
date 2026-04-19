@@ -26,22 +26,22 @@ namespace Sayeh.AspNetCore.Components
         public TItem? Item { get; set; }
 
         [Parameter]
-        public RenderFragment<TItem>? ItemTemplate { get; set; }
+        public RenderFragment<TItem>? Template { get; set; }
 
         [Parameter]
-        public RenderFragment<TItem>? ChildrenTemplate { get; set; }
+        public RenderFragment<TItem>? ChildContent { get; set; }
 
         [CascadingParameter]
         public SayehTreeView<TItem>? Owner { get; set; }
 
         [Parameter]
-        public Func<TItem, TItem>? ParentItem { get; set; }
+        public Func<TItem, TItem>? Parent { get; set; }
 
         [Parameter]
         public Func<TItem, IEnumerable<TItem>>? Children { get; set; }
 
         [Parameter]
-        public Func<TItem, string>? Text { get; set; }
+        public Func<TItem, string>? DisplayMember { get; set; }
 
         [Parameter]
         public bool Disabled { get; set; }
@@ -53,7 +53,7 @@ namespace Sayeh.AspNetCore.Components
         public bool InitiallySelected { get; set; }
 
         [CascadingParameter]
-        public SayehTreeViewItem<TItem>? Parent { get; set; }
+        public SayehTreeViewItem<TItem>? ParentNode { get; set; }
 
         [Parameter]
         public bool Selected { get; set; }
@@ -81,11 +81,11 @@ namespace Sayeh.AspNetCore.Components
         protected override void OnParametersSet()
         {
             base.OnParametersSet();
-            if (Selected && Parent != _parent)
+            if (Selected && ParentNode != _parent)
             {
-                _parent = Parent;
-                if (Parent is not null)
-                    setParentExpanded(Parent);
+                _parent = ParentNode;
+                if (ParentNode is not null)
+                    setParentExpanded(ParentNode);
             }
         }
 
@@ -106,8 +106,8 @@ namespace Sayeh.AspNetCore.Components
         void setParentExpanded(SayehTreeViewItem<TItem> parent)
         {
             parent?.SetExpanded(true);
-            if (parent?.Parent is not null)
-                setParentExpanded(parent.Parent);
+            if (parent?.ParentNode is not null)
+                setParentExpanded(parent.ParentNode);
         }
 
         internal void HandleSelectedChange(TreeChangeEventArgs args)
@@ -153,16 +153,15 @@ namespace Sayeh.AspNetCore.Components
         internal void Register(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _children[Owner!.GetKeyForItem(treeItem.Item!).ToString()!] = treeItem;
-            var checkboxParent = this as SayehTreeViewCheckboxItem<TItem>;
-            //checkboxParent?.RecalculateState();
-            //checkboxParent?.BubbleRecalculateToParents();
+            ArgumentNullException.ThrowIfNull(treeItem.Id);
+            _children[treeItem.Id] = treeItem;
         }
 
         internal void Unregister(SayehTreeViewItem<TItem> treeItem)
         {
             ArgumentNullException.ThrowIfNull(treeItem);
-            _children.Remove(Owner!.GetKeyForItem(treeItem.Item!).ToString()!);
+            ArgumentNullException.ThrowIfNull(treeItem.Id);
+            _children.Remove(treeItem.Id);
         }
 
         protected virtual void Dispose(bool disposing)

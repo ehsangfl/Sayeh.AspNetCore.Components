@@ -16,14 +16,14 @@ namespace Sayeh.AspNetCore.Components
         where TItem : class
         where TOption : notnull
     {
-        TItem? Item;
-        FluentCombobox<TOption>? element;
-        TOption? _selectedItem;
-        string? _selectedValue { get; set; }
-
-        Expression<Func<TItem, TOption>>? _lastSelectedItem;
-        PropertyInfo? selectedItemPropertyInfo;
-        Func<TItem, TOption>? _compiledSelectedItem;
+       protected TItem? Item;
+       FluentCombobox<TOption>? element;
+       protected TOption? _selectedItem;
+       protected string? _selectedValue { get; set; }
+       
+       protected Expression<Func<TItem, TOption>>? _lastSelectedItem;
+       protected PropertyInfo? selectedItemPropertyInfo;
+       protected Func<TItem, TOption>? _compiledSelectedItem;
 
         [EditorRequired, Parameter]
         public IEnumerable<TOption> Items { get; set; } = default!;

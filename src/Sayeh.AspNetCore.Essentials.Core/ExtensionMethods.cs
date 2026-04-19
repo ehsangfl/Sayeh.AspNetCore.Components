@@ -33,4 +33,6 @@ public static class ExtensionMethods
         }
         throw new InvalidCastException("The TValue provided does not implement IConvertible.");
     }
+
+    public static string Remove(this string @this,string text) => @this.Replace(text, "");
 }

@@ -76,7 +76,7 @@ namespace Sayeh.AspNetCore.Components
         {
             if (_selectProperty is null || Item is null)
                 return;
-            if (Parent != null && Parent is SayehTreeViewCheckboxItem<TItem> parent)
+            if (ParentNode != null && ParentNode is SayehTreeViewCheckboxItem<TItem> parent)
             {
                 parent.IsValid = false;
                 parent.SetIndeterminate();
@@ -119,6 +119,7 @@ namespace Sayeh.AspNetCore.Components
             if (_selectorPath != null)
             {
                 _selectorPath.SetValue(Item, value);
+                RaiseCheckedChanged(value);
             }
             UpdateParentsState();
         }
@@ -126,7 +127,7 @@ namespace Sayeh.AspNetCore.Components
         private void CheckedStateChanged(bool? value)
         {
             if (!value.HasValue)
-            { 
+            {
                 value = false;
                 CheckState = false;
             }
@@ -141,6 +142,8 @@ namespace Sayeh.AspNetCore.Components
             if (_selectorPath != null && value.HasValue)
             {
                 _selectorPath.SetValue(Item, value);
+                if (value.HasValue)
+                    RaiseCheckedChanged(value.Value);
             }
 
             UpdateParentsState();
@@ -200,6 +203,17 @@ namespace Sayeh.AspNetCore.Components
             }
 
             return false;
+        }
+
+        async void RaiseCheckedChanged(bool value)
+        {
+            if (Owner is not null)
+            {
+                if (value && Owner.ItemChecked.HasDelegate)
+                    await Owner.ItemChecked.InvokeAsync(Item);
+                else if (!value && Owner.ItemUnchecked.HasDelegate)
+                    await Owner.ItemUnchecked.InvokeAsync(Item);
+            }
         }
 
         #endregion

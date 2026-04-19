@@ -1,0 +1,17 @@
+﻿@namespace Sayeh.AspNetCore.Components
+@inherits FluentComponentBase
+@typeparam TItem
+
+<FluentAutocomplete TOption="TItem"
+                    @ref=_autocomplete
+                    IconSearch="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size16.TextBulletListTree())"
+                    Multiple=false
+                    OptionText="DisplayMember.Or(f=> f?.ToString())"
+                    @bind-SelectedOption="SelectedItem"
+                    OnOptionsSearch="OnOptionsSearch"
+                    OptionTemplate="ItemTemplate"
+                    OptionValue="ValueMember">
+    <HeaderContent>
+        <FluentButton Class="d-flex" OnClick="OpenDialog">@Resources.SelectFromTree</FluentButton>
+    </HeaderContent>
+</FluentAutocomplete>

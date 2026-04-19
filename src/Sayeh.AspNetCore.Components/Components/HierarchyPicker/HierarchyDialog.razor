@@ -1,0 +1,17 @@
+﻿@implements IDialogContentComponent<TItem?>
+@typeparam TItem
+@namespace Sayeh.AspNetCore.Components
+<FluentDialogHeader>
+    <FluentDialogBody>
+        <SayehTreeView Items="Items"
+                       Parent=ParentItem
+                       Children="Children"
+                       @bind-SelectedItem="Content"
+                       ItemTemplate="ItemTemplate"
+                       Virtualize=Virtualize 
+                       DisplayMember=DisplayMember/>
+    </FluentDialogBody>
+    <FluentDialogFooter>
+        <FluentButton OnClick="CloseModal">@Resources.Select</FluentButton>
+    </FluentDialogFooter>
+</FluentDialogHeader>

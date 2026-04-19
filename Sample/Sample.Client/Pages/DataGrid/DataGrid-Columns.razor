@@ -10,16 +10,25 @@ else
 {
     <label>all columns  sample</label>
     <SayehDataGrid TItem="WeatherForecast" Items="weatherForecasts" IsReadonly=true ResizableColumns=true>
-        <SayehPropertyColumn Property="p=> p.Order" />
-        <SayehDatePickerColumn Property="p=> p.Date" />
-        <SayehPropertyColumn Property="p=> p.DayofWeek" />
-        <SayehComboboxColumn Property="p=> p.Type" Items="DayTypes" ValueMember="v=> v" />
-        <SayehNumericTextboxColumn Property="p=> p.Tempreture" />
-        <SayehPropertyColumn Property="p=> p.TemporatureF" />
-        <SayehTextboxColumn Property="p=> p.Description" />
-        <SayehCommandColumn Command="ButtonCommand" Title="btn with command"/>
+        <SayehPropertyColumn Property="p => p.Order" />
+        <SayehDatePickerColumn Property="p => p.Date" />
+        <SayehPropertyColumn Property="p => p.DayofWeek" />
+        <SayehComboboxColumn Property="p => p.Type" Items="DayTypes" ValueMember="v => v" />
+        <SayehNumericTextboxColumn Property="p => p.Tempreture" />
+        <SayehPropertyColumn Property="p => p.TemporatureF" />
+        <SayehTextboxColumn Property="p => p.Description" />
+        <SayehCommandColumn Command="ButtonCommand" Title="btn with command" />
         <SayehAnchorColumn Href="https://google.com" Title="link with href to google">Goto Google</SayehAnchorColumn>
         <SayehAnchorColumn Command="GoToGoogle" Title="Link with command go to microsoft">Goto Microsoft</SayehAnchorColumn>
+        <SayehHierarchyColumn TItem="WeatherForecast" TValue="Guid?" TOption="HierarchycalItem" Items="hierarchycalItems" 
+                              ValueMember="v => v.ID" 
+                              DisplayMember="f => f?.Name"
+                              Parent="f=> f.Parent"
+                              Children="f=> f.Children" 
+                              SelectedItem="f=> f.Hierarchy"
+                              Property="f=> f.F_Hierarchy"
+                              Title="Hierarchy" />
+
     </SayehDataGrid>
 
     <FluentLabel>@Action.ToString()</FluentLabel>
@@ -27,6 +36,7 @@ else
 @code {
 
     private IEnumerable<WeatherForecast>? weatherForecasts { get; set; }
+    private IEnumerable<HierarchycalItem>? hierarchycalItems { get; set; }
 
     private DayType[]? DayTypes { get; set; }
 
@@ -57,7 +67,8 @@ else
         if (firstRender)
         {
             DayTypes = Enum.GetValues<DayType>();
-            weatherForecasts = WeatherForecast.GenerateItems();
+            hierarchycalItems = HierarchycalItem.GetHierarchycalItems(3, 4);
+            weatherForecasts = WeatherForecast.GenerateItems(hierarchycalItems);
             StateHasChanged();
         }
         base.OnAfterRender(firstRender);

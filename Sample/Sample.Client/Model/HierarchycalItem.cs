@@ -17,7 +17,7 @@
         {
             var random = new Random((int)DateTime.Now.Ticks + Random.Shared.Next());
             var id = random.Next();
-            var item = new HierarchycalItem($"item {id}",parent);
+            var item = new HierarchycalItem($"item level {currentDepth+1} - {id}",parent);
             var cdepth = ++currentDepth;
             var elc = currentDepth ==0 ? eachLevelCount : random.Next(1, eachLevelCount);
             if (currentDepth < maxDepth)

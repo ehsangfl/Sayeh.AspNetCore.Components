@@ -4,22 +4,22 @@
 @if (Item is not null && Owner is not null)
 {
     var selectedItemID = Owner.SelectedItem is not null ? Owner.GetKeyForItem(Owner.SelectedItem) : null;
-    var id = Owner.GetKeyForItem(Item);
-    var txt = Text != null ? Text(Item) : Item.ToString();
+    //var id = Owner.GetKeyForItem(Item);
+    var txt = DisplayMember != null ? DisplayMember(Item) : Item.ToString();
     <CascadingValue Value="this" IsFixed="true">
         <fluent-tree-item @ref=Element
                           class="@Class"
                           aria-label="@txt!"
                           aria-expanded="@Expanded.ToAttributeValue()"
                           style="@Style"
-                          id="@id"
+                          id="@Id"
                           expanded="@Expanded"
                           selected="@Selected"
                           disabled="@Disabled"
                           @onselectedchange="@HandleSelectedChange"
                           @onexpandedchange="@HandleExpandedChangeAsync"
                           @attributes="AdditionalAttributes">
-            @if (Children is not null && Children(Item).Any())
+            @if (Children is not null && (Children(Item)?.Any() ?? false))
             {
                 <FluentCheckbox ThreeState="true"
                                 @bind-CheckState:get="@CheckState"
@@ -44,7 +44,7 @@
                 }
                 else if (items is not null)
                 {
-                    @if (ChildrenTemplate is null)
+                    @if (ChildContent is null)
                     {
                         var selectedItemHashCode = Owner._selectProperty;
                         foreach (var item in items)
@@ -54,18 +54,16 @@
                                                        Children="Children"
                                                        SelectProperty="SelectProperty"
                                                        InitiallySelected=@(childId == selectedItemID)
-                                                       ParentItem="ParentItem"
+                                                       Parent="Parent"
+                                                       Template="Template"
                                                        @key=childId
-                                                       Text="Text" />
+                                                       DisplayMember="DisplayMember" />
                         }
 
                     }
                     else
                     {
-                        foreach (var item in items)
-                        {
-                            @ChildrenTemplate(item)
-                        }
+                        @ChildContent(Item)
                     }
                 }
             }
@@ -75,13 +73,13 @@
 @code {
     RenderFragment checkboxTemplate(string txt) => __builder =>
     {
-        @if (ItemTemplate == null)
+        @if (Template == null)
         {
             <span class="treeitem-text">@txt</span>
         }
         else
         {
-            @ItemTemplate(Item!)
+            @Template(Item!)
         }
     };
 }

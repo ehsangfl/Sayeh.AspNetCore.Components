@@ -1,0 +1,72 @@
+﻿@page "/treeview-childcontent"
+<h3>TreeView Hierarchy Source</h3>
+@if (Items is not null)
+{
+    <SayehTreeView TItem="NestedItem" Items="Items" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem">
+        <ChildContent>
+            @foreach (var item in Items)
+            {
+                <SayehTreeViewItem TItem="NestedItem"
+                                   Item="item"
+                                   @key=item.ID.ToString()
+                                   InitiallySelected=false
+                                   Children="f=> ((WeatherForecastGroup)f).Items">
+                    <Template Context="groupContext" >
+                        @{
+                            var groupItem = groupContext as WeatherForecastGroup;
+                        }
+                        <span class="treeitem-text">@groupItem!.Name - (@groupItem!.Items.Count())</span>
+                    </Template>
+                    <ChildContent Context="groupContext">
+                        @{
+                            var groupItem = groupContext as WeatherForecastGroup;
+                        }
+                        @foreach (var weatherItem in groupItem.Items)
+                        {
+                            <SayehTreeViewItem TItem="NestedItem"
+                                               Parent="p=> (p as WeatherForecast)?.Group"
+                                               Item="weatherItem"
+                                               @key=weatherItem.ID.ToString()
+                                               InitiallySelected="weatherItem == SelectedItem">
+                                <Template Context="wtiContext">
+                                    @{
+                                        var whiItem = wtiContext as WeatherForecast;
+                                    }
+                                    <span class="treeitem-text">@whiItem!.Date - @whiItem!.Tempreture</span>
+                                </Template>
+                            </SayehTreeViewItem>
+                        }
+                    </ChildContent>
+                </SayehTreeViewItem>
+            }
+        </ChildContent>
+    </SayehTreeView>
+
+    <label>selected Item is : @SelectedItem?.ToString() </label>
+}
+
+@code {
+    IEnumerable<WeatherForecastGroup>? Items { get; set; }
+    WeatherForecast? SelectedItem { get; set; }
+
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Items = WeatherForecast.GenerateGroupedItems();
+            SelectedItem = Items.First().Items.FirstOrDefault();
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    void setSelectedItem(object item)
+    {
+        this.SelectedItem = item as WeatherForecast;
+        InvokeAsync(StateHasChanged);
+    }
+
+
+
+}

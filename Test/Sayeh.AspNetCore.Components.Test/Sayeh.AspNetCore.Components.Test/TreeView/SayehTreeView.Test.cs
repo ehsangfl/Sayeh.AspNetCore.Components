@@ -28,8 +28,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.SelectedItem, forthLevelItem)
         .Add(p => p.Virtualize, virtualize)
         );
@@ -68,7 +68,7 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.SelectedItem, forthLevelItem)
         .Add(p => p.Virtualize, virtualize)
         );
@@ -114,13 +114,18 @@ public class SayehTreeViewTest : TestBase
         };
         RenderFragment<object> childrenItemtemplate = context => __builder =>
         {
-            var item = (WeatherForecast)context;
-            __builder.OpenComponent<SayehTreeViewItem<object>>(0);
-            __builder.AddComponentParameter(1, nameof(SayehTreeViewItem<object>.Item), item);
-            __builder.AddComponentParameter(2, nameof(SayehTreeViewItem<object>.ParentItem), (Func<object, object?>)(f => ((WeatherForecast)f).Group));
-            __builder.AddComponentParameter(3, nameof(SayehTreeViewItem<object>.InitiallySelected), item == secondLevelItem);
-            __builder.AddComponentParameter(4, nameof(SayehTreeViewItem<object>.ItemTemplate), secondLevelItemtemplate);
-            __builder.CloseComponent();
+            var group = (WeatherForecastGroup)context;
+            var index = 0;
+            foreach (var item in group.Items)
+            {
+                __builder.OpenComponent<SayehTreeViewItem<object>>(index++);
+                __builder.AddComponentParameter(index++, nameof(SayehTreeViewItem<object>.Item), item);
+                __builder.AddComponentParameter(index++, nameof(SayehTreeViewItem<object>.Parent), (Func<object, object?>)(f => ((WeatherForecast)f).Group));
+                __builder.AddComponentParameter(index++, nameof(SayehTreeViewItem<object>.InitiallySelected), item == secondLevelItem);
+                __builder.AddComponentParameter(index++, nameof(SayehTreeViewItem<object>.Template), secondLevelItemtemplate);
+                __builder.CloseComponent();
+            }
+            
         };
         RenderFragment<object> treeItemtemplate = context => __builder =>
         {
@@ -128,9 +133,8 @@ public class SayehTreeViewTest : TestBase
             __builder.OpenComponent<SayehTreeViewItem<object>>(0);
             __builder.AddComponentParameter(1, nameof(SayehTreeViewItem<object>.Item), item);
             __builder.AddComponentParameter(2, nameof(SayehTreeViewItem<object>.Children), (Func<object, IEnumerable<object>>)(f => ((WeatherForecastGroup)f).Items.Cast<object>()));
-            __builder.AddComponentParameter(3, nameof(SayehTreeViewItem<object>.Text), (Func<object, string>)(f => ((WeatherForecastGroup)f).Name));
-            __builder.AddComponentParameter(4, nameof(SayehTreeViewItem<object>.ItemTemplate), firstLevelItemtemplate);
-            __builder.AddComponentParameter(5, nameof(SayehTreeViewItem<object>.ChildrenTemplate), childrenItemtemplate);
+            __builder.AddComponentParameter(4, nameof(SayehTreeViewItem<object>.Template), firstLevelItemtemplate);
+            __builder.AddComponentParameter(5, nameof(SayehTreeViewItem<object>.ChildContent), childrenItemtemplate);
             __builder.CloseComponent();
         };
 
@@ -173,8 +177,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Filter, (x, txt) => x.Name.Contains(txt))
         .Add(p => p.Virtualize, virtualize)
         );
@@ -209,8 +213,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Filter, (x, txt) => x.Name.Contains(txt))
         .Add(p => p.Virtualize, virtualize)
         );
@@ -258,8 +262,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Filter, (x, txt) => x.Name.Contains(txt))
         .Add(p => p.Virtualize, virtualize)
         );
@@ -301,8 +305,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Filter, (x, txt) => x.Name.Contains(txt))
         .Add(p => p.Virtualize, virtualize)
         );
@@ -343,8 +347,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
         );
@@ -381,8 +385,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
         );
@@ -428,8 +432,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
         );
@@ -504,8 +508,8 @@ public class SayehTreeViewTest : TestBase
         var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
         .Add(p => p.Items, items)
         .Add(p => p.Children, x => x.Children)
-        .Add(p => p.ParentItem, x => x.Parent)
-        .Add(p => p.Text, x => x.Name)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayText, x => x.Name)
         .Add(p => p.Virtualize, virtualize)
         .Add(p => p.SelectProperty, s => s.IsSelected)
         );

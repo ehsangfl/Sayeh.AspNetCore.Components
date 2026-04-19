@@ -23,7 +23,7 @@ namespace Sayeh.AspNetCore.Components
         #region Fileds
 
         //private const string JAVASCRIPT_FILE = "./_content/Microsoft.FluentUI.AspNetCore.Components/Components/DataGrid/FluentDataGrid.razor.js";
-        private const string JAVASCRIPT_FILE = "./_content/Sayeh.AspNetCore.Components/DataGrid/SayehDataGrid.razor.js";
+        private const string JAVASCRIPT_FILE = "./_content/Sayeh.AspNetCore.Components/Components/DataGrid/SayehDataGrid.razor.js";
         public const string EMPTY_CONTENT_ROW_CLASS = "empty-content-row";
         public const string LOADING_CONTENT_ROW_CLASS = "loading-content-row";
 
