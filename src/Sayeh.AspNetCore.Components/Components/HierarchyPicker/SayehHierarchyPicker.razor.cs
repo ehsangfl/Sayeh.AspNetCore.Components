@@ -59,6 +59,9 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     [EditorRequired]
     public IEnumerable<TItem> Items { get; set; } = default!;
 
+    [Parameter]
+    public string? Label { get; set; }
+
     #endregion
 
     #region Events
