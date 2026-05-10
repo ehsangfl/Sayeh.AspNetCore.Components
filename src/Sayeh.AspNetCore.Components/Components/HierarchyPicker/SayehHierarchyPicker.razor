@@ -10,7 +10,9 @@
                     @bind-SelectedOption="SelectedItem"
                     OnOptionsSearch="OnOptionsSearch"
                     OptionTemplate="ItemTemplate"
-                    OptionValue="ValueMember">
+                    OptionValue="ValueMember"
+                    Label="@Label"
+                    AriaLabel="@Label">
     <HeaderContent>
         <FluentButton Class="d-flex" OnClick="OpenDialog">@Resources.SelectFromTree</FluentButton>
     </HeaderContent>
