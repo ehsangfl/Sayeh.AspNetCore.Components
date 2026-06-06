@@ -2,7 +2,7 @@
 <h3>TreeView Hierarchy Source</h3>
 @if (Items is not null)
 {
-    <SayehTreeView TItem="NestedItem" Items="Items" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem">
+    <SayehTreeView TItem="NestedItem" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem">
         <ChildContent>
             @foreach (var item in Items)
             {

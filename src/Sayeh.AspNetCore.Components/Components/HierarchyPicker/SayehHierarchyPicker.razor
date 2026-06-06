@@ -7,7 +7,8 @@
                     IconSearch="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size16.TextBulletListTree())"
                     Multiple=false
                     OptionText="DisplayMember.Or(f=> f?.ToString())"
-                    @bind-SelectedOption="SelectedItem"
+                    @bind-SelectedOption:get="SelectedItem"
+                    @bind-SelectedOption:set="f => SetSelectedItem(f)"
                     OnOptionsSearch="OnOptionsSearch"
                     OptionTemplate="ItemTemplate"
                     OptionValue="ValueMember"

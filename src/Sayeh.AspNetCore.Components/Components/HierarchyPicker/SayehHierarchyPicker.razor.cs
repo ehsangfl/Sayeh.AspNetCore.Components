@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.FluentUI.AspNetCore.Components;
 using Sayeh.Essentials.Core;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Sayeh.AspNetCore.Components;
@@ -11,6 +12,7 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     #region Fields
 
     FluentAutocomplete<TItem> _autocomplete = default!;
+    private TItem? _internalSelectedItem;
 
     #endregion
 
@@ -27,6 +29,9 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
 
     [Parameter]
     public RenderFragment<TItem>? TreeItemTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment? TreeChildContent { get; set; }
 
     [Parameter]
     public bool Virtualize { get; set; }
@@ -55,9 +60,18 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     [EditorRequired]
     public virtual Func<TItem, string?>? ValueMember { get; set; } = default!;
 
+    /// <summary>
+    /// Set flatten items, the TreeView dialog uses TreeItems property or if its null, find nodes by parent and child properties
+    /// </summary>
     [Parameter]
     [EditorRequired]
     public IEnumerable<TItem> Items { get; set; } = default!;
+
+    /// <summary>
+    /// Set Hierarchical items, if is null, tree items calculated based on Parent/Children property
+    /// </summary>
+    [Parameter]
+    public IEnumerable<TItem> TreeItems { get; set; } = default!;
 
     [Parameter]
     public string? Label { get; set; }
@@ -72,6 +86,11 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     #endregion
 
     #region Initialize
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        _internalSelectedItem = SelectedItem;
+    }
 
     #endregion
 
@@ -83,10 +102,11 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
         var parameter = new DialogParameters<TItem>() { Modal = true, Content = SelectedItem };
 
         parameter["Parameters"] = new HierarchyDialog<TItem>.Parameters(
-            Items?.Where(w => Parent?.Invoke(w) is null),
+            TreeItems ?? (Parent is null ? Items : Items?.Where(w => Parent?.Invoke(w) is null)),
             Parent,
             Children,
             TreeItemTemplate.Or(ItemTemplate),
+            TreeChildContent,
             DisplayMember,
             Virtualize);
 
@@ -122,13 +142,26 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     {
         if (result.Cancelled)
             return;
-        SelectedItem = result.Data as TItem;
-        if (SelectedItem is not null && _autocomplete is not null && _autocomplete.Items is not null && !_autocomplete.Items.Contains(SelectedItem))
-        if (SelectedItemChanged.HasDelegate)
-            await SelectedItemChanged.InvokeAsync(SelectedItem);
-        await InvokeAsync(StateHasChanged);
+        await UpdateSelectedItemAsync(result.Data as TItem);
     }
 
+    // Called by the Autocomplete set binding
+    private Task SetSelectedItem(TItem? item) =>
+        UpdateSelectedItemAsync(item);
+
+    // Centralized updater: notify parent and update component UI
+    private async Task UpdateSelectedItemAsync(TItem? item)
+    {
+        if (!EqualityComparer<TItem?>.Default.Equals(_internalSelectedItem, item))
+        {
+            _internalSelectedItem = item;
+            if (SelectedItemChanged.HasDelegate)
+            {
+                await SelectedItemChanged.InvokeAsync(item);
+            }
+            await InvokeAsync(StateHasChanged);
+        }
+    }
 
     #endregion
 

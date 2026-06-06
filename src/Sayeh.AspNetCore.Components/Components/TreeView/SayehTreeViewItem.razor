@@ -29,18 +29,19 @@
                 @Template(Item)
             }
 
-            @if (Owner != null && Children != null)
+            @if (ChildContent is null)
             {
-                var items = Children.Invoke(Item);
-                @if (Owner.Virtualize && items.Any() && !Expanded)
+                if (Owner != null && Children != null)
                 {
-                    @* Lazy loading required a "fake" sub-item to simulate the [+] *@
-                    <fluent-tree-item>@Resources.Loading</fluent-tree-item>
-                }
-                else
-                {
-                    @if (ChildContent is null)
+                    var items = Children.Invoke(Item);
+                    @if (Owner.Virtualize && items.Any() && !Expanded)
                     {
+                        @* Lazy loading required a "fake" sub-item to simulate the [+] *@
+                        <fluent-tree-item>@Resources.Loading</fluent-tree-item>
+                    }
+                    else
+                    {
+
                         foreach (var item in items)
                         {
                             var childId = Owner.GetKeyForItem(item).ToString()!;
@@ -50,15 +51,16 @@
                                                Parent="Parent"
                                                Template="Template"
                                                @key=childId
-                                               DisplayMember="DisplayMember" />
+                                               DisplayMember="DisplayMember"/>
                         }
 
-                    }
-                    else
-                    {
-                        @ChildContent(Item)
+
                     }
                 }
+            }
+            else
+            {
+                @ChildContent(Item)
             }
         </fluent-tree-item>
     </CascadingValue>
