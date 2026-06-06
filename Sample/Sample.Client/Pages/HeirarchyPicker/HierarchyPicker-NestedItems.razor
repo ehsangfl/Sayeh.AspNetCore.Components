@@ -11,7 +11,7 @@
     <TreeChildContent>
         @foreach (var item in TreeItems)
         {
-            <SayehTreeViewItem TItem="NestedItem" Item="item" @key=item.ID.ToString() Children="f => ((WeatherForecastGroup)f).Items">
+            <SayehTreeViewItem TItem="NestedItem" Item="item" @key=item.ID.ToString()>
                 <Template Context="item">
                    group @item.ToString()
                 </Template>
