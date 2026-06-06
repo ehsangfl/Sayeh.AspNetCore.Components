@@ -9,6 +9,7 @@ partial class HierarchyDialog<TItem> where TItem : class
         , Func<TItem, TItem?>? ParentItem
         , Func<TItem, IEnumerable<TItem>>? Children
         , RenderFragment<TItem>? ItemTemplate
+        , RenderFragment? TreeChildContent
         , Func<TItem, string?>? DisplayMember
         , bool Virtualize);
 
@@ -30,6 +31,8 @@ partial class HierarchyDialog<TItem> where TItem : class
     public Func<TItem, string>? ValueMember { get; set; }
 
     public Func<TItem, TItem?>? ParentItem { get; set; }
+
+    public RenderFragment? ChildContent { get; set; }
 
     [CascadingParameter]
     public FluentDialog Dialog { get; set; } = default!;
@@ -55,6 +58,7 @@ partial class HierarchyDialog<TItem> where TItem : class
         Virtualize = parameters.Virtualize;
         DisplayMember = parameters.DisplayMember;
         ParentItem = parameters.ParentItem;
+        ChildContent = parameters.TreeChildContent;
     }
 
     async void CloseModal()

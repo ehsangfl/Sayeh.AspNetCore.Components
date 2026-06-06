@@ -9,7 +9,8 @@
                        @bind-SelectedItem="Content"
                        ItemTemplate="ItemTemplate"
                        Virtualize=Virtualize 
-                       DisplayMember=DisplayMember/>
+                       DisplayMember=DisplayMember
+                       ChildContent="ChildContent"/>
     </FluentDialogBody>
     <FluentDialogFooter>
         <FluentButton OnClick="CloseModal">@Resources.Select</FluentButton>

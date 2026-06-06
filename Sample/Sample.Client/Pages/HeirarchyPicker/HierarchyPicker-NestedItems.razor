@@ -1,0 +1,52 @@
+﻿@page "/nested-items-picker"
+<SayehHierarchyPicker TItem="NestedItem"
+                      Items="Items"
+                      Label="Test hierarchy picker"
+                      ValueMember="f=> f.ID.ToString()"
+                      @bind-SelectedItem:get="Item"
+                      @bind-SelectedItem:set="value => Item = value as WeatherForecast">
+    <ItemTemplate>
+        <div>listItem @context.ToString()</div>
+    </ItemTemplate>
+    <TreeChildContent>
+        @foreach (var item in TreeItems)
+        {
+            <SayehTreeViewItem TItem="NestedItem" Item="item" @key=item.ID.ToString() Children="f => ((WeatherForecastGroup)f).Items">
+                <Template Context="item">
+                   group @item.ToString()
+                </Template>
+                <ChildContent Context="Group">
+                    @{
+                        var group = Group as WeatherForecastGroup;
+                        if (group is null) return;
+                    }
+                    @foreach (var wf in group.Items)
+                    {
+                        <SayehTreeViewItem Item="wf" @key=wf.ID.ToString() InitiallySelected="Item == wf" TItem="NestedItem" Parent="p => (p as WeatherForecast)?.Group">
+                            <Template Context="wf">
+                               item @wf.ToString()
+                            </Template>
+                        </SayehTreeViewItem>
+                    }
+                </ChildContent>
+            </SayehTreeViewItem>
+
+        }
+    </TreeChildContent>
+</SayehHierarchyPicker>
+<div>Selected Item is : "@Item?.ToString()"</div>
+
+@code {
+    public IEnumerable<WeatherForecast> Items { get; set; } = default!;
+    public IEnumerable<WeatherForecastGroup> TreeItems { get; set; } = default!;
+
+    public NestedItem? Item { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var source = WeatherForecast.GenerateGroupedItems(); ;
+        Items = source.SelectMany(s => s.Items);
+        TreeItems = source;
+        base.OnInitialized();
+    }
+}
