@@ -34,7 +34,8 @@ else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
 }
-app.UseStaticFiles();
+
+app.MapStaticAssets();
 app.UseAntiforgery();
 
 app.UseRequestLocalization();

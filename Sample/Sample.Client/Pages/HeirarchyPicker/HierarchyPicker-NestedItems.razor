@@ -3,8 +3,7 @@
                       Items="Items"
                       Label="Test hierarchy picker"
                       ValueMember="f=> f.ID.ToString()"
-                      @bind-SelectedItem:get="Item"
-                      @bind-SelectedItem:set="value => Item = value as WeatherForecast">
+                      @bind-SelectedItem="Item">
     <ItemTemplate>
         <div>listItem @context.ToString()</div>
     </ItemTemplate>
