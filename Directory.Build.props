@@ -17,6 +17,6 @@
     <FluentVersion>4.14.2</FluentVersion>
     <LoggingVersion8>8.0.1</LoggingVersion8>
     <LoggingVersion10>8.0.1</LoggingVersion10>
-    <PackageVersion>4.1.0.1</PackageVersion>
+    <PackageVersion>5.0.0.0</PackageVersion>
   </PropertyGroup>
 </Project>
