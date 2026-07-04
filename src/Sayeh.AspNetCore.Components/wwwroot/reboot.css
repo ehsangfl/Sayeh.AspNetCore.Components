@@ -15,3 +15,17 @@ fluent-anchor {
     color: var(--neutral-foreground-rest);
 }
 */
+
+/* FluentDialog always forces its panel to a fixed Width/Height (wrapped in calc(), so
+   "auto"/"fit-content" can't be passed through DialogParameters). This opt-in override lets
+   the panel shrink/grow to its content instead. Apply the "sayeh-dialog-autosize" class either
+   on <FluentDialog Class="..."> directly (declarative usage), or on any element rendered inside
+   the dialog content, e.g. <FluentDialogBody Class="sayeh-dialog-autosize"> (DialogService usage,
+   where DialogParameters has no way to set a class on the <fluent-dialog> host itself). */
+fluent-dialog.sayeh-dialog-autosize::part(control),
+fluent-dialog:has(.sayeh-dialog-autosize)::part(control) {
+    width: fit-content !important;
+    height: fit-content !important;
+    max-width: min(96vw, 1200px);
+    max-height: min(96vh, 900px);
+}

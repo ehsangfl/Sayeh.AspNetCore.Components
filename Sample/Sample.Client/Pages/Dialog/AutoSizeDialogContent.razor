@@ -1,0 +1,23 @@
+@using Microsoft.FluentUI.AspNetCore.Components
+@implements IDialogContentComponent<string>
+
+<FluentDialogBody Class="@(Content == "autosize" ? "sayeh-dialog-autosize" : null)">
+    <div style="width: 900px; background: var(--neutral-fill-secondary-rest); padding: 1rem;">
+        This block is 900px wide, simulating a wide embedded modal (e.g. a bootstrap modal). Without
+        auto-size the dialog panel stays at its ~500px default and this content gets clipped/scrolled.
+        With auto-size the panel grows to match.
+    </div>
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton OnClick="Close">Close</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    [Parameter]
+    public string Content { get; set; } = default!;
+
+    async Task Close() => await Dialog.CloseAsync();
+}

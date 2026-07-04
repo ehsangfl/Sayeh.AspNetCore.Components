@@ -47,4 +47,4 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Sample.Client._Imports).Assembly);
 
-app.Run();
+    app.Run();

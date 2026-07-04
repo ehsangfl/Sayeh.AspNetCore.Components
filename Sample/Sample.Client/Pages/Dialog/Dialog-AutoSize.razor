@@ -1,0 +1,34 @@
+@page "/dialog-autosize"
+@using Microsoft.FluentUI.AspNetCore.Components
+@inject IDialogService DialogService
+
+<div class="d-flex flex-column p-3" style="gap: 1rem;">
+    <p>
+        FluentDialog always forces its panel to a fixed width/height. The buttons below open the
+        same wide content (a 900px block, simulating an embedded bootstrap modal) once with the
+        default FluentDialog behavior (clipped/scrolled at ~500px) and once with the
+        <code>sayeh-dialog-autosize</code> opt-in class (panel grows to fit the content).
+    </p>
+    <FluentButton OnClick="OpenDefault">Open default dialog (fixed width)</FluentButton>
+    <FluentButton OnClick="OpenAutoSize">Open auto-size dialog</FluentButton>
+</div>
+
+@code {
+    async Task OpenDefault()
+    {
+        await DialogService.ShowDialogAsync<AutoSizeDialogContent>("default", new DialogParameters<string>
+        {
+            Content = "default",
+            Title = "Default (fixed width)"
+        });
+    }
+
+    async Task OpenAutoSize()
+    {
+        await DialogService.ShowDialogAsync<AutoSizeDialogContent>("autosize", new DialogParameters<string>
+        {
+            Content = "autosize",
+            Title = "Auto-size (fit content)"
+        });
+    }
+}
