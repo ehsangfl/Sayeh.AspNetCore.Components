@@ -24,15 +24,23 @@
                 <FluentCheckbox ThreeState="true"
                                 @bind-CheckState:get="@CheckState"
                                 @bind-CheckState:set=CheckedStateChanged>
-                    @checkboxTemplate(txt)
+                    @txt
                 </FluentCheckbox>
+                if (Template is not null)
+                {
+                    @txt.Or(string.Empty)
+                }
             }
             else
             {
                 <FluentCheckbox Value="_selectProperty.Invoke(Item)"
                                 ValueChanged="CheckedChanged">
-                    @checkboxTemplate(txt)
+                    @txt.Or(string.Empty)
                 </FluentCheckbox>
+                if (Template is not null)
+                {
+                    @Template(Item)
+                }
             }
             @if (Owner != null && Children != null)
             {
