@@ -16,4 +16,5 @@ fluent-dialog:has(.sayeh-dialog-autosize)::part(control) {
     height: fit-content !important;
     max-width: min(96vw, 1200px);
     max-height: min(96vh, 900px);
+    min-width: 300px;
 }
