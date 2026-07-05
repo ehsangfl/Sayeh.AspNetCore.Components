@@ -27,7 +27,7 @@ public class LocalStorage(Blazored.LocalStorage.ILocalStorageService ls) : ILoca
         else return default;
     }
 
-    public async ValueTask WriteAll<TValue>(Dictionary<string, TValue?> Data)
+    public async ValueTask WriteAll<TValue>(Dictionary<string, TValue> Data)
     {
         foreach (var item in Data)
         {

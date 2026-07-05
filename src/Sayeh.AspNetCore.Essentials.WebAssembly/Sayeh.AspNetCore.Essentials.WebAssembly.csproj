@@ -4,7 +4,7 @@
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>$(PackageVersion)</VersionPrefix>
+    <VersionPrefix>$(SayehVersion)</VersionPrefix>
     <Title>Sayeh.AspNetCore.Essentials.Blazor</Title>
     <Description>Some Services,Helpers DotNetCore Blazor platform</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageReference Include="Blazored.LocalStorage" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PackageReference Include="Sayeh.AspNetCore.Essentials.Core" Version="$(PackageVersion)" />
+    <PackageReference Include="Sayeh.AspNetCore.Essentials.Core" />
   </ItemGroup>
 
 </Project>
