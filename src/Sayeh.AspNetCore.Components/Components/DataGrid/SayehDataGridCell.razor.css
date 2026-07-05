@@ -120,6 +120,7 @@ td ::deep fluent-select,
 td ::deep fluent-combobox,
 td ::deep fluent-text-field {
     min-width: 0 !important;
+    max-width:unset !important;
 }
 
 .invalid {

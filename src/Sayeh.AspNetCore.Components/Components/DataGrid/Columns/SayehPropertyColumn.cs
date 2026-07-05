@@ -134,6 +134,9 @@ public partial class SayehPropertyColumn<[DynamicallyAccessedMembers(Dynamically
                 }
                 if (Property.Body is MemberExpression memberExpression)
                     PropertyInfo = memberExpression.Member as PropertyInfo;
+                else if (Property.Body is UnaryExpression { NodeType: System.Linq.Expressions.ExpressionType.Convert } unary
+                         && unary.Operand is MemberExpression innerMember)
+                    PropertyInfo = innerMember.Member as PropertyInfo;
             }
             else PropertyInfo = null;
         }
