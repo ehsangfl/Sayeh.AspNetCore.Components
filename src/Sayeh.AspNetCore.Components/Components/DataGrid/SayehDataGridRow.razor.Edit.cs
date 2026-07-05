@@ -15,6 +15,7 @@ namespace Sayeh.AspNetCore.Components
         List<ValidationResult>? _validationResult;
         ValidationContext? _validationContext;
         SayehDataGridCell<TItem>? _currentEditCell;
+        private bool _pendingColumnWidthsUnlock;
 
         internal DataGridItemMode Mode { get; set; } = DataGridItemMode.Readonly;
 
@@ -30,7 +31,7 @@ namespace Sayeh.AspNetCore.Components
         #region Functions
 
         [RequiresUnreferencedCode("Use 'MethodFriendlyToTrimming' instead", Url = "http://help/unreferencedcode")]
-        internal bool BeginEdit()
+        internal async Task<bool> BeginEditAsync()
         {
             if (!_implementedIEditableObject.HasValue)
                 _implementedIEditableObject = typeof(IEditableObject).IsAssignableFrom(typeof(TItem));
@@ -38,6 +39,9 @@ namespace Sayeh.AspNetCore.Components
                 return false;
             if (Mode == DataGridItemMode.Readonly && GridContext.Grid.BeginItemEdit(this))
             {
+                // Lock the grid's current column widths before this row's cells render their (often
+                // wider) edit controls, so entering edit mode can't reflow every other row's columns.
+                await Grid.LockColumnWidthsAsync();
                 _validationContext = new ValidationContext(Item);
                 _validationResult = new List<ValidationResult>();
                 _editContext = new EditContext(Item);
@@ -61,6 +65,10 @@ namespace Sayeh.AspNetCore.Components
             foreach (var cell in cells.Where(w => w.Value.Column?.IsEditable ?? false))
                 cell.Value.MakeValid();
             _currentEditCell = null;
+            // Unlock only once this row has actually re-rendered back to readonly content -
+            // see OnAfterRenderAsync - otherwise the column widths would be recalculated against
+            // the still-showing (wider) edit controls.
+            _pendingColumnWidthsUnlock = true;
             StateHasChanged();
             //Grid.removeCellEditableConfig(this);
         }
@@ -172,15 +180,16 @@ namespace Sayeh.AspNetCore.Components
                 Mode = DataGridItemMode.Readonly;
             await Grid.EndEdit(this, EditActionEnum.Cancel);
             //Grid.removeCellEditableConfig(this);
+            _pendingColumnWidthsUnlock = true;
             StateHasChanged();
         }
 
         [RequiresUnreferencedCode("Use 'MethodFriendlyToTrimming' instead", Url = "http://help/unreferencedcode")]
-        private void OnRowDblClicked()
+        private async Task OnRowDblClickedAsync()
         {
             if (Grid.IsReadonly && RowType == Microsoft.FluentUI.AspNetCore.Components.DataGridRowType.Default)
                 return;
-            BeginEdit();
+            await BeginEditAsync();
         }
 
         #endregion

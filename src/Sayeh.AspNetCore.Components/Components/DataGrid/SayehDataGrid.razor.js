@@ -1,6 +1,37 @@
 ﻿let grids = [];
 const minWidth = 100;
 
+// Columns without an explicit Width fall back to the "auto" track sizing function (see
+// SayehDataGrid.FinishCollectingColumns), which sizes to the widest content across ALL rows of
+// that shared CSS grid column. Locking right before a row enters edit mode - and unlocking again
+// once it leaves - freezes every column at its current (pre-edit) pixel width for the duration of
+// the edit, so the wider input/select/date-picker control rendered by the editing row can't grow
+// or shrink columns for every other row. Saving/restoring whatever was already on the element
+// (rather than resetting to a hardcoded value) means an earlier manual column resize survives an
+// edit/unedit cycle untouched.
+export function lockGridColumnWidths(gridElement) {
+    if (!gridElement || !gridElement.classList.contains('grid')) {
+        return;
+    }
+    if (gridElement.dataset.preLockGridTemplateColumns !== undefined) {
+        // already locked (e.g. a second row started editing before the first one unlocked)
+        return;
+    }
+    gridElement.dataset.preLockGridTemplateColumns = gridElement.style.gridTemplateColumns || '';
+    gridElement.style.gridTemplateColumns = getComputedStyle(gridElement).gridTemplateColumns;
+}
+
+export function unlockGridColumnWidths(gridElement) {
+    if (!gridElement || !gridElement.classList.contains('grid')) {
+        return;
+    }
+    if (gridElement.dataset.preLockGridTemplateColumns === undefined) {
+        return;
+    }
+    gridElement.style.gridTemplateColumns = gridElement.dataset.preLockGridTemplateColumns;
+    delete gridElement.dataset.preLockGridTemplateColumns;
+}
+
 export function init(gridElement, autoFocus) {
     if (gridElement === undefined || gridElement === null) {
         return;

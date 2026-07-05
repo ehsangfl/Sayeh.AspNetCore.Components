@@ -72,19 +72,19 @@ td.grid-cell-placeholder:after {
 .col-justify-start ::deep .col-sort-button::part(control) {
     justify-content: start;
     overflow: hidden;
-    opacity: 1
+    opacity: 1;
 }
 
 .col-justify-center ::deep .col-sort-button::part(control) {
     justify-content: center;
     overflow: hidden;
-    opacity: 1
+    opacity: 1;
 }
 
 .col-justify-end ::deep .col-sort-button::part(control) {
     justify-content: end;
     overflow: hidden;
-    opacity: 1
+    opacity: 1;
 }
 
 
@@ -108,8 +108,18 @@ td.grid-cell-placeholder:after {
 .col-justify-end ::deep .col-title {
     text-align: end;
 }
-.edit-mode td {
+.edit-mode td:has(*):not(:has(fluent-checkbox)) {
     padding: 0 !important;
+}
+
+/* FluentUI's fluent-select/fluent-combobox web components carry a hard-coded
+   :host{min-width:250px} in their own shadow-root stylesheet, which is not
+   overridable via the Width/Class parameters and forces the column wider
+   than its resized width as soon as the cell enters edit mode. */
+td ::deep fluent-select,
+td ::deep fluent-combobox,
+td ::deep fluent-text-field {
+    min-width: 0 !important;
 }
 
 .invalid {

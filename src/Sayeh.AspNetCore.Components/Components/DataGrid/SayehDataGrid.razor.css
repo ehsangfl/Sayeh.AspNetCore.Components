@@ -23,6 +23,16 @@
     display: contents;
 }
 
+/* Grid items default to an automatic minimum size equal to their content's min-content
+   size. Without overriding it to 0, a cell that renders a wider edit control (input/select/
+   date-picker) than the plain text it replaces inflates that column's 1fr/auto track and
+   steals space from sibling columns - i.e. other columns visibly resize when a row enters
+   edit mode. Explicit min-width: 0 removes that automatic floor. */
+.grid ::deep th,
+.grid ::deep td {
+    min-width: 0;
+}
+
 .fluent-data-grid tbody tr .hover {
     background: var(--neutral-fill-stealth-hover);
 }

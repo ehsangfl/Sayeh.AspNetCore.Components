@@ -56,6 +56,8 @@ dotnet test Test/Sayeh.AspNetCore.Components.Test/Sayeh.AspNetCore.Components.Te
 dotnet test Test/Sayeh.AspNetCore.Components.Test/Sayeh.AspNetCore.Components.Test/Sayeh.AspNetCore.Components.Test.csproj -f net10.0
 ```
 
+## The Microsoft FluentUI Blazor Source code is available on H:\OpenSource\Blazor\BlazorFluent
+
 ## CI/CD
 
 `azure-pipelines.yml` (triggers on the `Live` branch) builds, packs, and pushes each of the four

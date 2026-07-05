@@ -434,6 +434,39 @@ namespace Sayeh.AspNetCore.Components
             }
         }
 
+        /// <summary>
+        /// Freezes the grid's current (pre-edit) column widths so that a row switching into edit
+        /// mode - which may render a wider input/select/date-picker control than the plain text it
+        /// replaces - can't grow or shrink columns for every row. Called by a row right before it
+        /// switches to <see cref="DataGridItemMode.Edit"/>; pair with <see cref="UnlockColumnWidthsAsync"/>.
+        /// </summary>
+        internal async Task LockColumnWidthsAsync()
+        {
+            if (DisplayMode != DataGridDisplayMode.Grid || Module is null || _gridReference is null)
+                return;
+            try
+            {
+                await Module.InvokeVoidAsync("lockGridColumnWidths", _gridReference);
+            }
+            catch (JSException) { }
+        }
+
+        /// <summary>
+        /// Reverses <see cref="LockColumnWidthsAsync"/>, restoring whatever column sizing was in
+        /// effect before the lock (the original content-based "auto" sizing, or a prior manual
+        /// resize) so columns can resume tracking the (possibly now-changed) committed content.
+        /// </summary>
+        internal async Task UnlockColumnWidthsAsync()
+        {
+            if (DisplayMode != DataGridDisplayMode.Grid || Module is null || _gridReference is null)
+                return;
+            try
+            {
+                await Module.InvokeVoidAsync("unlockGridColumnWidths", _gridReference);
+            }
+            catch (JSException) { }
+        }
+
         private void StartCollectingColumns()
         {
             _columns.Clear();

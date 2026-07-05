@@ -93,6 +93,15 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
 
     #region Functions
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingColumnWidthsUnlock)
+        {
+            _pendingColumnWidthsUnlock = false;
+            await Grid.UnlockColumnWidthsAsync();
+        }
+    }
+
     internal void setRowIndex(int index)
     {
         RowIndex = index;
@@ -161,7 +170,7 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
                 await GridContext.Grid.OnRowDoubleClick.InvokeAsync(row);
             }
         }
-        OnRowDblClicked();
+        await OnRowDblClickedAsync();
         //if (CurrentCell is not null)
         //{
         //    if (_currentEditCell is not null && !CurrentCell.CellId.Equals(_currentEditCell.CellId) && CommitCell())
@@ -189,10 +198,10 @@ public partial class SayehDataGridRow<TItem> : FluentComponentBase, IHandleEvent
     }
 
     /// <summary />
-    internal void HandleOnRowKeyDown(string rowId, KeyboardEventArgs e)
+    internal async Task HandleOnRowKeyDown(string rowId, KeyboardEventArgs e)
     {
         if (e.Key.ToLower() == "f2")
-            BeginEdit();
+            await BeginEditAsync();
     }
 
     private static string? ColumnJustifyClass(SayehColumnBase<TItem> column)

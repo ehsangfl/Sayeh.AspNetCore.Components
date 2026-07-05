@@ -8,7 +8,7 @@
 else
 {
     <label>editable datagrid</label>
-    <SayehDataGrid TItem="WeatherForecast" Items="weatherForecasts" RowsDelete="OnRowsDeleted">
+    <SayehDataGrid TItem="WeatherForecast" Items="weatherForecasts" RowsDelete="OnRowsDeleted" ResizableColumns="true">
         <SayehSelectColumn Property="p => p.IsSelected" />
         <SayehPropertyColumn Property="p => p.Order" />
         <SayehDatePickerColumn Property="p => p.Date" />
