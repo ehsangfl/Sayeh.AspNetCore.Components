@@ -9,8 +9,7 @@
                 <SayehTreeViewItem TItem="NestedItem"
                                    Item="item"
                                    @key=item.ID.ToString()
-                                   InitiallySelected=false
-                                   Children="f=> ((WeatherForecastGroup)f).Items">
+                                   InitiallySelected=false>
                     <Template Context="groupContext" >
                         @{
                             var groupItem = groupContext as WeatherForecastGroup;
