@@ -38,7 +38,6 @@ public class ObservableComponent<T> : ComponentBase, IDisposable
                 ItemSource.PropertyChanged += OnModelPropertyChanged;
 
             _itemSource = ItemSource;
-            Console.WriteLine($"itemSource change detected for and its value is {ItemSource?.ToString()}");
             InvokeAsync(StateHasChanged);
         }
     }
@@ -46,7 +45,6 @@ public class ObservableComponent<T> : ComponentBase, IDisposable
 
     private void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        Console.WriteLine($"{e.PropertyName?.ToString()} change detected for {ItemSource?.GetType().FullName}");
         if (PropertyName.None() || (e.PropertyName?.Equals(PropertyName) ?? true))
             InvokeAsync(StateHasChanged);
     }

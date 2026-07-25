@@ -66,6 +66,9 @@ namespace Sayeh.AspNetCore.Components
         public Func<TItem, string>? DisplayMember { get; set; }
 
         [Parameter]
+        public Func<TItem, bool>? IsReadOnlyMember { get; set; }
+
+        [Parameter]
         public Expression<Func<TItem, bool>> SelectProperty { get; set; }
 
         [Parameter]

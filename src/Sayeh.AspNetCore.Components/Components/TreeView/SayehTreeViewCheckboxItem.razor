@@ -21,7 +21,7 @@
                           @attributes="AdditionalAttributes">
             @if (Children is not null && (Children(Item)?.Any() ?? false))
             {
-                <FluentCheckbox ThreeState="true"
+                <FluentCheckbox ThreeState="true" ReadOnly="IsReadOnlyMember?.Invoke(Item) ?? false"
                                 @bind-CheckState:get="@CheckState"
                                 @bind-CheckState:set=CheckedStateChanged>
                     @txt

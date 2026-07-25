@@ -28,7 +28,10 @@ namespace Sayeh.AspNetCore.Components
         #region Properties
 
         [Parameter]
-        public Expression<Func<TItem, bool>> SelectProperty { get; set; }
+        public Expression<Func<TItem, bool>> SelectProperty { get; set; } = default!;
+
+        [Parameter]
+        public Func<TItem, bool>? IsReadOnlyMember { get; set; }
 
         #endregion
 
