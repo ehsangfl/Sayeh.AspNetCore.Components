@@ -10,7 +10,7 @@
                                    Item="item"
                                    @key=item.ID.ToString()
                                    InitiallySelected=false>
-                    <Template Context="groupContext" >
+                    <Template Context="groupContext">
                         @{
                             var groupItem = groupContext as WeatherForecastGroup;
                         }
@@ -41,7 +41,50 @@
         </ChildContent>
     </SayehTreeView>
 
-    <label>selected Item is : @SelectedItem?.ToString() </label>
+    <label class="mb-3">selected Item is : @SelectedItem?.ToString() </label>
+
+    <label>Tree view CheckboxItem with ChildContent  </label>
+
+    <SayehTreeView TItem="NestedItem" SelectedItem="SelectedItem" SelectedItemChanged="setSelectedItem">
+        <ChildContent>
+            @foreach (var item in Items)
+            {
+                <SayehTreeViewCheckboxItem TItem="NestedItem"
+                                           Item="item"
+                                           SelectProperty="s=> false"
+                                           @key=item.ID.ToString()
+                                           InitiallySelected=false>
+                    <Template Context="groupContext">
+                        @{
+                            var groupItem = groupContext as WeatherForecastGroup;
+                        }
+                        <span class="treeitem-text">@groupItem!.Name - (@groupItem!.Items.Count())</span>
+                    </Template>
+                    <ChildContent Context="groupContext">
+                        @{
+                            var groupItem = groupContext as WeatherForecastGroup;
+                        }
+                        @foreach (var weatherItem in groupItem.Items)
+                        {
+                            <SayehTreeViewCheckboxItem TItem="NestedItem"
+                                                       Parent="p=> (p as WeatherForecast)?.Group"
+                                                       Item="weatherItem"
+                                                       SelectProperty="s=> ((WeatherForecast)s).IsSelected"
+                                                       @key=weatherItem.ID.ToString()
+                                                       InitiallySelected="weatherItem == SelectedItem">
+                                <Template Context="wtiContext">
+                                    @{
+                                        var whiItem = wtiContext as WeatherForecast;
+                                    }
+                                    <span class="treeitem-text">@whiItem!.Date - @whiItem!.Tempreture</span>
+                                </Template>
+                            </SayehTreeViewCheckboxItem>
+                        }
+                    </ChildContent>
+                </SayehTreeViewCheckboxItem>
+            }
+        </ChildContent>
+    </SayehTreeView>
 }
 
 @code {

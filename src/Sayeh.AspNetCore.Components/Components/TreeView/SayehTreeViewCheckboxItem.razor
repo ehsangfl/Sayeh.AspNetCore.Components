@@ -42,7 +42,7 @@
                     @Template(Item)
                 }
             }
-            @if (ChildContent is not null)
+            @if (ChildContent is null)
             {
                 @if (Owner != null && Children != null)
                 {
@@ -74,7 +74,7 @@
                     }
                 }
             }
-            else if (ChildContent is not null)
+            else 
             {
                 @ChildContent(Item)
             }
