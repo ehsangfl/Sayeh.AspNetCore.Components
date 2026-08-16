@@ -1,0 +1,15 @@
+.sayeh-command-link {
+    cursor: pointer;
+    color: var(--accent-fill-rest);
+    user-select: none;
+}
+
+.sayeh-command-link:hover {
+    text-decoration: underline;
+}
+
+.sayeh-command-link-disabled {
+    cursor: default;
+    opacity: 0.5;
+    pointer-events: none;
+}

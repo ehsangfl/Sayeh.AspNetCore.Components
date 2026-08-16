@@ -31,6 +31,13 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public RenderFragment<TItem>? ChildContent { get; set; }
 
+        /// <summary>
+        /// Rendered at the end of the item's row (after the Template/DisplayMember content).
+        /// Revealed with an animation when the mouse hovers the row.
+        /// </summary>
+        [Parameter]
+        public RenderFragment<TItem>? Actions { get; set; }
+
         [CascadingParameter]
         public SayehTreeView<TItem>? Owner { get; set; }
 

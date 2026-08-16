@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.AspNetCore.Components.Web
 @namespace Sayeh.AspNetCore.Components
 @typeparam TItem
 @inherits SayehColumnBase<TItem>
@@ -7,11 +8,30 @@
 }
 @code {
 
+    // Rendered as a plain element rather than a SayehButton/FluentButton: this column type is used
+    // inside virtualized grid rows, where hundreds of rows can mount and unmount per scroll session.
+    // FluentButton's Shadow-DOM web component is expensive to instantiate/destroy at that churn rate;
+    // a plain span carries none of that cost. CanExecute is evaluated fresh on every render instead
+    // of caching it via a CanExecuteChanged subscription, so there's no per-row event subscription to
+    // leak either.
     protected internal override void CellContent(RenderTreeBuilder __builder, TItem item)
     {
-        <SayehButton Command="Command" CommandParameter="@item" Appearance="@Appearance">
+        var canExecute = Command?.CanExecute(item) ?? true;
+        <span class="@("sayeh-command-link" + (canExecute ? "" : " sayeh-command-link-disabled"))"
+              role="button"
+              tabindex="0"
+              @onclick="@(() => { if (canExecute) Command?.Execute(item); })"
+              @onkeydown="@(e => { if (canExecute && (e.Key == "Enter" || e.Key == " ")) Command?.Execute(item); })">
+            @if (StartIcon is not null)
+            {
+                <FluentIcon Value="@StartIcon" />
+            }
             @ChildContent.Invoke(item)
-        </SayehButton>
+            @if (EndIcon is not null)
+            {
+                <FluentIcon Value="@EndIcon" />
+            }
+        </span>
     }
 
 }

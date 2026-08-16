@@ -36,6 +36,7 @@
                                        Children="Children"
                                        Parent="Parent"
                                        Template="ItemTemplate"
+                                       Actions="ItemActions"
                                        @key=id
                                        DisplayMember="DisplayMember" />
                 }
@@ -49,6 +50,7 @@
                                                InitiallySelected=@(id == selectedItemID)
                                                Children="Children"
                                                Template="ItemTemplate"
+                                               Actions="ItemActions"
                                                Parent="Parent"
                                                IsReadOnlyMember="IsReadOnlyMember"
                                                @key=id

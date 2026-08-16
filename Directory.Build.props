@@ -13,5 +13,8 @@
 
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 
+    <!--local NuGet feed consumed by other solutions (e.g. SayehERP) via loose per-TFM folders-->
+    <LocalPackagesRoot>E:\ThirdParties\LocalPackages</LocalPackagesRoot>
+
   </PropertyGroup>
 </Project>

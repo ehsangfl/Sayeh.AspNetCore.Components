@@ -2,6 +2,41 @@
     pointer-events: none;
 }
 
+.treeitem-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+}
+
+.treeitem-label {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.treeitem-actions {
+    display: grid;
+    grid-template-columns: 0fr;
+    opacity: 0;
+    margin-inline-start: calc(var(--design-unit, 4) * 1px);
+    transition: grid-template-columns 0.2s ease-in-out, opacity 0.15s ease-in-out;
+}
+
+.treeitem-actions-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--design-unit, 4) * 1px);
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.treeitem-row:hover .treeitem-actions,
+.treeitem-row:focus-within .treeitem-actions {
+    grid-template-columns: 1fr;
+    opacity: 1;
+}
+
 [dir='rtl'] fluent-tree-item[selected]::after {
     right: calc(var(--focus-stroke-width)* 1px);
 }

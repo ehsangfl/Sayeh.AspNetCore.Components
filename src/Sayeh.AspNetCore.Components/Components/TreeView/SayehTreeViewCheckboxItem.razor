@@ -5,7 +5,7 @@
 {
     var selectedItemID = Owner.SelectedItem is not null ? Owner.GetKeyForItem(Owner.SelectedItem) : null;
     //var id = Owner.GetKeyForItem(Item);
-    var txt = DisplayMember != null ? DisplayMember(Item) : Item.ToString();
+    var txt = Template is not null ? string.Empty : (DisplayMember != null ? DisplayMember(Item) : Item.ToString());
     <CascadingValue Value="this" IsFixed="true">
         <fluent-tree-item @ref=Element
                           class="@Class"
@@ -19,29 +19,41 @@
                           @onselectedchange="@HandleSelectedChange"
                           @onexpandedchange="@HandleExpandedChangeAsync"
                           @attributes="AdditionalAttributes">
-            @if (Children is not null && (Children(Item)?.Any() ?? false))
-            {
-                <FluentCheckbox ThreeState="true" ReadOnly="IsReadOnlyMember?.Invoke(Item) ?? false"
-                                @bind-CheckState:get="@CheckState"
-                                @bind-CheckState:set=CheckedStateChanged>
-                    @txt
-                </FluentCheckbox>
-                if (Template is not null)
+            <div class="treeitem-row">
+                <span class="treeitem-label">
+                    @if (Children is not null && (Children(Item)?.Any() ?? false))
+                    {
+                        <FluentCheckbox ThreeState="true" ReadOnly="IsReadOnlyMember?.Invoke(Item) ?? false"
+                                        @bind-CheckState:get="@CheckState"
+                                        @bind-CheckState:set=CheckedStateChanged>
+                            @txt
+                        </FluentCheckbox>
+                        if (Template is not null)
+                        {
+                            @Template(Item)
+                        }
+                    }
+                    else
+                    {
+                        <FluentCheckbox Value="_selectProperty.Invoke(Item)"
+                                        ValueChanged="CheckedChanged">
+                            @txt.Or(string.Empty)
+                        </FluentCheckbox>
+                        if (Template is not null)
+                        {
+                            @Template(Item)
+                        }
+                    }
+                </span>
+                @if (Actions is not null)
                 {
-                    @Template(Item)
+                    <span class="treeitem-actions">
+                        <span class="treeitem-actions-inner">
+                            @Actions(Item)
+                        </span>
+                    </span>
                 }
-            }
-            else
-            {
-                <FluentCheckbox Value="_selectProperty.Invoke(Item)"
-                                ValueChanged="CheckedChanged">
-                    @txt.Or(string.Empty)
-                </FluentCheckbox>
-                if (Template is not null)
-                {
-                    @Template(Item)
-                }
-            }
+            </div>
             @if (ChildContent is null)
             {
                 @if (Owner != null && Children != null)
@@ -66,6 +78,7 @@
                                                            InitiallySelected=@(childId == selectedItemID)
                                                            Parent="Parent"
                                                            Template="Template"
+                                                           Actions="Actions"
                                                            @key=childId
                                                            DisplayMember="DisplayMember" />
                             }
@@ -80,17 +93,4 @@
             }
         </fluent-tree-item>
     </CascadingValue>
-}
-@code {
-    RenderFragment checkboxTemplate(string txt) => __builder =>
-    {
-        @if (Template == null)
-        {
-            <span class="treeitem-text">@txt</span>
-        }
-        else
-        {
-            @Template(Item!)
-        }
-    };
 }

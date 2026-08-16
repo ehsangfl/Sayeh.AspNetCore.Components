@@ -562,6 +562,7 @@ namespace Sayeh.AspNetCore.Components
                 return Task.FromResult(false);
             _displayOptionsForColumn = column;
             _checkColumnOptionsPosition = true; // Triggers a call to JSRuntime to position the options element, apply autofocus, and any other setup
+            StateHasChanged();
             return Task.FromResult(true);
         }
 
@@ -594,6 +595,7 @@ namespace Sayeh.AspNetCore.Components
             {
                 _displayOptionsForColumn.CloseFilter();
                 _displayOptionsForColumn = null;
+                StateHasChanged();
             }
         }
 
@@ -755,9 +757,10 @@ namespace Sayeh.AspNetCore.Components
             }
             else if (Items is not null)
             {
-                var totalItemCount = Items.Count();
+                var filtered = request.ApplyFilterAndSorting(Items);
+                var totalItemCount = filtered?.Count() ?? 0;
                 _internalGridContext.TotalItemCount = totalItemCount;
-                var result = request.ApplyFilterAndSorting(Items)?.Skip(request.StartIndex);
+                var result = filtered?.Skip(request.StartIndex);
                 if (result is not null)
                 {
                     if (request.Count.HasValue)

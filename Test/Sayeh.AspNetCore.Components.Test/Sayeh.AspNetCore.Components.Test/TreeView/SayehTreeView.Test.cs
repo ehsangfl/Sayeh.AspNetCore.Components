@@ -163,6 +163,159 @@ public class SayehTreeViewTest : TestBase
 
     #endregion
 
+    #region Item Template
+
+    [TestMethod("Template : renders Template instead of Item.ToString() when no DisplayMember is set")]
+    public void TreeViewItem_RendersTemplate_NotToString()
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(3, 1);
+        var firstItem = items.First();
+
+        RenderFragment<HierarchycalItem> itemTemplate = item => builder =>
+        {
+            builder.OpenElement(0, "span");
+            builder.AddAttribute(1, "class", "custom-template");
+            builder.AddContent(2, $"TPL:{item.Name}");
+            builder.CloseElement();
+        };
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.ItemTemplate, itemTemplate)
+        );
+
+        Assert.IsTrue(cut.Markup.Contains($"TPL:{firstItem.Name}"), "Template content should be rendered");
+        Assert.IsFalse(cut.Markup.Contains(firstItem.ID.ToString()), "Item.ToString() should not be rendered when Template is set");
+    }
+
+    [TestMethod("Template : renders Template instead of DisplayMember when both are set")]
+    public void TreeViewItem_RendersTemplate_NotDisplayMember()
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(3, 1);
+        var firstItem = items.First();
+
+        RenderFragment<HierarchycalItem> itemTemplate = item => builder =>
+        {
+            builder.OpenElement(0, "span");
+            builder.AddAttribute(1, "class", "custom-template");
+            builder.AddContent(2, $"TPL:{item.Name}");
+            builder.CloseElement();
+        };
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.DisplayMember, x => $"DISPLAYMEMBER:{x.Name}")
+        .Add(p => p.ItemTemplate, itemTemplate)
+        );
+
+        Assert.IsTrue(cut.Markup.Contains($"TPL:{firstItem.Name}"), "Template content should be rendered");
+        Assert.IsFalse(cut.Markup.Contains($"DISPLAYMEMBER:{firstItem.Name}"), "DisplayMember should not be rendered when Template is set");
+    }
+
+    [TestMethod("Template : checkbox item renders Template instead of Item.ToString() when no DisplayMember is set")]
+    public void TreeViewCheckboxItem_RendersTemplate_NotToString()
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(3, 1);
+        var firstItem = items.First();
+
+        RenderFragment<HierarchycalItem> itemTemplate = item => builder =>
+        {
+            builder.OpenElement(0, "span");
+            builder.AddAttribute(1, "class", "custom-template");
+            builder.AddContent(2, $"TPL:{item.Name}");
+            builder.CloseElement();
+        };
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.SelectProperty, s => s.IsSelected)
+        .Add(p => p.ItemTemplate, itemTemplate)
+        );
+
+        Assert.IsTrue(cut.Markup.Contains($"TPL:{firstItem.Name}"), "Template content should be rendered");
+        Assert.IsFalse(cut.Markup.Contains(firstItem.ID.ToString()), "Item.ToString() should not be rendered when Template is set");
+    }
+
+    [TestMethod("Template : checkbox item renders Template instead of DisplayMember when both are set")]
+    public void TreeViewCheckboxItem_RendersTemplate_NotDisplayMember()
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(3, 1);
+        var firstItem = items.First();
+
+        RenderFragment<HierarchycalItem> itemTemplate = item => builder =>
+        {
+            builder.OpenElement(0, "span");
+            builder.AddAttribute(1, "class", "custom-template");
+            builder.AddContent(2, $"TPL:{item.Name}");
+            builder.CloseElement();
+        };
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.SelectProperty, s => s.IsSelected)
+        .Add(p => p.DisplayMember, x => $"DISPLAYMEMBER:{x.Name}")
+        .Add(p => p.ItemTemplate, itemTemplate)
+        );
+
+        Assert.IsTrue(cut.Markup.Contains($"TPL:{firstItem.Name}"), "Template content should be rendered");
+        Assert.IsFalse(cut.Markup.Contains($"DISPLAYMEMBER:{firstItem.Name}"), "DisplayMember should not be rendered when Template is set");
+    }
+
+    [TestMethod("Template : checkbox item renders Template instead of Item.ToString() for every node, including leaves, with a conditional/nested-component template")]
+    public void TreeViewCheckboxItem_RendersTemplate_NotToString_AllLevels()
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(3, 2);
+        var allItems = Flatten(items).ToList();
+
+        RenderFragment<HierarchycalItem> itemTemplate = item => builder =>
+        {
+            builder.OpenElement(0, "span");
+            builder.AddAttribute(1, "class", "custom-template");
+            builder.AddContent(2, $"TPL:{item.Name}");
+            builder.CloseElement();
+            if (item.Children.Count == 0)
+            {
+                builder.OpenComponent<SayehButton>(3);
+                builder.AddAttribute(4, "ChildContent", (RenderFragment)(b => b.AddContent(0, "leaf-action")));
+                builder.CloseComponent();
+            }
+        };
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+        .Add(p => p.Items, items)
+        .Add(p => p.Children, x => x.Children)
+        .Add(p => p.Parent, x => x.Parent)
+        .Add(p => p.SelectProperty, s => s.IsSelected)
+        .Add(p => p.ItemTemplate, itemTemplate)
+        );
+
+        foreach (var item in allItems)
+        {
+            Assert.IsTrue(cut.Markup.Contains($"TPL:{item.Name}"), $"Template content should be rendered for '{item.Name}'");
+            Assert.IsFalse(cut.Markup.Contains(item.ID.ToString()), $"Item.ToString() should not be rendered for '{item.Name}' when Template is set");
+        }
+    }
+
+    static IEnumerable<HierarchycalItem> Flatten(IEnumerable<HierarchycalItem> items)
+    {
+        foreach (var item in items)
+        {
+            yield return item;
+            foreach (var child in Flatten(item.Children))
+                yield return child;
+        }
+    }
+
+    #endregion
+
     #region Search
 
     [TestMethod("Search : set selectedItem")]

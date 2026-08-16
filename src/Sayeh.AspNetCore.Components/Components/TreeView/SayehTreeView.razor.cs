@@ -56,6 +56,12 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public RenderFragment<TItem>? ItemTemplate { get; set; }
 
+        /// <summary>
+        /// Rendered at the end of each item's row, revealed with an animation on mouse hover.
+        /// </summary>
+        [Parameter]
+        public RenderFragment<TItem>? ItemActions { get; set; }
+
         [Parameter]
         public bool Virtualize { get; set; }
 

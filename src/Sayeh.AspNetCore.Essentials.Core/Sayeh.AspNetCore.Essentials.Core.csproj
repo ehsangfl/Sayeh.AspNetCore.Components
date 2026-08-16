@@ -22,5 +22,23 @@
     <PackageReference Include="NetTopologySuite" />
     <PackageReference Include="Microsoft.Extensions.Logging"/>
   </ItemGroup>
-  
+
+  <Target Name="CopyToLocalPackagesFeed" AfterTargets="Build" Condition="'$(Configuration)'=='Debug' And '$(TargetFramework)'!=''">
+    <ItemGroup>
+      <_LocalFeedOutputFiles Include="$(OutDir)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_LocalFeedOutputFiles)"
+          DestinationFiles="@(_LocalFeedOutputFiles->'$(LocalPackagesRoot)\$(PackageId)\$(TargetFramework)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyNupkgToLocalPackagesFeed" AfterTargets="Pack" Condition="'$(Configuration)'=='Debug'">
+    <ItemGroup>
+      <_LocalFeedNupkg Include="$(PackageOutputPath)$(PackageId).*.nupkg" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_LocalFeedNupkg)"
+          DestinationFolder="$(LocalPackagesRoot)\$(PackageId)\"
+          SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

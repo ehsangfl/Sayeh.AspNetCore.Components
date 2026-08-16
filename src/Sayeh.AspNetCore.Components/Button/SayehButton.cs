@@ -14,7 +14,7 @@ namespace Sayeh.AspNetCore.Components
     /// <summary>
     /// this is MVVM freindly button with command and commandparameter properties
     /// </summary>
-    public class SayehButton : FluentButton
+    public class SayehButton : FluentButton, IAsyncDisposable
     {
         #region Properties
 
@@ -71,6 +71,17 @@ namespace Sayeh.AspNetCore.Components
         {
             if (Command != null)
                 Command.Execute(CommandParameter);
+        }
+
+        // FluentButton.DisposeAsync() isn't virtual, so this re-declares IAsyncDisposable to hook
+        // into the renderer's disposal path (it checks IAsyncDisposable first). Without this,
+        // rows created and torn down repeatedly during virtualized scrolling (e.g. SayehCommandColumn
+        // buttons bound to a shared ICommand) would leak a CanExecuteChanged subscription per row.
+        public new async ValueTask DisposeAsync()
+        {
+            if (_command is not null)
+                _command.CanExecuteChanged -= OnCommandCanExecuteChanged;
+            await base.DisposeAsync();
         }
 
         #endregion
