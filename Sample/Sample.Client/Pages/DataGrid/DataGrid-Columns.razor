@@ -18,6 +18,14 @@ else
         <SayehPropertyColumn Property="p => p.TemporatureF" />
         <SayehTextboxColumn Property="p => p.Description" />
         <SayehCommandColumn Command="ButtonCommand" Title="btn with command" />
+        <SayehActionColumn Title="Actions">
+            <span class="sayeh-command-link" role="button" tabindex="0" @onclick="@(() => EditCommand_Sub(context))">
+                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Edit())" />
+            </span>
+            <span class="sayeh-command-link" role="button" tabindex="0" @onclick="@(() => DeleteCommand_Sub(context))">
+                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())" />
+            </span>
+        </SayehActionColumn>
         <SayehAnchorColumn Href="https://google.com" Title="link with href to google">Goto Google</SayehAnchorColumn>
         <SayehAnchorColumn Command="GoToGoogle" Title="Link with command go to microsoft">Goto Microsoft</SayehAnchorColumn>
         <SayehHierarchyColumn TItem="WeatherForecast" TValue="Guid?" TOption="HierarchycalItem" Items="hierarchycalItems" 
@@ -59,6 +67,18 @@ else
     void ButtonCommand_Sub(WeatherForecast? e)
     {
         Action.AppendLine($"button command executed with {e.ToString()} parameter");
+        StateHasChanged();
+    }
+
+    void EditCommand_Sub(WeatherForecast e)
+    {
+        Action.AppendLine($"edit action executed with {e} parameter");
+        StateHasChanged();
+    }
+
+    void DeleteCommand_Sub(WeatherForecast e)
+    {
+        Action.AppendLine($"delete action executed with {e} parameter");
         StateHasChanged();
     }
 

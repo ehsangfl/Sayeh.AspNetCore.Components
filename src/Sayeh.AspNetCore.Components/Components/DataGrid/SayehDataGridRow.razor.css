@@ -9,3 +9,9 @@
 .active ::deep td {
     background-color: var(--neutral-fill-stealth-hover-on-neutral-fill-layer-rest);
 }
+
+tr:hover ::deep .sayeh-action-cell:not(.sayeh-action-cell-static),
+tr:focus-within ::deep .sayeh-action-cell:not(.sayeh-action-cell-static) {
+    opacity: 1;
+    pointer-events: auto;
+}

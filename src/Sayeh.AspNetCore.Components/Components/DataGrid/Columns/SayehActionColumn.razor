@@ -1,0 +1,19 @@
+@using Microsoft.AspNetCore.Components.Rendering
+@namespace Sayeh.AspNetCore.Components
+@typeparam TItem
+@inherits SayehColumnBase<TItem>
+@{
+    InternalGridContext.Grid.AddColumn(this);
+}
+@code {
+
+    protected internal override void CellContent(RenderTreeBuilder __builder, TItem item)
+    {
+        <span class="@(RevealOnHover ? "sayeh-action-cell" : "sayeh-action-cell sayeh-action-cell-static")">
+            <span class="sayeh-action-cell-inner">
+                @ChildContent.Invoke(item)
+            </span>
+        </span>
+    }
+
+}
