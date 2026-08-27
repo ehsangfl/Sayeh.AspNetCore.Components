@@ -1,0 +1,11 @@
+@namespace Sayeh.AspNetCore.Components
+@typeparam TItem
+
+<span class="@(CanExecute ? "sayeh-command-link" : "sayeh-command-link sayeh-command-link-disabled")"
+      role="button"
+      tabindex="0"
+      title="@Title"
+      @onclick="OnClickHandler"
+      @onkeydown="OnKeyDownHandler">
+    <FluentIcon Value="@Icon" />
+</span>

@@ -1,0 +1,26 @@
+.sayeh-command-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Matches fluent-button's own control padding formula so an icon-only link reads as a button. */
+    padding: calc(var(--design-unit, 4) * 1px) calc((var(--design-unit, 4) * 2 + 2) * 1px);
+    margin-inline-end: calc(var(--design-unit, 4) * 0.5px);
+    border-radius: calc(var(--control-corner-radius, 4) * 1px);
+    cursor: pointer;
+    color: var(--accent-fill-rest);
+    user-select: none;
+}
+
+.sayeh-command-link:last-child {
+    margin-inline-end: 0;
+}
+
+.sayeh-command-link:hover {
+    text-decoration: underline;
+}
+
+.sayeh-command-link-disabled {
+    cursor: default;
+    opacity: 0.5;
+    pointer-events: none;
+}
