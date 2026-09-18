@@ -19,3 +19,27 @@ fluent-dialog:has(.sayeh-dialog-autosize)::part(control) {
     min-width: var(--dialog-width);
     min-height: var(--dialog-height);
 }
+
+/* FluentCard defaults to content-visibility: auto (perf: skip rendering off-screen cards),
+   which forces CSS containment as a side effect and makes the card establish its own
+   stacking context. Any popup opened inside (fluent-combobox, fluent-select, fluent-menu, ...)
+   gets trapped in that stacking context, so once the popup's position would fall past the
+   card's own box it renders BEHIND whatever comes after the card instead of floating above
+   it. Lift both content-visibility and contain only while a popup inside the card is open,
+   so a closed card still gets the rendering-skip optimization. */
+fluent-card:has([open]) {
+    content-visibility: visible !important;
+    contain: none !important;
+}
+
+/* FluentSelect/FluentCombobox only cap their listbox popup height when the app passes an
+   explicit Height parameter (FluentSelect.razor.cs / FluentCombobox.razor set max-height via
+   an inline #id::part(listbox) style, which nothing in this app does). With no cap, a long
+   option list renders at full height instead of scrolling. Give the popup a sane default
+   max-height with scrolling; an instance's own Height parameter still wins, since its inline
+   #id selector outranks this element selector. */
+fluent-select::part(listbox),
+fluent-combobox::part(listbox) {
+    max-height: min(300px, 60vh);
+    overflow-y: auto;
+}
