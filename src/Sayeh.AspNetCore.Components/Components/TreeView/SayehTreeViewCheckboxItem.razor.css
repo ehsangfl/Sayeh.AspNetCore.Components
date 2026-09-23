@@ -10,6 +10,9 @@
 }
 
 .treeitem-label {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--design-unit, 4) * 1px);
     flex: 0 1 auto;
     min-width: 0;
 }

@@ -37,11 +37,24 @@ partial class HierarchyDialog<TItem> where TItem : class
     [CascadingParameter]
     public FluentDialog Dialog { get; set; } = default!;
 
+    /// <summary>
+    /// Tree selection, decoupled from the <see cref="Content"/> parameter. FluentDialog re-passes
+    /// Content on every one of its own re-renders (FluentDialog.razor's DynamicComponent gets
+    /// Parameters from DialogInstance.GetParameterDictionary(), which always holds the original
+    /// object the dialog was opened with - see DialogInstance.Content). Binding the tree directly
+    /// to Content would get silently reset back to that original value by the next such
+    /// re-render (busy indicator, focus trap JS interop, etc.), discarding the user's pick before
+    /// "Select" is even clicked. Seeded once from Content in OnInitialized; never written back to
+    /// the Content parameter itself.
+    /// </summary>
+    private TItem? _selectedItem;
+
     #endregion
 
     protected override void OnInitialized()
     {
         SetParameters();
+        _selectedItem = Content;
         base.OnInitialized();
     }
 
@@ -63,7 +76,7 @@ partial class HierarchyDialog<TItem> where TItem : class
 
     async void CloseModal()
     {
-        await Dialog.CloseAsync(DialogResult.Ok(Content));
+        await Dialog.CloseAsync(DialogResult.Ok(_selectedItem));
     }
 
     #endregion

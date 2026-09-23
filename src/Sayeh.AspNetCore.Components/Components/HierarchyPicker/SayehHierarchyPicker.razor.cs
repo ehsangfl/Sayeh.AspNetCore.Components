@@ -90,6 +90,7 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     {
         base.OnParametersSet();
         _internalSelectedItem = SelectedItem;
+        EnsureItemIsKnown(_internalSelectedItem);
     }
 
     #endregion
@@ -99,7 +100,7 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
     async void OpenDialog()
     {
         await _autocomplete.CloseDropdownAsync();
-        var parameter = new DialogParameters<TItem>() { Modal = true, Content = SelectedItem };
+        var parameter = new DialogParameters<TItem>() { Modal = true, Content = _internalSelectedItem };
 
         parameter["Parameters"] = new HierarchyDialog<TItem>.Parameters(
             TreeItems ?? (Parent is null ? Items : Items?.Where(w => Parent?.Invoke(w) is null)),
@@ -111,7 +112,7 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
             Virtualize);
 
         //DialogService.CreateDialogCallback(this, TreeCallback);
-        var reference = await DialogService.ShowPanelAsync<TItem>(typeof(HierarchyDialog<TItem>), SelectedItem!, parameter);
+        var reference = await DialogService.ShowPanelAsync<TItem>(typeof(HierarchyDialog<TItem>), _internalSelectedItem!, parameter);
         var result = await reference.Result;
         await TreeCallback(result);
     }
@@ -131,9 +132,9 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
             e.Items = Items?.Where(w => w?.ToString()?.Remove(" ")?.Contains(e.Text, StringComparison.OrdinalIgnoreCase) ?? false);
         }
         var items = e.Items;
-        if (SelectedItem is not null && items is not null)
+        if (_internalSelectedItem is not null && items is not null)
         {
-            items = new List<TItem>() { SelectedItem }.Union(items);
+            items = new List<TItem>() { _internalSelectedItem }.Union(items);
         }
         e.Items = items;
     }
@@ -155,11 +156,39 @@ partial class SayehHierarchyPicker<TItem> where TItem : class
         if (!EqualityComparer<TItem?>.Default.Equals(_internalSelectedItem, item))
         {
             _internalSelectedItem = item;
+            EnsureItemIsKnown(item);
             if (SelectedItemChanged.HasDelegate)
             {
                 await SelectedItemChanged.InvokeAsync(item);
             }
             await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    /// <summary>
+    /// FluentAutocomplete (via ListComponentBase's parameter processing) resets SelectedOption
+    /// back to null - and fires SelectedOptionChanged(null) right back at us - whenever a newly
+    /// pushed SelectedOption isn't found in its own (parameter) Items collection. We never bind
+    /// Items on the &lt;FluentAutocomplete&gt; in this component's markup (it's populated purely
+    /// from live OnOptionsSearch results), so an item picked from the tree dialog - which never
+    /// went through a search - fails that Contains() check and gets silently nulled out the
+    /// instant we set it. Patching the item directly into the child's Items list (not via markup,
+    /// so our own re-renders never overwrite it) keeps that check happy without requiring a
+    /// search to have happened first.
+    /// </summary>
+    private void EnsureItemIsKnown(TItem? item)
+    {
+        if (item is null || _autocomplete is null)
+            return;
+        var current = _autocomplete.Items ?? Enumerable.Empty<TItem>();
+        if (!current.Contains(item))
+        {
+            // BL0005 fires because this is normally a footgun (a parent's next render would
+            // silently clobber it back) - deliberately safe here since our own markup never
+            // binds Items on <FluentAutocomplete>, so nothing ever writes over this.
+#pragma warning disable BL0005
+            _autocomplete.Items = current.Append(item).ToList();
+#pragma warning restore BL0005
         }
     }
 

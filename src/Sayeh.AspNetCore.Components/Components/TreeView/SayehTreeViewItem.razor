@@ -16,6 +16,8 @@
                           expanded="@Expanded"
                           selected="@Selected"
                           disabled="@Disabled"
+                          @onclick="HandleRowClick"
+                          @onclick:stopPropagation="true"
                           @onselectedchange="@HandleSelectedChange"
                           @onexpandedchange="@HandleExpandedChangeAsync"
                           @attributes="AdditionalAttributes">

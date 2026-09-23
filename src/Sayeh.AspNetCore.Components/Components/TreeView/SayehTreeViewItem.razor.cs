@@ -117,7 +117,30 @@ namespace Sayeh.AspNetCore.Components
                 setParentExpanded(parent.ParentNode);
         }
 
-        internal void HandleSelectedChange(TreeChangeEventArgs args)
+        /// <summary>
+        /// fluent-tree-item does not dispatch a "selectedchange" custom event on a plain mouse
+        /// click (only HandleExpandedChangeAsync's expand/collapse event reliably fires), so
+        /// selecting an item by clicking it never reached <see cref="HandleSelectedChange"/>.
+        /// This explicit click handler drives selection directly instead of depending on that
+        /// event. @onclick:stopPropagation keeps a child item's click from also re-selecting
+        /// every ancestor item it bubbles through.
+        /// </summary>
+        internal async Task HandleRowClick()
+        {
+            if (Disabled)
+            {
+                return;
+            }
+
+            SetSelected(true);
+
+            if (Owner != null)
+            {
+                await Owner.ItemSelectedChangeAsync(this);
+            }
+        }
+
+        internal async Task HandleSelectedChange(TreeChangeEventArgs args)
         {
             if (args.AffectedId != Id || args.Selected is null || args.Selected == Selected)
             {
@@ -132,7 +155,7 @@ namespace Sayeh.AspNetCore.Components
             if (Owner != null)
             {
                 Selected = args.Selected.Value;
-                //await Owner.ItemSelectedChangeAsync(this);
+                await Owner.ItemSelectedChangeAsync(this);
             }
         }
 

@@ -6,7 +6,7 @@
     <FluentVersion>4.14.2</FluentVersion>
     <LoggingVersion8>8.0.1</LoggingVersion8>
     <LoggingVersion10>8.0.1</LoggingVersion10>
-    <SayehVersion>5.4.0.10</SayehVersion>
+    <SayehVersion>5.4.0.14</SayehVersion>
   </PropertyGroup>
 
 

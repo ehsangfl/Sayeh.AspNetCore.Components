@@ -139,10 +139,34 @@ namespace Sayeh.AspNetCore.Components
 
         internal async Task ItemSelectedChangeAsync(SayehTreeViewItem<TItem> item)
         {
-            //if (OnSelectedChange.HasDelegate)
-            //{
-            //    await OnSelectedChange.InvokeAsync(item);
-            //}
+            // Inlines SetSelectedNode's deselect-previous/select/auto-expand logic instead of
+            // calling it directly: SetSelectedNode fires SelectedItemChanged.InvokeAsync without
+            // awaiting it, so an exception thrown by a subscriber (e.g. a NavigateTo call) would
+            // be silently swallowed as an unobserved task instead of surfacing here.
+            if (item.Selected)
+            {
+                if (_selectedNode is not null && _selectedNode != item)
+                    _selectedNode.SetSelected(false);
+                _selectedNode = item;
+                SelectedItem = item.Item;
+                _selectedItem = SelectedItem;
+                if (SelectedItemChanged.HasDelegate)
+                    await SelectedItemChanged.InvokeAsync(SelectedItem);
+                if (!(item.Expanded || (item.ParentNode?.Expanded ?? true)))
+                {
+                    foreach (var parent in findCollapsedParents(item))
+                        parent.SetExpanded(true);
+                }
+            }
+            else if (_selectedNode == item)
+            {
+                _selectedNode = null;
+                SelectedItem = null;
+                _selectedItem = null;
+                if (SelectedItemChanged.HasDelegate)
+                    await SelectedItemChanged.InvokeAsync(null);
+            }
+            await InvokeAsync(StateHasChanged);
         }
 
         internal void HandleCurrentSelectedChange(TreeChangeEventArgs args)
