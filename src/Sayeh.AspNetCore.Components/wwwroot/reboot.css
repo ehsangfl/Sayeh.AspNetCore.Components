@@ -26,8 +26,13 @@ fluent-dialog:has(.sayeh-dialog-autosize)::part(control) {
    gets trapped in that stacking context, so once the popup's position would fall past the
    card's own box it renders BEHIND whatever comes after the card instead of floating above
    it. Lift both content-visibility and contain only while a popup inside the card is open,
-   so a closed card still gets the rendering-skip optimization. */
-fluent-card:has([open]) {
+   so a closed card still gets the rendering-skip optimization.
+   [open] covers popups that reflect an open attribute (fluent-select, fluent-combobox, ...);
+   fluent-anchored-region covers FluentAutocomplete, FluentDatePicker, FluentMenu, ..., which
+   render their popup into an anchored region only while it is open and set no open attribute.
+   MinimalStyle cards render a plain div with the same contain: content, so they get the same. */
+fluent-card:has([open], fluent-anchored-region),
+.fluent-card-minimal-style:has([open], fluent-anchored-region) {
     content-visibility: visible !important;
     contain: none !important;
 }
