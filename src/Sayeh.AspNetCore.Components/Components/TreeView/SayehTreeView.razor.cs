@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Sayeh.AspNetCore.Components
 {
@@ -105,6 +106,17 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public EventCallback<TItem> ItemUnchecked { get; set; }
 
+        /// <summary>
+        /// Executed with the item as parameter when an item is checked, alongside <see cref="ItemChecked"/>.
+        /// </summary>
+        [Parameter]
+        public ICommand? ItemCheckedCommand { get; set; }
+
+        /// <summary>
+        /// Executed with the item as parameter when an item is unchecked, alongside <see cref="ItemUnchecked"/>.
+        /// </summary>
+        [Parameter]
+        public ICommand? ItemUncheckedCommand { get; set; }
 
         #endregion
 

@@ -212,6 +212,10 @@ namespace Sayeh.AspNetCore.Components
         {
             if (Owner is not null)
             {
+                var command = value ? Owner.ItemCheckedCommand : Owner.ItemUncheckedCommand;
+                if (command?.CanExecute(Item) == true)
+                    command.Execute(Item);
+
                 if (value && Owner.ItemChecked.HasDelegate)
                     await Owner.ItemChecked.InvokeAsync(Item);
                 else if (!value && Owner.ItemUnchecked.HasDelegate)
