@@ -47,7 +47,7 @@
             {
                 if (Owner != null && Children != null)
                 {
-                    var items = Children.Invoke(Item);
+                    var items = GetChildItems();
                     @if (Owner.Virtualize && items.Any() && !Expanded)
                     {
                         @* Lazy loading required a "fake" sub-item to simulate the [+] *@

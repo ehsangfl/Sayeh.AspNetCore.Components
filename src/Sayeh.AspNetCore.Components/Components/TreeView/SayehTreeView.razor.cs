@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
@@ -30,6 +31,8 @@ namespace Sayeh.AspNetCore.Components
 
         // Keeps one generated key per item instance (does not persist across replacements)
         private readonly ConditionalWeakTable<TItem, string> _generatedKeys = new();
+
+        INotifyCollectionChanged? _observedItems;
 
 
         #endregion
@@ -140,7 +143,15 @@ namespace Sayeh.AspNetCore.Components
             if (_selectPropertyExpression != SelectProperty)
             {
                 _selectPropertyExpression = SelectProperty;
-                _selectProperty = _selectPropertyExpression.Compile();
+                _selectProperty = _selectPropertyExpression?.Compile()!;
+            }
+            if (!ReferenceEquals(_observedItems, Items))
+            {
+                if (_observedItems is not null)
+                    _observedItems.CollectionChanged -= OnItemsCollectionChanged;
+                _observedItems = Items as INotifyCollectionChanged;
+                if (_observedItems is not null)
+                    _observedItems.CollectionChanged += OnItemsCollectionChanged;
             }
             base.OnParametersSet();
         }
@@ -217,6 +228,43 @@ namespace Sayeh.AspNetCore.Components
             }));
         }
 
+        private void OnItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+            => _ = InvokeAsync(async () =>
+            {
+                await HandleSourceCollectionChangedAsync(sender, e, null);
+                StateHasChanged();
+            });
+
+        /// <summary>
+        /// Clears the selection when the selected item was removed from an observed source collection
+        /// (the root <see cref="Items"/> or the <see cref="Children"/> collection of <paramref name="ownerNode"/>).
+        /// </summary>
+        internal async Task HandleSourceCollectionChangedAsync(object? sender, NotifyCollectionChangedEventArgs e, SayehTreeViewItem<TItem>? ownerNode)
+        {
+            if (_selectedItem is null)
+                return;
+
+            var selectedRemoved = e.Action switch
+            {
+                NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Replace
+                    => e.OldItems?.Cast<object>().Any(o => ReferenceEquals(o, _selectedItem)) == true,
+                // Reset carries no OldItems: the selection was lost if the selected node was rendered
+                // from this collection and the collection no longer contains it.
+                NotifyCollectionChangedAction.Reset
+                    => _selectedNode is not null && _selectedNode.ParentNode == ownerNode
+                       && sender is IEnumerable<TItem> source && !source.Contains(_selectedItem),
+                _ => false
+            };
+            if (!selectedRemoved)
+                return;
+
+            _selectedNode = null;
+            SelectedItem = null;
+            _selectedItem = null;
+            if (SelectedItemChanged.HasDelegate)
+                await SelectedItemChanged.InvokeAsync(null);
+        }
+
         internal void ItemSelectedChange(SayehTreeViewItem<TItem> node)
         {
             if (_selectedNode != node)
@@ -247,6 +295,8 @@ namespace Sayeh.AspNetCore.Components
             var item = treeItem.Item!;
             _allItems.Remove(treeItem.Id);
             treeItem.ParentNode?.Unregister(treeItem);
+            if (_selectedNode == treeItem)
+                _selectedNode = null;
         }
 
         private void SetSelectedNode(SayehTreeViewItem<TItem> node)
@@ -374,6 +424,9 @@ namespace Sayeh.AspNetCore.Components
             if (disposing)
             {
                 _currentSelectedChangedDebounce?.Dispose();
+                if (_observedItems is not null)
+                    _observedItems.CollectionChanged -= OnItemsCollectionChanged;
+                _observedItems = null;
                 _allItems.Clear();
             }
 

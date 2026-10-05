@@ -1,6 +1,7 @@
 ﻿using Microsoft.FluentUI.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -18,6 +19,7 @@ namespace Sayeh.AspNetCore.Components
         internal Func<TItem, bool> _selectProperty;
         Expression<Func<TItem, bool>>? _selectPropertyExpression;
         internal bool IsValid = false;
+        bool _childrenChanged;
 
         //public bool? CheckState { get => _checkState; private set { _checkState = value; InvokeAsync(StateHasChanged); } }
         public bool? CheckState { get; private set; } = false;
@@ -47,7 +49,25 @@ namespace Sayeh.AspNetCore.Components
                     UpdateParentsState();
                 }
             }
+            else if (_childrenChanged)
+            {
+                // Children were added/removed: recompute this node's tri-state from the current
+                // children (already registered/unregistered by this render) and propagate upwards.
+                _childrenChanged = false;
+                IsValid = false;
+                var previous = CheckState;
+                GetIsChecked();
+                UpdateParentsState();
+                if (previous != CheckState)
+                    StateHasChanged();
+            }
             base.OnAfterRender(firstRender);
+        }
+
+        protected override void OnChildrenChanged(NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action != NotifyCollectionChangedAction.Move)
+                _childrenChanged = true;
         }
 
         protected override void OnParametersSet()

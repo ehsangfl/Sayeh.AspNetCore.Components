@@ -1,6 +1,7 @@
 using Microsoft.FluentUI.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -17,6 +18,7 @@ namespace Sayeh.AspNetCore.Components
         protected bool _disposed;
         internal readonly Dictionary<string, SayehTreeViewItem<TItem>> _children = [];
         SayehTreeViewItem<TItem>? _parent;
+        internal INotifyCollectionChanged? _observedChildren;
 
         #endregion
 
@@ -109,6 +111,41 @@ namespace Sayeh.AspNetCore.Components
 
             Selected = value;
         }
+
+        /// <summary>
+        /// Returns <see cref="Children"/> of <see cref="Item"/> and, when the returned collection implements
+        /// <see cref="INotifyCollectionChanged"/>, keeps this node subscribed to it so adding/removing a child
+        /// re-renders only this node.
+        /// </summary>
+        internal IEnumerable<TItem> GetChildItems()
+        {
+            var items = (Item is not null ? Children?.Invoke(Item) : null) ?? [];
+            if (!ReferenceEquals(_observedChildren, items))
+            {
+                if (_observedChildren is not null)
+                    _observedChildren.CollectionChanged -= OnChildrenCollectionChanged;
+                _observedChildren = items as INotifyCollectionChanged;
+                if (_observedChildren is not null)
+                    _observedChildren.CollectionChanged += OnChildrenCollectionChanged;
+            }
+            return items;
+        }
+
+        void OnChildrenCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+            => _ = InvokeAsync(async () =>
+            {
+                if (_disposed)
+                    return;
+                if (Owner is not null)
+                    await Owner.HandleSourceCollectionChangedAsync(sender, e, this);
+                OnChildrenChanged(e);
+                StateHasChanged();
+            });
+
+        /// <summary>
+        /// Called after an observed <see cref="Children"/> collection of this node changed, before re-rendering.
+        /// </summary>
+        protected virtual void OnChildrenChanged(NotifyCollectionChangedEventArgs e) { }
 
         void setParentExpanded(SayehTreeViewItem<TItem> parent)
         {
@@ -204,6 +241,9 @@ namespace Sayeh.AspNetCore.Components
             if (disposing)
             {
                 Owner?.Unregister(this);
+                if (_observedChildren is not null)
+                    _observedChildren.CollectionChanged -= OnChildrenCollectionChanged;
+                _observedChildren = null;
             }
 
             _disposed = true;

@@ -1,0 +1,84 @@
+@page "/treeview-observable"
+@using System.Collections.ObjectModel
+@using Sayeh.Essentials.Core.MVVM
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+<h3>TreeView Observable Source</h3>
+<p>
+    Items and children are <code>ObservableCollection</code>s changed by view-model commands
+    (the page itself does not re-render); the tree reacts to <code>INotifyCollectionChanged</code>.
+</p>
+
+<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+    <SayehLightIconButton TItem="HierarchycalItem?" Item="null" Command="_vm.AddCommand" Title="Add root"
+                          Icon="@(new Icons.Regular.Size20.Add())" />
+    <span>Add root</span>
+</FluentStack>
+
+<FluentStack Orientation="Orientation.Horizontal" HorizontalGap="24">
+    <div style="flex:1">
+        <h4>Single select</h4>
+        <SayehTreeView Items="_vm.Items" @bind-SelectedItem="_selectedItem"
+                       Children="f => f.Children" Parent="p => p.Parent" DisplayMember="d => d.Name">
+            <ItemActions>
+                <SayehLightIconButton TItem="HierarchycalItem?" Item="context" Command="_vm.AddCommand" Title="Add child"
+                                      Icon="@(new Icons.Regular.Size16.Add())" />
+                <SayehLightIconButton TItem="HierarchycalItem?" Item="context" Command="_vm.RemoveCommand" Title="Remove"
+                                      Icon="@(new Icons.Regular.Size16.Delete())" />
+            </ItemActions>
+        </SayehTreeView>
+        <label>selected Item is : @_selectedItem?.Name </label>
+    </div>
+    <div style="flex:1">
+        <h4>Checkbox</h4>
+        <SayehTreeView Items="_vm.Items" SelectProperty="s => s.IsSelected"
+                       Children="f => f.Children" Parent="p => p.Parent" DisplayMember="d => d.Name">
+            <ItemActions>
+                <SayehLightIconButton TItem="HierarchycalItem?" Item="context" Command="_vm.AddCommand" Title="Add child"
+                                      Icon="@(new Icons.Regular.Size16.Add())" />
+                <SayehLightIconButton TItem="HierarchycalItem?" Item="context" Command="_vm.RemoveCommand" Title="Remove"
+                                      Icon="@(new Icons.Regular.Size16.Delete())" />
+            </ItemActions>
+        </SayehTreeView>
+    </div>
+</FluentStack>
+
+@code {
+    readonly ViewModel _vm = new();
+    HierarchycalItem? _selectedItem;
+
+    class ViewModel
+    {
+        int _counter;
+
+        public ViewModel()
+        {
+            AddCommand = new RelayCommand<HierarchycalItem?>(p => Add(p));
+            RemoveCommand = new RelayCommand<HierarchycalItem?>(Remove, i => i is not null);
+            for (var i = 0; i < 3; i++)
+            {
+                var root = Add(null);
+                Add(root);
+                Add(root);
+            }
+        }
+
+        public ObservableCollection<HierarchycalItem> Items { get; } = [];
+
+        public RelayCommand<HierarchycalItem?> AddCommand { get; }
+
+        public RelayCommand<HierarchycalItem?> RemoveCommand { get; }
+
+        HierarchycalItem Add(HierarchycalItem? parent)
+        {
+            var item = new HierarchycalItem($"item {++_counter}", parent) { Children = new ObservableCollection<HierarchycalItem>() };
+            (parent?.Children ?? Items).Add(item);
+            return item;
+        }
+
+        void Remove(HierarchycalItem? item)
+        {
+            if (item is not null)
+                (item.Parent?.Children ?? Items).Remove(item);
+        }
+    }
+}

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Sample.Client.Model;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 namespace Sayeh.AspNetCore.Components.Test;
 
@@ -478,7 +479,169 @@ public class SayehTreeViewTest : TestBase
 
     #endregion
 
+    #region Collection changes
+
+    static ObservableCollection<HierarchycalItem> GetObservableItems(int count, int childCount)
+    {
+        var roots = new ObservableCollection<HierarchycalItem>();
+        for (var i = 0; i < count; i++)
+        {
+            var root = new HierarchycalItem($"root-{i}", null) { Children = new ObservableCollection<HierarchycalItem>() };
+            for (var j = 0; j < childCount; j++)
+                root.Children.Add(new HierarchycalItem($"child-{i}-{j}", root) { Children = new ObservableCollection<HierarchycalItem>() });
+            roots.Add(root);
+        }
+        return roots;
+    }
+
+    [TestMethod("Collection : adding/removing a root item re-renders the tree")]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void Collection_RootAddRemove_Rerenders(bool checkbox)
+    {
+        var items = GetObservableItems(3, 2);
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters =>
+        {
+            parameters
+                .Add(p => p.Items, items)
+                .Add(p => p.Children, x => x.Children)
+                .Add(p => p.Parent, x => x.Parent)
+                .Add(p => p.DisplayMember, x => x.Name);
+            if (checkbox)
+                parameters.Add(p => p.SelectProperty, s => s.IsSelected);
+        });
+
+        var added = new HierarchycalItem("new-root", null) { Children = new ObservableCollection<HierarchycalItem>() };
+        cut.InvokeAsync(() => items.Add(added));
+        cut.WaitForAssertion(() => Assert.IsTrue(cut.Markup.Contains("new-root")));
+        Assert.IsNotNull(cut.Instance.GetNode(added));
+
+        var removed = items[0];
+        cut.InvokeAsync(() => items.Remove(removed));
+        cut.WaitForAssertion(() => Assert.IsFalse(cut.Markup.Contains(removed.Name)));
+        Assert.IsNull(cut.Instance.GetNode(removed));
+    }
+
+    [TestMethod("Collection : adding/removing a child item re-renders its parent node")]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void Collection_ChildAddRemove_Rerenders(bool checkbox)
+    {
+        var items = GetObservableItems(2, 2);
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters =>
+        {
+            parameters
+                .Add(p => p.Items, items)
+                .Add(p => p.Children, x => x.Children)
+                .Add(p => p.Parent, x => x.Parent)
+                .Add(p => p.DisplayMember, x => x.Name);
+            if (checkbox)
+                parameters.Add(p => p.SelectProperty, s => s.IsSelected);
+        });
+
+        var parent = items[1];
+        var leaf = parent.Children[0];
+        var added = new HierarchycalItem("new-grandchild", leaf) { Children = new ObservableCollection<HierarchycalItem>() };
+        cut.InvokeAsync(() => leaf.Children.Add(added));
+        cut.WaitForAssertion(() => Assert.IsTrue(cut.Markup.Contains("new-grandchild")));
+        Assert.IsNotNull(cut.Instance.GetNode(leaf)!.GetNode(added));
+
+        var removed = parent.Children[1];
+        cut.InvokeAsync(() => parent.Children.Remove(removed));
+        cut.WaitForAssertion(() => Assert.IsFalse(cut.Markup.Contains(removed.Name)));
+        Assert.IsNull(cut.Instance.GetNode(parent)!.GetNode(removed));
+    }
+
+    [TestMethod("Collection : removing the selected item clears SelectedItem")]
+    public async Task Collection_RemoveSelected_ClearsSelection()
+    {
+        var items = GetObservableItems(2, 2);
+        var selected = items[0].Children[1];
+        HierarchycalItem? reported = selected;
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+            .Add(p => p.Items, items)
+            .Add(p => p.Children, x => x.Children)
+            .Add(p => p.Parent, x => x.Parent)
+            .Add(p => p.DisplayMember, x => x.Name)
+            .Add(p => p.SelectedItem, selected)
+            .Add(p => p.SelectedItemChanged, (HierarchycalItem? i) => reported = i));
+
+        var pov = new PrivateObject(cut.Instance);
+        int waitCount = 0;
+        while (pov.GetField("_selectedNode") == null && waitCount < 6)
+        {
+            waitCount++;
+            await Task.Delay(100);
+        }
+        Assert.IsNotNull(pov.GetField("_selectedNode"));
+
+        await cut.InvokeAsync(() => items[0].Children.Remove(selected));
+        cut.WaitForAssertion(() => Assert.IsNull(cut.Instance.SelectedItem));
+        Assert.IsNull(reported);
+        Assert.IsNull(pov.GetField("_selectedNode"));
+    }
+
+    [TestMethod("Collection : adding an unchecked child to a fully checked parent makes it indeterminate")]
+    public void Collection_CheckboxParentStateUpdatesOnChildAdd()
+    {
+        var items = GetObservableItems(1, 2);
+        var parent = items[0];
+        foreach (var c in parent.Children)
+            c.IsSelected = true;
+
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+            .Add(p => p.Items, items)
+            .Add(p => p.Children, x => x.Children)
+            .Add(p => p.Parent, x => x.Parent)
+            .Add(p => p.DisplayMember, x => x.Name)
+            .Add(p => p.SelectProperty, s => s.IsSelected));
+
+        var node = (SayehTreeViewCheckboxItem<HierarchycalItem>)cut.Instance.GetNode(parent)!;
+        cut.WaitForAssertion(() => Assert.IsTrue(node.CheckState));
+
+        cut.InvokeAsync(() => parent.Children.Add(new HierarchycalItem("unchecked-child", parent) { Children = new ObservableCollection<HierarchycalItem>() }));
+        cut.WaitForAssertion(() => Assert.IsNull(node.CheckState));
+    }
+
+    [TestMethod("Collection : non-observable source keeps default behavior")]
+    public void Collection_NonObservable_NoRerender()
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(3, 1).ToList();
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+            .Add(p => p.Items, items)
+            .Add(p => p.Children, x => x.Children)
+            .Add(p => p.Parent, x => x.Parent)
+            .Add(p => p.DisplayMember, x => x.Name));
+
+        var added = new HierarchycalItem("not-observed", null);
+        cut.InvokeAsync(() => items.Add(added));
+        Assert.IsFalse(cut.Markup.Contains("not-observed"));
+
+        cut.Render();
+        Assert.IsTrue(cut.Markup.Contains("not-observed"));
+    }
+
+    #endregion
+
     #region Multi Select
+
+    [TestMethod("Multi select : SelectProperty can be switched back to null")]
+    public void SelectProperty_SetBackToNull_DoesNotThrow()
+    {
+        var items = HierarchycalItem.GetHierarchycalItems(3, 1);
+        var cut = Render<SayehTreeView<HierarchycalItem>>(parameters => parameters
+            .Add(p => p.Items, items)
+            .Add(p => p.Children, x => x.Children)
+            .Add(p => p.Parent, x => x.Parent)
+            .Add(p => p.DisplayMember, x => x.Name)
+            .Add(p => p.SelectProperty, s => s.IsSelected));
+
+        Assert.IsInstanceOfType<SayehTreeViewCheckboxItem<HierarchycalItem>>(cut.Instance.GetNode(items.First()));
+
+        cut.Render(parameters => parameters.Add(p => p.SelectProperty, (System.Linq.Expressions.Expression<Func<HierarchycalItem, bool>>)null!));
+
+        Assert.IsNotInstanceOfType<SayehTreeViewCheckboxItem<HierarchycalItem>>(cut.Instance.GetNode(items.First()));
+    }
 
     [TestMethod]
     [DataRow(false)]
