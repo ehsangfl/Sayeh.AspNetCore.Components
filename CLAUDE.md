@@ -60,6 +60,13 @@ dotnet test Test/Sayeh.AspNetCore.Components.Test/Sayeh.AspNetCore.Components.Te
 
 ## The Microsoft FluentUI Blazor Source code is available on H:\OpenSource\Blazor\BlazorFluent
 
+## Git operations
+
+Delegate git operations (commit, merge, rebase, push, pull, branch, tag, cherry-pick, stash, conflict
+resolution) to the `git-ops` subagent (`.claude/agents/git-ops.md`, runs on Sonnet) via the Agent tool
+with `subagent_type: "git-ops"`, rather than running them directly. Read-only git commands used while
+coding (`git status`, `git diff`, `git log`) can still be run inline.
+
 ## CI/CD
 
 `azure-pipelines.yml` (triggers on the `Live` branch) builds, packs, and pushes each of the four
