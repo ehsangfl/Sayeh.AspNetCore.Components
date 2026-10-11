@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: center;
     /* Matches fluent-button's own control padding formula so an icon-only link reads as a button. */
-    padding: calc(var(--design-unit, 4) * 1px) calc((var(--design-unit, 4) * 2 + 2) * 1px);
+    padding: calc(var(--design-unit, 4) * 1px) calc((var(--design-unit, 4) + 2) * 1px);
     margin-inline-end: calc(var(--design-unit, 4) * 0.5px);
     border-radius: calc(var(--control-corner-radius, 4) * 1px);
     cursor: pointer;
