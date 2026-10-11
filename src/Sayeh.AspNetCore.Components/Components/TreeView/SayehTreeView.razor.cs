@@ -1,5 +1,6 @@
 ﻿using Microsoft.FluentUI.AspNetCore.Components;
 using Microsoft.FluentUI.AspNetCore.Components.Utilities;
+using Microsoft.JSInterop;
 using NetTopologySuite.Index.HPRtree;
 using System;
 using System.Collections;
@@ -9,6 +10,7 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +18,7 @@ using System.Windows.Input;
 
 namespace Sayeh.AspNetCore.Components
 {
-    partial class SayehTreeView<TItem> : FluentComponentBase, IDisposable where TItem : class
+    partial class SayehTreeView<TItem> : FluentComponentBase, IDisposable, IAsyncDisposable where TItem : class
     {
 
         #region Fields
@@ -33,6 +35,15 @@ namespace Sayeh.AspNetCore.Components
         private readonly ConditionalWeakTable<TItem, string> _generatedKeys = new();
 
         INotifyCollectionChanged? _observedItems;
+
+        private const string JAVASCRIPT_FILE = "./_content/Sayeh.AspNetCore.Components/Components/TreeView/SayehTreeView.razor.js";
+        IJSObjectReference? _module;
+        IJSObjectReference? _dragDropHandle;
+        DotNetObjectReference<SayehTreeView<TItem>>? _dotNetRef;
+        bool? _dragDropCheckDrop;
+        bool _dragDropInitializing;
+        // The item being moved by an ItemDropped handler: its removal from the source collection must not clear the selection.
+        TItem? _movingItem;
 
 
         #endregion
@@ -84,6 +95,35 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public RenderFragment? ChildContent { get; set; }
 
+        /// <summary>
+        /// Lets the user reorder/re-parent items by dragging them. The tree does not move the data itself:
+        /// handle <see cref="ItemDropped"/> or <see cref="ItemDroppedCommand"/> to update the source collections.
+        /// </summary>
+        [Parameter]
+        public bool AllowDragDrop { get; set; }
+
+        /// <summary>
+        /// Decides whether an item can be dragged. When not set, every item can be dragged (if <see cref="AllowDragDrop"/> is enabled).
+        /// </summary>
+        [Parameter]
+        public Func<TItem, bool>? CanDrag { get; set; }
+
+        /// <summary>
+        /// Decides whether the dragged item can be dropped at the given place. Dropping an item on itself or on one
+        /// of its descendants is always refused. <see cref="ItemDroppedCommand"/>'s CanExecute is checked as well.
+        /// </summary>
+        [Parameter]
+        public Func<TreeViewItemDropEventArgs<TItem>, bool>? CanDrop { get; set; }
+
+        /// <summary>
+        /// Milliseconds the dragged item must hover the middle of a collapsed node before that node is expanded.
+        /// </summary>
+        [Parameter]
+        public int DragExpandDelay { get; set; } = 800;
+
+        [Inject]
+        IJSRuntime JSRuntime { get; set; } = default!;
+
         #endregion
 
         #region Events
@@ -121,6 +161,20 @@ namespace Sayeh.AspNetCore.Components
         [Parameter]
         public ICommand? ItemUncheckedCommand { get; set; }
 
+        /// <summary>
+        /// Called when an item is dropped (see <see cref="AllowDragDrop"/>). The handler moves the item in the source collections.
+        /// </summary>
+        [Parameter]
+        public EventCallback<TreeViewItemDropEventArgs<TItem>> ItemDropped { get; set; }
+
+        /// <summary>
+        /// Executed with a <see cref="TreeViewItemDropEventArgs{TItem}"/> as parameter when an item is dropped, alongside <see cref="ItemDropped"/>.
+        /// Its CanExecute is evaluated while dragging (when the item enters a node, for each drop position): a position it
+        /// refuses shows no drop indicator, and a refused drop raises neither the command nor <see cref="ItemDropped"/>.
+        /// </summary>
+        [Parameter]
+        public ICommand? ItemDroppedCommand { get; set; }
+
         #endregion
 
         #region Initialization
@@ -154,6 +208,50 @@ namespace Sayeh.AspNetCore.Components
                     _observedItems.CollectionChanged += OnItemsCollectionChanged;
             }
             base.OnParametersSet();
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (!AllowDragDrop || _disposed || _dragDropInitializing)
+                return;
+            try
+            {
+                // The JS module only asks .NET whether a drop is allowed when something can refuse it.
+                var checkDrop = CanDrop is not null || ItemDroppedCommand is not null || OverridesDragEnter;
+                if (_dragDropHandle is null)
+                {
+                    // A render while the module import is awaited must not register the listeners twice.
+                    _dragDropInitializing = true;
+                    _module ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", JAVASCRIPT_FILE);
+                    _dotNetRef ??= DotNetObjectReference.Create(this);
+                    _dragDropHandle = await _module.InvokeAsync<IJSObjectReference>("init", Element, _dotNetRef,
+                        new { checkDrop, expandDelay = DragExpandDelay });
+                    _dragDropCheckDrop = checkDrop;
+                    if (_disposed)
+                    {
+                        await _dragDropHandle.InvokeVoidAsync("stop");
+                        await _dragDropHandle.DisposeAsync();
+                        _dragDropHandle = null;
+                    }
+                }
+                else if (_dragDropCheckDrop != checkDrop)
+                {
+                    _dragDropCheckDrop = checkDrop;
+                    await _dragDropHandle.InvokeVoidAsync("setOptions", new { checkDrop, expandDelay = DragExpandDelay });
+                }
+            }
+            catch (JSException ex)
+            {
+                Console.WriteLine("[SayehTreeView] " + ex.Message);
+            }
+            catch (Exception ex) when (ex is JSDisconnectedException || ex is OperationCanceledException)
+            {
+                // The JS side may already be gone if the client disconnected.
+            }
+            finally
+            {
+                _dragDropInitializing = false;
+            }
         }
 
         #endregion
@@ -241,7 +339,7 @@ namespace Sayeh.AspNetCore.Components
         /// </summary>
         internal async Task HandleSourceCollectionChangedAsync(object? sender, NotifyCollectionChangedEventArgs e, SayehTreeViewItem<TItem>? ownerNode)
         {
-            if (_selectedItem is null)
+            if (_selectedItem is null || (_movingItem is not null && ReferenceEquals(_movingItem, _selectedItem)))
                 return;
 
             var selectedRemoved = e.Action switch
@@ -286,6 +384,9 @@ namespace Sayeh.AspNetCore.Components
             var item = treeItem.Item!;
             _allItems[treeItem.Id] = treeItem;
             treeItem.ParentNode?.Register(treeItem);
+            // A selected item re-created elsewhere (e.g. moved by drag and drop) becomes the selected node again.
+            if (_selectedItem is not null && ReferenceEquals(item, _selectedItem))
+                _selectedNode = treeItem;
         }
 
         internal void Unregister(SayehTreeViewItem<TItem> treeItem)
@@ -414,6 +515,28 @@ namespace Sayeh.AspNetCore.Components
             GC.SuppressFinalize(this);
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            try
+            {
+                if (_dragDropHandle is not null)
+                {
+                    await _dragDropHandle.InvokeVoidAsync("stop");
+                    await _dragDropHandle.DisposeAsync();
+                }
+                if (_module is not null)
+                    await _module.DisposeAsync();
+            }
+            catch (Exception ex) when (ex is JSDisconnectedException || ex is OperationCanceledException)
+            {
+                // The JS side may already be gone if the client disconnected.
+            }
+            _dragDropHandle = null;
+            _module = null;
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
@@ -423,6 +546,7 @@ namespace Sayeh.AspNetCore.Components
 
             if (disposing)
             {
+                _dotNetRef?.Dispose();
                 _currentSelectedChangedDebounce?.Dispose();
                 if (_observedItems is not null)
                     _observedItems.CollectionChanged -= OnItemsCollectionChanged;
@@ -441,6 +565,142 @@ namespace Sayeh.AspNetCore.Components
 
             return _generatedKeys.GetValue(item, _ => Guid.NewGuid().ToString("N"));
         }
+
+        internal bool IsItemDraggable(TItem item) => AllowDragDrop && (CanDrag?.Invoke(item) ?? true);
+
+        /// <summary>
+        /// Builds the drop description for the nodes rendered with the given ids, or <c>null</c> when the drop is invalid
+        /// (unknown node, undraggable item, or the target is the dragged node itself or one of its descendants).
+        /// </summary>
+        internal TreeViewItemDropEventArgs<TItem>? CreateDropArgs(string sourceId, string targetId, string position)
+        {
+            if (!AllowDragDrop
+                || !Enum.TryParse<TreeViewDropPosition>(position, out var dropPosition)
+                || !_allItems.TryGetValue(sourceId, out var source) || source.Item is null
+                || !_allItems.TryGetValue(targetId, out var target) || target.Item is null
+                || !IsItemDraggable(source.Item))
+                return null;
+            for (var node = target; node is not null; node = node.ParentNode)
+            {
+                if (node == source)
+                    return null;
+            }
+
+            var item = source.Item;
+            var newParent = dropPosition == TreeViewDropPosition.Inside ? target.Item : target.ParentNode?.Item;
+            var siblings = (newParent is null ? Items : Children?.Invoke(newParent))?.ToList();
+            var index = -1;
+            if (siblings is not null)
+            {
+                var oldIndex = siblings.FindIndex(s => ReferenceEquals(s, item));
+                if (dropPosition == TreeViewDropPosition.Inside)
+                    index = siblings.Count;
+                else
+                {
+                    index = siblings.FindIndex(s => ReferenceEquals(s, target.Item));
+                    if (index >= 0 && dropPosition == TreeViewDropPosition.After)
+                        index++;
+                }
+                // The index is meant to be used after the item was removed from its old position.
+                if (oldIndex >= 0 && index > oldIndex)
+                    index--;
+            }
+            return new TreeViewItemDropEventArgs<TItem>(item, target.Item, dropPosition, source.ParentNode?.Item, newParent, index);
+        }
+
+        /// <summary>
+        /// A drop is allowed when <see cref="CanDrop"/> and <see cref="ItemDroppedCommand"/>'s CanExecute both accept it.
+        /// </summary>
+        bool IsDropAllowed(TreeViewItemDropEventArgs<TItem> args)
+            => (CanDrop?.Invoke(args) ?? true) && (ItemDroppedCommand?.CanExecute(args) ?? true);
+
+        /// <summary>
+        /// Called by the JS module when the dragged item enters <paramref name="targetId"/>'s node: returns every
+        /// <see cref="TreeViewDropPosition"/> (as its name) the item may be dropped at on that node.
+        /// </summary>
+        [JSInvokable]
+        public async Task<string[]> GetAllowedDropPositionsAsync(string sourceId, string targetId)
+        {
+            if (!_allItems.TryGetValue(sourceId, out var source) || source.Item is null
+                || !_allItems.TryGetValue(targetId, out var target) || target.Item is null)
+                return [];
+
+            var args = new TreeViewItemDragEnterEventArgs<TItem>(source.Item, target.Item);
+            await OnDragEntering(args);
+            if (args.Cancel)
+                return [];
+
+            args.AllowedPositions = Enum.GetValues<TreeViewDropPosition>()
+                .Where(position => CreateDropArgs(sourceId, targetId, position.ToString()) is { } dropArgs && IsDropAllowed(dropArgs))
+                .ToArray();
+            await OnDragEntered(args);
+            return args.AllowedPositions.Select(p => p.ToString()).ToArray();
+        }
+
+        [JSInvokable]
+        public async Task DropItemAsync(string sourceId, string targetId, string position)
+        {
+            var args = CreateDropArgs(sourceId, targetId, position);
+            if (args is null || !IsDropAllowed(args))
+                return;
+
+            await OnDropping(args);
+            if (args.Cancel)
+                return;
+
+            // OnDropped is inside the guard as well: a derived tree may move the item there.
+            _movingItem = args.Item;
+            try
+            {
+                ItemDroppedCommand?.Execute(args);
+                if (ItemDropped.HasDelegate)
+                    await ItemDropped.InvokeAsync(args);
+
+                // Reveal the dropped item when it was moved into a collapsed node.
+                if (args.Position == TreeViewDropPosition.Inside && _allItems.TryGetValue(targetId, out var target) && !target.Expanded)
+                    target.SetExpanded(true);
+                await OnDropped(args);
+            }
+            finally
+            {
+                _movingItem = null;
+            }
+            StateHasChanged();
+        }
+
+        /// <summary>
+        /// Called the first time the dragged item enters a node during a drag, before the drop positions are evaluated.
+        /// Set <see cref="TreeViewItemDragEnterEventArgs{TItem}.Cancel"/> to refuse every drop on that node.
+        /// </summary>
+        protected virtual Task OnDragEntering(TreeViewItemDragEnterEventArgs<TItem> args) => Task.CompletedTask;
+
+        /// <summary>
+        /// Called after the drop positions allowed on the entered node were evaluated
+        /// (see <see cref="TreeViewItemDragEnterEventArgs{TItem}.AllowedPositions"/>). Not called when OnDragEntering cancelled.
+        /// </summary>
+        protected virtual Task OnDragEntered(TreeViewItemDragEnterEventArgs<TItem> args) => Task.CompletedTask;
+
+        /// <summary>
+        /// Called when an allowed drop happens, before <see cref="ItemDroppedCommand"/> and <see cref="ItemDropped"/>.
+        /// Set <see cref="TreeViewItemDropEventArgs{TItem}.Cancel"/> to cancel the drop (e.g. after a confirmation dialog).
+        /// </summary>
+        protected virtual Task OnDropping(TreeViewItemDropEventArgs<TItem> args) => Task.CompletedTask;
+
+        /// <summary>
+        /// Called after <see cref="ItemDroppedCommand"/> and <see cref="ItemDropped"/> handled the drop. Not called when the drop was cancelled.
+        /// </summary>
+        protected virtual Task OnDropped(TreeViewItemDropEventArgs<TItem> args) => Task.CompletedTask;
+
+        /// <summary>
+        /// Whether a derived tree overrides <see cref="OnDragEntering"/> or <see cref="OnDragEntered"/>: the JS module must then
+        /// ask .NET for the allowed positions on every entered node even without CanDrop/ItemDroppedCommand.
+        /// </summary>
+        internal bool OverridesDragEnter
+            => _overridesDragEnter ??= IsOverridden(nameof(OnDragEntering)) || IsOverridden(nameof(OnDragEntered));
+        bool? _overridesDragEnter;
+
+        bool IsOverridden(string methodName)
+            => GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)?.DeclaringType != typeof(SayehTreeView<TItem>);
 
         #endregion
 

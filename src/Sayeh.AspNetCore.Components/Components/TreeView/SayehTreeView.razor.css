@@ -1,0 +1,18 @@
+/* Drag and drop indicators; the data attributes are set by SayehTreeView.razor.js on the fluent-tree-item elements (not classes: FAST rewrites the host class on expand).
+   !important: the tree-item's own styles otherwise win over ::part() for these properties. */
+::deep fluent-tree-item[data-sayeh-dragging]::part(positioning-region) {
+    opacity: 0.5 !important;
+}
+
+::deep fluent-tree-item[data-sayeh-drop="before"]::part(positioning-region) {
+    box-shadow: inset 0 2px 0 0 var(--accent-fill-rest) !important;
+}
+
+::deep fluent-tree-item[data-sayeh-drop="after"]::part(positioning-region) {
+    box-shadow: inset 0 -2px 0 0 var(--accent-fill-rest) !important;
+}
+
+::deep fluent-tree-item[data-sayeh-drop="inside"]::part(positioning-region) {
+    background: var(--neutral-fill-stealth-hover) !important;
+    box-shadow: inset 0 0 0 calc(var(--focus-stroke-width, 2) * 1px) var(--accent-fill-rest) !important;
+}

@@ -4,7 +4,7 @@
 <ObservableComponent ItemSource="ViewModel">
     @if (ViewModel is not null)
     {
-        <label>temprature of @ViewModel.Model.DayofWeek on @ViewModel.Model.Date.ToShortDateString() is @ViewModel.Model.TemporatureF because @ViewModel.Model.Description</label>
+        <label>temprature of @ViewModel.Model?.DayofWeek on @ViewModel.Model?.Date.ToShortDateString() is @ViewModel.Model?.TemporatureF because @ViewModel.Model?.Description</label>
     }
 </ObservableComponent>
 @code {

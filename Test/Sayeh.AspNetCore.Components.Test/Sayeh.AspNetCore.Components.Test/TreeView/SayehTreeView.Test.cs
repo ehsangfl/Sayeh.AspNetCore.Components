@@ -844,4 +844,285 @@ public class SayehTreeViewTest : TestBase
 
 
     #endregion
+
+    #region Drag and drop
+
+    (ObservableCollection<HierarchycalItem> roots, IRenderedComponent<SayehTreeView<HierarchycalItem>> cut, List<TreeViewItemDropEventArgs<HierarchycalItem>> drops)
+        RenderDragDropTree(Func<TreeViewItemDropEventArgs<HierarchycalItem>, bool>? canDrop = null, System.Windows.Input.ICommand? droppedCommand = null)
+        => RenderDragDropTree<SayehTreeView<HierarchycalItem>>(canDrop, droppedCommand);
+
+    (ObservableCollection<HierarchycalItem> roots, IRenderedComponent<TTree> cut, List<TreeViewItemDropEventArgs<HierarchycalItem>> drops)
+        RenderDragDropTree<TTree>(Func<TreeViewItemDropEventArgs<HierarchycalItem>, bool>? canDrop = null, System.Windows.Input.ICommand? droppedCommand = null)
+        where TTree : SayehTreeView<HierarchycalItem>
+    {
+        // root0 { child0, child1, child2 }, root1 { }, root2 { }
+        var roots = new ObservableCollection<HierarchycalItem>();
+        for (var i = 0; i < 3; i++)
+            roots.Add(new HierarchycalItem($"root{i}", null) { Children = new ObservableCollection<HierarchycalItem>() });
+        for (var i = 0; i < 3; i++)
+            roots[0].Children.Add(new HierarchycalItem($"child{i}", roots[0]) { Children = new ObservableCollection<HierarchycalItem>() });
+
+        var drops = new List<TreeViewItemDropEventArgs<HierarchycalItem>>();
+        var cut = Render<TTree>(parameters => parameters
+            .Add(p => p.Items, roots)
+            .Add(p => p.Children, x => x.Children)
+            .Add(p => p.Parent, x => x.Parent)
+            .Add(p => p.DisplayMember, x => x.Name)
+            .Add(p => p.AllowDragDrop, true)
+            .Add(p => p.CanDrag, x => x.Name != "root2")
+            .Add(p => p.CanDrop, canDrop)
+            .Add(p => p.ItemDroppedCommand, droppedCommand)
+            .Add(p => p.ItemDropped, (TreeViewItemDropEventArgs<HierarchycalItem> e) =>
+            {
+                drops.Add(e);
+                var source = e.OldParent?.Children ?? roots;
+                var destination = e.NewParent?.Children ?? roots;
+                source.Remove(e.Item);
+                destination.Insert(e.Index, e.Item);
+                e.Item.Parent = e.NewParent;
+            }));
+        return (roots, cut, drops);
+    }
+
+    static string NodeId<TTree>(IRenderedComponent<TTree> cut, HierarchycalItem item) where TTree : SayehTreeView<HierarchycalItem>
+        => cut.Instance.GetNode(item)?.Id ?? cut.Instance.GetNode(item.Parent!).GetNode(item)!.Id!;
+
+    [TestMethod("DragDrop : rows are draggable only when allowed")]
+    public void DragDropDraggableAttributeTest()
+    {
+        var (roots, cut, _) = RenderDragDropTree();
+        var rows = cut.FindAll("fluent-tree-view > fluent-tree-item > .treeitem-row");
+        Assert.AreEqual(3, rows.Count);
+        Assert.AreEqual("true", rows[0].GetAttribute("draggable"));
+        Assert.IsNull(rows[2].GetAttribute("draggable"), "CanDrag returns false for root2");
+    }
+
+    [TestMethod("DragDrop : reorder siblings")]
+    [DataRow("Before", 0, 2, new[] { "child2", "child0", "child1" })]
+    [DataRow("After", 2, 0, new[] { "child1", "child2", "child0" })]
+    [DataRow("After", 0, 1, new[] { "child0", "child1", "child2" })]
+    public async Task DragDropReorderSiblingsTest(string position, int targetIndex, int sourceIndex, string[] expected)
+    {
+        var (roots, cut, drops) = RenderDragDropTree();
+        var children = roots[0].Children;
+        cut.Instance.GetNode(roots[0]).SetExpanded(true);
+        cut.Render();
+
+        await cut.InvokeAsync(() => cut.Instance.DropItemAsync(NodeId(cut, children[sourceIndex]), NodeId(cut, children[targetIndex]), position));
+
+        Assert.AreEqual(1, drops.Count);
+        Assert.AreSame(roots[0], drops[0].OldParent);
+        Assert.AreSame(roots[0], drops[0].NewParent);
+        CollectionAssert.AreEqual(expected, children.Select(c => c.Name).ToArray());
+    }
+
+    [TestMethod("DragDrop : move inside another item and keep the selection")]
+    public async Task DragDropInsideKeepsSelectionTest()
+    {
+        var (roots, cut, drops) = RenderDragDropTree();
+        var root0 = roots[0];
+        var root1 = roots[1];
+        HierarchycalItem? selectedChanged = root0;
+        cut.Render(parameters => parameters
+            .Add(p => p.SelectedItem, root0)
+            .Add(p => p.SelectedItemChanged, (HierarchycalItem? i) => selectedChanged = i));
+        await cut.InvokeAsync(() => cut.Instance.GetNode(root0).HandleRowClick());
+
+        await cut.InvokeAsync(() => cut.Instance.DropItemAsync(NodeId(cut, root0), NodeId(cut, root1), "Inside"));
+
+        Assert.AreEqual(1, drops.Count);
+        Assert.IsNull(drops[0].OldParent);
+        Assert.AreSame(root1, drops[0].NewParent);
+        Assert.AreEqual(0, drops[0].Index);
+        CollectionAssert.AreEqual(new[] { "root1", "root2" }, roots.Select(r => r.Name).ToArray());
+        Assert.AreSame(root0, root1.Children.Single());
+        Assert.AreSame(root0, selectedChanged, "moving the selected item must not clear the selection");
+        Assert.AreSame(root0, cut.Instance.SelectedItem);
+        Assert.IsTrue(cut.Instance.GetNode(root1).Expanded, "the drop target is expanded to reveal the moved item");
+    }
+
+    [TestMethod("DragDrop : refuse invalid drops")]
+    public async Task DragDropRefusedTest()
+    {
+        var (roots, cut, drops) = RenderDragDropTree(e => e.Target.Name != "root1");
+        cut.Instance.GetNode(roots[0]).SetExpanded(true);
+        cut.Render();
+        var root0 = NodeId(cut, roots[0]);
+
+        // onto itself / its own descendant
+        CollectionAssert.AreEqual(Array.Empty<string>(), await cut.Instance.GetAllowedDropPositionsAsync(root0, root0));
+        CollectionAssert.AreEqual(Array.Empty<string>(), await cut.Instance.GetAllowedDropPositionsAsync(root0, NodeId(cut, roots[0].Children[1])));
+        // CanDrag = false
+        CollectionAssert.AreEqual(Array.Empty<string>(), await cut.Instance.GetAllowedDropPositionsAsync(NodeId(cut, roots[2]), root0));
+        // CanDrop = false
+        CollectionAssert.AreEqual(Array.Empty<string>(), await cut.Instance.GetAllowedDropPositionsAsync(root0, NodeId(cut, roots[1])));
+        CollectionAssert.AreEqual(new[] { "Before", "Inside", "After" }, await cut.Instance.GetAllowedDropPositionsAsync(root0, NodeId(cut, roots[2])));
+
+        await cut.InvokeAsync(() => cut.Instance.DropItemAsync(root0, NodeId(cut, roots[1]), "Inside"));
+        Assert.AreEqual(0, drops.Count);
+    }
+
+    [TestMethod("DragDrop : ItemDroppedCommand.CanExecute refuses drops")]
+    public async Task DragDropCommandCanExecuteTest()
+    {
+        // The command refuses dropping inside another item: only reordering is allowed.
+        var command = new DropCommand(e => e.Position != TreeViewDropPosition.Inside);
+        var (roots, cut, drops) = RenderDragDropTree(droppedCommand: command);
+        var root0 = NodeId(cut, roots[0]);
+        var root1 = NodeId(cut, roots[1]);
+
+        CollectionAssert.AreEqual(new[] { "Before", "After" }, await cut.Instance.GetAllowedDropPositionsAsync(root0, root1));
+
+        await cut.InvokeAsync(() => cut.Instance.DropItemAsync(root0, root1, "Inside"));
+        Assert.AreEqual(0, command.Executed.Count, "a refused drop does not execute the command");
+        Assert.AreEqual(0, drops.Count, "a refused drop does not raise ItemDropped");
+
+        await cut.InvokeAsync(() => cut.Instance.DropItemAsync(root0, root1, "After"));
+        Assert.AreEqual(1, command.Executed.Count);
+        Assert.AreEqual(1, drops.Count);
+        Assert.AreSame(command.Executed[0], drops[0], "the command and the callback receive the same args");
+    }
+
+    class DropCommand(Func<TreeViewItemDropEventArgs<HierarchycalItem>, bool> canExecute) : System.Windows.Input.ICommand
+    {
+        public List<TreeViewItemDropEventArgs<HierarchycalItem>> Executed { get; } = [];
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
+        public bool CanExecute(object? parameter) => canExecute((TreeViewItemDropEventArgs<HierarchycalItem>)parameter!);
+        public void Execute(object? parameter) => Executed.Add((TreeViewItemDropEventArgs<HierarchycalItem>)parameter!);
+    }
+
+    [TestMethod("DragDrop : overridable OnDragEntering/OnDragEntered")]
+    public async Task DragDropOverrideDragEnterTest()
+    {
+        var (roots, cut, _) = RenderDragDropTree<TrackingTreeView>();
+        var tree = cut.Instance;
+        var root0 = NodeId(cut, roots[0]);
+
+        Assert.IsTrue(tree.OverridesDragEnter, "a derived tree overriding OnDragEnter* makes the JS module ask .NET");
+        Assert.IsFalse(RenderDragDropTree().cut.Instance.OverridesDragEnter);
+
+        // allowed: Entering then Entered, with the evaluated positions
+        var allowed = await tree.GetAllowedDropPositionsAsync(root0, NodeId(cut, roots[1]));
+        CollectionAssert.AreEqual(new[] { "Before", "Inside", "After" }, allowed);
+        CollectionAssert.AreEqual(new[] { "Entering root1", "Entered root1 Before,Inside,After" }, tree.Log);
+
+        // cancelled in OnDragEntering: no position, OnDragEntered not called
+        tree.Log.Clear();
+        tree.CancelEnterOn = "root2";
+        CollectionAssert.AreEqual(Array.Empty<string>(), await tree.GetAllowedDropPositionsAsync(root0, NodeId(cut, roots[2])));
+        CollectionAssert.AreEqual(new[] { "Entering root2" }, tree.Log);
+    }
+
+    [TestMethod("DragDrop : overridable OnDropping/OnDropped")]
+    public async Task DragDropOverrideDropTest()
+    {
+        var command = new DropCommand(_ => true);
+        var (roots, cut, drops) = RenderDragDropTree<TrackingTreeView>(droppedCommand: command);
+        var tree = cut.Instance;
+        var root0 = NodeId(cut, roots[0]);
+
+        // cancelled in OnDropping: neither the command, ItemDropped nor OnDropped run
+        tree.CancelDropOn = "root1";
+        await cut.InvokeAsync(() => tree.DropItemAsync(root0, NodeId(cut, roots[1]), "Inside"));
+        CollectionAssert.AreEqual(new[] { "Dropping root1" }, tree.Log);
+        Assert.AreEqual(0, command.Executed.Count);
+        Assert.AreEqual(0, drops.Count);
+
+        // accepted: OnDropping -> command -> ItemDropped -> OnDropped
+        tree.Log.Clear();
+        tree.CancelDropOn = null;
+        await cut.InvokeAsync(() => tree.DropItemAsync(root0, NodeId(cut, roots[2]), "After"));
+        CollectionAssert.AreEqual(new[] { "Dropping root2", "Dropped root2 commands:1 callbacks:1" }, tree.Log);
+        Assert.AreEqual(1, drops.Count);
+    }
+
+    [TestMethod("DragDrop : a derived tree moving the selected item in OnDropped keeps the selection")]
+    public async Task DragDropMoveInOnDroppedKeepsSelectionTest()
+    {
+        var roots = new ObservableCollection<HierarchycalItem>();
+        for (var i = 0; i < 2; i++)
+            roots.Add(new HierarchycalItem($"root{i}", null) { Children = new ObservableCollection<HierarchycalItem>() });
+        var root0 = roots[0];
+        var root1 = roots[1];
+        HierarchycalItem? selectedChanged = root0;
+        var cut = Render<MovingTreeView>(parameters => parameters
+            .Add(p => p.Items, roots)
+            .Add(p => p.Children, x => x.Children)
+            .Add(p => p.Parent, x => x.Parent)
+            .Add(p => p.DisplayMember, x => x.Name)
+            .Add(p => p.AllowDragDrop, true)
+            .Add(p => p.SelectedItem, root0)
+            .Add(p => p.SelectedItemChanged, (HierarchycalItem? i) => selectedChanged = i));
+        cut.Instance.Roots = roots;
+        await cut.InvokeAsync(() => cut.Instance.GetNode(root0).HandleRowClick());
+
+        await cut.InvokeAsync(() => cut.Instance.DropItemAsync(NodeId(cut, root0), NodeId(cut, root1), "Inside"));
+
+        Assert.AreSame(root0, root1.Children.Single());
+        Assert.AreSame(root0, selectedChanged, "moving the selected item in OnDropped must not clear the selection");
+        Assert.AreSame(root0, cut.Instance.SelectedItem);
+    }
+
+    /// <summary>Moves the dropped item itself, in OnDropped, like a tree bound to a ViewModel's hierarchy editor.</summary>
+    class MovingTreeView : SayehTreeView<HierarchycalItem>
+    {
+        public ObservableCollection<HierarchycalItem> Roots { get; set; } = [];
+
+        protected override Task OnDropped(TreeViewItemDropEventArgs<HierarchycalItem> args)
+        {
+            (args.OldParent?.Children ?? Roots).Remove(args.Item);
+            (args.NewParent?.Children ?? Roots).Add(args.Item);
+            args.Item.Parent = args.NewParent;
+            return Task.CompletedTask;
+        }
+    }
+
+    class TrackingTreeView : SayehTreeView<HierarchycalItem>
+    {
+        public List<string> Log { get; } = [];
+        public string? CancelEnterOn { get; set; }
+        public string? CancelDropOn { get; set; }
+        // Counts what already ran when OnDropped is called, to check the order.
+        int _commandCount => (ItemDroppedCommand as DropCommand)?.Executed.Count ?? 0;
+        int _callbackCount;
+
+        protected override void OnParametersSet()
+        {
+            base.OnParametersSet();
+            var dropped = ItemDropped;
+            ItemDropped = EventCallback.Factory.Create<TreeViewItemDropEventArgs<HierarchycalItem>>(this, async e =>
+            {
+                _callbackCount++;
+                await dropped.InvokeAsync(e);
+            });
+        }
+
+        protected override async Task OnDragEntering(TreeViewItemDragEnterEventArgs<HierarchycalItem> args)
+        {
+            await Task.Yield();
+            Log.Add($"Entering {args.Target.Name}");
+            args.Cancel = args.Target.Name == CancelEnterOn;
+        }
+
+        protected override Task OnDragEntered(TreeViewItemDragEnterEventArgs<HierarchycalItem> args)
+        {
+            Log.Add($"Entered {args.Target.Name} {string.Join(",", args.AllowedPositions)}");
+            return Task.CompletedTask;
+        }
+
+        protected override async Task OnDropping(TreeViewItemDropEventArgs<HierarchycalItem> args)
+        {
+            await Task.Yield();
+            Log.Add($"Dropping {args.Target.Name}");
+            args.Cancel = args.Target.Name == CancelDropOn;
+        }
+
+        protected override Task OnDropped(TreeViewItemDropEventArgs<HierarchycalItem> args)
+        {
+            Log.Add($"Dropped {args.Target.Name} commands:{_commandCount} callbacks:{_callbackCount}");
+            return Task.CompletedTask;
+        }
+    }
+
+    #endregion
 }

@@ -1,0 +1,73 @@
+@page "/treeview-dragdrop"
+@using System.Collections.ObjectModel
+<h3>TreeView Drag and Drop</h3>
+<p>
+    Drag an item onto the top/bottom edge of another item to place it before/after it, or onto its middle to make it
+    a child (hovering a collapsed item expands it). The tree only raises <code>ItemDropped</code>; the handler moves the
+    item in the <code>ObservableCollection</code>s and the tree re-renders by itself.
+    Items named "locked" cannot be dragged, and nothing can be dropped inside them.
+</p>
+
+<FluentStack Orientation="Orientation.Horizontal" HorizontalGap="24">
+    <div style="flex:1">
+        <h4>Single select</h4>
+        <SayehTreeView TItem="HierarchycalItem" Items="_items" @bind-SelectedItem="_selectedItem"
+                       Children="f => f.Children" Parent="p => p.Parent" DisplayMember="d => d.Name"
+                       AllowDragDrop="true" CanDrag="CanDrag" CanDrop="CanDrop" ItemDropped="OnItemDropped" />
+        <label>selected Item is : @_selectedItem?.Name </label>
+    </div>
+    <div style="flex:1">
+        <h4>Checkbox</h4>
+        <SayehTreeView TItem="HierarchycalItem" Items="_items" SelectProperty="s => s.IsSelected"
+                       Children="f => f.Children" Parent="p => p.Parent" DisplayMember="d => d.Name"
+                       AllowDragDrop="true" CanDrag="CanDrag" CanDrop="CanDrop" ItemDropped="OnItemDropped" />
+    </div>
+</FluentStack>
+<p>@_lastDrop</p>
+
+@code {
+    readonly ObservableCollection<HierarchycalItem> _items = [];
+    HierarchycalItem? _selectedItem;
+    string? _lastDrop;
+    int _counter;
+
+    protected override void OnInitialized()
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            var root = Add(null);
+            for (var j = 0; j < 3; j++)
+                Add(Add(root));
+        }
+        Add(_items[0], "locked");
+    }
+
+    HierarchycalItem Add(HierarchycalItem? parent, string? name = null)
+    {
+        var item = new HierarchycalItem(name ?? $"item {++_counter}", parent) { Children = new ObservableCollection<HierarchycalItem>() };
+        (parent?.Children ?? _items).Add(item);
+        return item;
+    }
+
+    static bool CanDrag(HierarchycalItem item) => item.Name != "locked";
+
+    static bool CanDrop(TreeViewItemDropEventArgs<HierarchycalItem> e)
+        => !(e.Position == TreeViewDropPosition.Inside && e.Target.Name == "locked");
+
+    void OnItemDropped(TreeViewItemDropEventArgs<HierarchycalItem> e)
+    {
+        var source = e.OldParent?.Children ?? _items;
+        var destination = e.NewParent?.Children ?? _items;
+        if (ReferenceEquals(source, destination))
+        {
+            ((ObservableCollection<HierarchycalItem>)source).Move(source.IndexOf(e.Item), e.Index);
+        }
+        else
+        {
+            source.Remove(e.Item);
+            destination.Insert(e.Index, e.Item);
+            e.Item.Parent = e.NewParent;
+        }
+        _lastDrop = $"{e.Item.Name} dropped {e.Position} {e.Target.Name} (new parent: {e.NewParent?.Name ?? "root"}, index {e.Index})";
+    }
+}

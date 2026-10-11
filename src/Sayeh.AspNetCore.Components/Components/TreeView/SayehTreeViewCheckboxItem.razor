@@ -19,7 +19,7 @@
                           @onselectedchange="@HandleSelectedChange"
                           @onexpandedchange="@HandleExpandedChangeAsync"
                           @attributes="AdditionalAttributes">
-            <div class="treeitem-row">
+            <div class="treeitem-row" draggable="@(Owner.IsItemDraggable(Item) ? "true" : null)">
                 <span class="treeitem-label">
                     @if (Children is not null && (Children(Item)?.Any() ?? false))
                     {
