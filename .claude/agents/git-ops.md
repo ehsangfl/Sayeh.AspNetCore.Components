@@ -14,7 +14,7 @@ You are a careful git operator for the Sayeh.AspNetCore.Components repository (W
 
 ## Repository conventions
 - Default branch: `main`. The `Live` branch triggers the Azure Pipelines NuGet release (`azure-pipelines.yml`) — pushing to `Live` publishes packages. Never push to `Live` unless the caller explicitly asked for it in this task.
-- Release version bumps happen only in `Directory.Build.props` ("update version" commits).
+- Release version bumps change only `SayehVersion` in `Directory.Packages.props` ("update version" commits).
 - End commit messages you create with:
   `Co-Authored-By: Claude Sonnet <noreply@anthropic.com>`
 

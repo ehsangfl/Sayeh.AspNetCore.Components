@@ -33,9 +33,11 @@ published NuGet packages (see the `Condition="'$(Configuration)|$(Platform)'=='.
 `.csproj`). This means Release-configuration builds require the referenced package versions to already
 exist on the configured NuGet feed — normal local development should use the Debug configuration.
 
-Shared MSBuild properties (target frameworks, FluentUI version, package version) live in
-`Directory.Build.props` at the repo root — bump `PackageVersion` there when cutting a release ("update
-version" commits touch only this file).
+Shared MSBuild properties (assembly metadata, nullable/implicit usings, central package management) live
+in `Directory.Build.props` at the repo root. Package versions are centrally managed in
+`Directory.Packages.props` — including the FluentUI version (`FluentVersion`) and the library's own
+release version (`SayehVersion`, used as `VersionPrefix` by each library `.csproj`). Bump `SayehVersion`
+there when cutting a release ("update version" commits touch only this file).
 
 ## Common commands
 
